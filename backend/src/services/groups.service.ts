@@ -25,8 +25,8 @@ export const getMany = async () => {
     }
 
     return {
-        timesheets: await prisma.group.findMany(mainQuery),
-        total: await prisma.timesheet.count()
+        groups: await prisma.group.findMany(mainQuery),
+        total: await prisma.group.count()
     }
 }
 
@@ -38,9 +38,8 @@ export const create = async (group: ICreateGroup) => {
             startTime: group.startTime,
             endTime: group.endTime,
             Break: {
-                create: {
-                    startTime: group.startTime,
-                    endTime: group.endTime
+                createMany: {
+                    data: group.breaks
                 }
             }
         }

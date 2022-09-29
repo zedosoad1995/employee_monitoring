@@ -18,8 +18,8 @@ export const getMany = async () => {
     }
 
     return {
-        timesheets: await prisma.employee.findMany(mainQuery),
-        total: await prisma.timesheet.count()
+        employees: await prisma.employee.findMany(mainQuery),
+        total: await prisma.employee.count()
     }
 }
 
