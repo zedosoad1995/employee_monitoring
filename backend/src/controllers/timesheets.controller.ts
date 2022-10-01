@@ -5,7 +5,7 @@ import httpStatusCodes from 'http-status-codes'
 export const getMany = async (req: Request, res: Response, next: NextFunction) => {
     let resp
     try {
-        resp = await timesheetsService.getMany()
+        resp = await timesheetsService.getMany(req.query)
     } catch (err) {
         return next(err)
     }

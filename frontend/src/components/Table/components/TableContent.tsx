@@ -16,15 +16,15 @@ export default function TableContent(props: TableContentProps) {
             {rows && rows.map((row, index) => {
                 return <Row key={index} row={row} collapsedRow={collapsedRows[index]} columns={columns} />
             })}
-            {emptyRows > 0 && (
+            {/* {emptyRows > 0 && (
                 <TableRow
                     style={{
-                        height: 33 * emptyRows,
+                        height: 47 * emptyRows,
                     }}
                 >
                     <TableCell colSpan={columns.length + 1} />
                 </TableRow>
-            )}
+            )} */}
         </TableBody>
     )
 }

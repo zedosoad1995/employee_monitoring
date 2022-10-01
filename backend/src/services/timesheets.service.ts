@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client"
 import prisma from "../../prisma/prisma-client"
-import { getMinsFromTimeStr, getTimeStrFromMins } from "../helpers/dateTime"
-import { addPlusSign } from "../helpers/string"
+import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from "../constants"
+import { getMinsFromTimeStr } from "../helpers/dateTime"
 import { getBreaks, getOvertime } from "../helpers/timesheet"
 import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
 
@@ -27,7 +27,7 @@ import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
     }
 } */
 
-export const getMany = async () => {
+export const getMany = async (query: any) => {
     let timesheets = await prisma.timesheet.findMany({
         select: {
             id: true,
@@ -84,7 +84,7 @@ export const getMany = async () => {
             // Calculate Time late
             const enterTime = ts.times.find(el => el.isEnter)
             const timeLate = (group && enterTime) ?
-                addPlusSign(getTimeStrFromMins(getMinsFromTimeStr(enterTime.time) - getMinsFromTimeStr(group.startTime))) :
+                getMinsFromTimeStr(enterTime.time) - getMinsFromTimeStr(group.startTime) :
                 null
 
             // Calculate Breaks Duration
@@ -104,9 +104,31 @@ export const getMany = async () => {
             }
         })
 
+    let { page, limit, sortBy, order }: { page: string, limit: string, sortBy: string, order: string } = query
+
+    const allowedSortFields = ['name', 'group', 'overtime', 'timeLate', 'startTime', 'endTime']
+    if (allowedSortFields.includes(sortBy)) {
+        transformedTimesheets.sort((a, b) => {
+            // @ts-ignore
+            if (typeof a[sortBy] === 'string') {
+                // @ts-ignore
+                return order === 'desc' ? b[sortBy].localeCompare(a[sortBy]) : a[sortBy].localeCompare(b[sortBy])
+            } else {
+                // @ts-ignore
+                return order === 'desc' ? b[sortBy] - a[sortBy] : a[sortBy] - b[sortBy]
+            }
+        })
+    }
+
+
+    const _page = page ? Math.max(Number(page), 0) : 0
+    const _limit = limit ? Math.min(Number(limit), MAX_PAGE_LIMIT) : DEFAULT_PAGE_LIMIT
+
+    const ini = _page * _limit
+    const fin = ini + _limit
 
     return {
-        timesheets: transformedTimesheets,
+        timesheets: transformedTimesheets.slice(ini, fin),
         total: transformedTimesheets.length
     }
 }

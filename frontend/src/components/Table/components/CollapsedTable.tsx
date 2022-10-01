@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material'
 import Box from '@mui/material/Box'
 import Collapse from '@mui/material/Collapse'
 import Table from '@mui/material/Table'
@@ -38,6 +39,7 @@ export default function CollapsedTable(props: CollapsedTableProps) {
             <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={parentColumns.length + 1} >
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
+                        <Typography>Breaks</Typography>
                         <Table size="small">
                             <TableHead>
                                 <TableRow>

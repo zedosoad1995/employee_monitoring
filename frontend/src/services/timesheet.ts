@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const getTimesheets = () => {
-    return axios.get(`${process.env.REACT_APP_API_URL}/timesheets`)
+export const getTimesheets = (query: any) => {
+    return axios.get(`${process.env.REACT_APP_API_URL}/timesheets`, { params: query })
         .then((res) => res.data)
 }

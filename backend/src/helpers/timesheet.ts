@@ -34,7 +34,7 @@ export const getOvertime = (
         return acc + getMinsFromTimeStr(el.endTime) - getMinsFromTimeStr(el.startTime)
     }, 0)
     const expectedMins = totalTimeDiff - timeInBreaks
-    return addPlusSign(getTimeStrFromMins(totalMins - expectedMins))
+    return totalMins - expectedMins
 }
 
 export const getBreaks = (
