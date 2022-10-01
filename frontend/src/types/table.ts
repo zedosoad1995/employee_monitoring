@@ -1,14 +1,25 @@
 export interface RowData {
-    col1: string
-    col2: number
-    col3: number
-    col4: string
+    name: string,
+    group: string,
+    overtime: string,
+    timeLate: string,
+    startTime: string,
+    endTime: string,
+    hasNonAcceptableBreaks: boolean
 }
 
 export interface HeadCell {
     id: keyof RowData
     label: string
     numeric: boolean
+}
+
+export interface CollapsedRowData {
+    startTime: string,
+    endTime: string,
+    duration: string,
+    minsExceeding: number,
+    isNotAcceptable: boolean
 }
 
 export interface CollapsedHeadCell {
@@ -43,10 +54,6 @@ export interface RowProps {
     columns: Array<HeadCell>,
 }
 
-export interface CollapsedRowData {
-    ccol1: string
-    ccol2: string
-}
 
 export interface CollapsedTableProps {
     open: boolean,

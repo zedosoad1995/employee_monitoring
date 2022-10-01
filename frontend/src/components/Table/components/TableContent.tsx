@@ -9,11 +9,11 @@ import Row from './Row'
 export default function TableContent(props: TableContentProps) {
     const { rows, collapsedRows, columns, rowsPerPage } = props
 
-    const emptyRows = Math.max(0, rowsPerPage - rows.length)
+    const emptyRows = Math.max(0, rowsPerPage - (rows ? rows.length : 0))
 
     return (
         <TableBody>
-            {rows.map((row, index) => {
+            {rows && rows.map((row, index) => {
                 return <Row key={index} row={row} collapsedRow={collapsedRows[index]} columns={columns} />
             })}
             {emptyRows > 0 && (

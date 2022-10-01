@@ -8,53 +8,10 @@ import { HeadCell, Order, RowData } from '../../types/table'
 import TableContent from './components/TableContent'
 import Paper from '@mui/material/Paper'
 
-const columns: Array<HeadCell> = [
-    {
-        id: 'col1',
-        label: 'col1',
-        numeric: false
-    },
-    {
-        id: 'col2',
-        label: 'col2',
-        numeric: true
-    },
-    {
-        id: 'col3',
-        label: 'col3',
-        numeric: true
-    },
-    {
-        id: 'col4',
-        label: 'col4',
-        numeric: false
-    }
-]
 
-const rows = [
-    { col1: 'name1', col2: 1, col3: 1, col4: 'name1' },
-    { col1: 'name2', col2: 2, col3: 2, col4: 'name2' },
-    { col1: 'name3', col2: 3, col3: 3, col4: 'name3' },
-]
-
-const collapsedRows = [
-    [
-        { ccol1: 'name1', ccol2: 'name1' },
-        { ccol1: 'name1', ccol2: 'name1' }
-    ],
-    [
-        { ccol1: 'name1', ccol2: 'name1' },
-        { ccol1: 'name1', ccol2: 'name1' },
-        { ccol1: 'name1', ccol2: 'name1' },
-        { ccol1: 'name1', ccol2: 'name1' }
-    ],
-    [
-    ],
-]
-
-export default function () {
+export default function ({ rows, collapsedRows, columns, total }: any) {
     const [order, setOrder] = useState<Order>('asc')
-    const [orderBy, setOrderBy] = useState<keyof RowData>('col1')
+    const [orderBy, setOrderBy] = useState<keyof RowData>('name')
     const [page, setPage] = useState(0)
     const [rowsPerPage, setRowsPerPage] = useState(5)
 
@@ -78,7 +35,7 @@ export default function () {
 
     return (
         <>
-            <TableToolbar title='Title table' />
+            <TableToolbar title='Timesheets' />
             <TableContainer component={Paper}>
                 <Table
                     aria-labelledby="tableTitle"
@@ -96,7 +53,7 @@ export default function () {
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={rows.length}
+                count={total}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

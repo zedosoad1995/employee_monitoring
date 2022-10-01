@@ -7,16 +7,25 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import { CollapsedTableProps, CollapsedHeadCell } from '../../../types/table'
 
-
 const columns: Array<CollapsedHeadCell> = [
     {
-        id: 'ccol1',
-        label: 'ccol1',
+        id: 'startTime',
+        label: 'Start Time',
         numeric: false
     },
     {
-        id: 'ccol2',
-        label: 'ccol2',
+        id: 'endTime',
+        label: 'End Time',
+        numeric: false
+    },
+    {
+        id: 'duration',
+        label: 'Duration',
+        numeric: false
+    },
+    {
+        id: 'isNotAcceptable',
+        label: '',
         numeric: false
     }
 ]

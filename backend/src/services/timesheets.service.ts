@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client"
 import prisma from "../../prisma/prisma-client"
 import { getMinsFromTimeStr, getTimeStrFromMins } from "../helpers/dateTime"
+import { addPlusSign } from "../helpers/string"
 import { getBreaks, getOvertime } from "../helpers/timesheet"
 import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
 
@@ -83,7 +84,7 @@ export const getMany = async () => {
             // Calculate Time late
             const enterTime = ts.times.find(el => el.isEnter)
             const timeLate = (group && enterTime) ?
-                getTimeStrFromMins(getMinsFromTimeStr(enterTime.time) - getMinsFromTimeStr(group.startTime)) :
+                addPlusSign(getTimeStrFromMins(getMinsFromTimeStr(enterTime.time) - getMinsFromTimeStr(group.startTime))) :
                 null
 
             // Calculate Breaks Duration
@@ -94,7 +95,8 @@ export const getMany = async () => {
             return {
                 name: ts.name,
                 group: group ? group.name : null,
-                overtime, timeLate,
+                overtime,
+                timeLate,
                 startTime: enterTime ? enterTime.time : null,
                 endTime: exitTime ? exitTime.time : null,
                 breaks,
@@ -105,6 +107,7 @@ export const getMany = async () => {
 
     return {
         timesheets: transformedTimesheets,
+        total: transformedTimesheets.length
     }
 }
 

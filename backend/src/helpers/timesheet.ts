@@ -1,5 +1,6 @@
 import { BREAK_DURATION_TH } from "../constants"
 import { getMinsFromTimeStr, getTimeStrFromMins } from "./dateTime"
+import { addPlusSign } from "./string"
 
 interface IGroup {
     startTime: string,
@@ -33,7 +34,7 @@ export const getOvertime = (
         return acc + getMinsFromTimeStr(el.endTime) - getMinsFromTimeStr(el.startTime)
     }, 0)
     const expectedMins = totalTimeDiff - timeInBreaks
-    return getTimeStrFromMins(totalMins - expectedMins)
+    return addPlusSign(getTimeStrFromMins(totalMins - expectedMins))
 }
 
 export const getBreaks = (

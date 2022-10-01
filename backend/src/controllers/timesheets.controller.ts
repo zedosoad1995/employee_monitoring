@@ -10,7 +10,7 @@ export const getMany = async (req: Request, res: Response, next: NextFunction) =
         return next(err)
     }
 
-    res.status(httpStatusCodes.OK).json({ data: resp })
+    res.status(httpStatusCodes.OK).json(resp)
 }
 
 export const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -21,5 +21,5 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
         return next(err)
     }
 
-    res.status(httpStatusCodes.CREATED).json({ data: resp })
+    res.status(httpStatusCodes.CREATED).json(resp)
 }

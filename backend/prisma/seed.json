@@ -1,0 +1,430 @@
+{
+    "groups": [
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1ee",
+            "name": "Factory Workers",
+            "startTime": "7:30",
+            "endTime": "17:30"
+        },
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1ed",
+            "name": "Office Workers",
+            "startTime": "8:00",
+            "endTime": "17:30"
+        }
+    ],
+    "breaks": [
+        {
+            "startTime": "10:30",
+            "endTime": "10:45",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "startTime": "12:30",
+            "endTime": "13:30",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "startTime": "15:30",
+            "endTime": "15:45",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "startTime": "10:00",
+            "endTime": "10:10",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        },
+        {
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        },
+        {
+            "startTime": "15:15",
+            "endTime": "15:30",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        }
+    ],
+    "employees": [
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1e0",
+            "cardId": "1",
+            "name": "Chen",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1e1",
+            "cardId": "2",
+            "name": "Django",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1e2",
+            "cardId": "3",
+            "name": "Ronaldo",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1e3",
+            "cardId": "4",
+            "name": "Kat Wally",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        },
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1e4",
+            "cardId": "5",
+            "name": "Walter",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        },
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1e5",
+            "cardId": "6",
+            "name": "Joao Q",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        },
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1e6",
+            "cardId": "7",
+            "name": "Coolio",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        }
+    ],
+    "timesheets": [
+        {
+            "date": "2022-01-01",
+            "time": "07:26",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e0"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:30",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e0"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:46",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e0"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "12:01",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e0"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "13:01",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e0"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:21",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e0"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:33",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e0"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "17:43",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e0"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "09:12",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e1"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:30",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e1"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:46",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e1"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "12:01",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e1"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "13:01",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e1"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:21",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e1"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:33",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e1"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "17:43",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e1"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "07:00",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e2"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:30",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e2"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:46",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e2"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "12:01",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e2"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "13:01",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e2"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:21",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e2"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:33",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e2"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "21:43",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e2"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "07:26",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e3"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:30",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e3"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:46",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e3"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "12:01",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e3"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "13:01",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e3"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:21",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e3"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:30",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e3"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "17:40",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e3"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "06:46",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e4"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:30",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e4"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:46",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e4"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "12:01",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e4"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "13:22",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e4"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:21",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e4"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:33",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e4"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "17:13",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e4"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "07:26",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e5"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:30",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e5"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:46",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e5"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "12:01",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e5"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "13:01",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e5"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:25",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e5"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:33",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e5"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "17:03",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e5"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "07:29",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e6"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:30",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e6"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "10:46",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e6"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "12:01",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e6"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "12:54",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e6"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:21",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e6"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "15:33",
+            "isEnter": true,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e6"
+        },
+        {
+            "date": "2022-01-01",
+            "time": "18:43",
+            "isEnter": false,
+            "employeeId": "04ea9489-fa9a-413d-896e-754422f5a1e6"
+        }
+    ]
+}
