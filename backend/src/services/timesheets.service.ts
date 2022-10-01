@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client"
 import prisma from "../../prisma/prisma-client"
 import { getMinsFromTimeStr, getTimeStrFromMins } from "../helpers/dateTime"
+import { getBreaks, getOvertime } from "../helpers/timesheet"
 import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
 
 
@@ -74,98 +75,31 @@ export const getMany = async () => {
         return acc
     }, {}))
         .map(ts => {
-
-            // Calculate Overtime
-            const { totalMins } = ts.times.reduce((acc: any, el) => {
-                if (acc.hasEntered && !el.isEnter) {
-                    acc.totalMins += getMinsFromTimeStr(el.time) - acc.prevMins
-                    acc.hasEntered = false
-                } else if (!acc.hasEntered && el.isEnter) {
-                    acc.prevMins = getMinsFromTimeStr(el.time)
-                    acc.hasEntered = true
-                }
-
-                return acc
-            }, { totalMins: 0, hasEntered: false, prevMins: 0 })
-
-
             const group = groups.find(el => el.id === ts.group)
 
-            let overtime
-            if (group) {
-                const totalTimeDiff = getMinsFromTimeStr(group.endTime) - getMinsFromTimeStr(group.startTime)
-                const timeInBreaks = group.Break.reduce((acc: number, el) => {
-                    return acc + getMinsFromTimeStr(el.endTime) - getMinsFromTimeStr(el.startTime)
-                }, 0)
-                const expectedMins = totalTimeDiff - timeInBreaks
-                overtime = getTimeStrFromMins(totalMins - expectedMins)
-            }
-
+            // Calculate Overtime
+            const overtime = group ? getOvertime(ts.times, group) : null
 
             // Calculate Time late
             const enterTime = ts.times.find(el => el.isEnter)
-
-            let timeLate
-            if (group && enterTime) {
-                timeLate = getTimeStrFromMins(getMinsFromTimeStr(enterTime.time) - getMinsFromTimeStr(group.startTime))
-            }
-
-
+            const timeLate = (group && enterTime) ?
+                getTimeStrFromMins(getMinsFromTimeStr(enterTime.time) - getMinsFromTimeStr(group.startTime)) :
+                null
 
             // Calculate Breaks Duration
-            let breaks
-
-            if (group) {
-                const expectedMoves = '10'.repeat(group.Break.length + 1)
-                const moves = ts.times.reduce((acc, el) => {
-                    return acc + String(Number(el.isEnter))
-                }, '')
-
-                if (expectedMoves === moves) {
-                    breaks = ts.times.slice(1, -1).reduce((acc: Array<Array<string>>, el) => {
-                        if (el.isEnter) {
-                            acc[acc.length - 1].push(el.time)
-                        } else {
-                            acc.push([el.time])
-                        }
-                        return acc
-                    }, [])
-                        .map((el, index) => ({
-                            startTime: el[0],
-                            endTime: el[1],
-                            duration: getTimeStrFromMins(getMinsFromTimeStr(el[1]) - getMinsFromTimeStr(el[0])),
-                            minsExceeding: (getMinsFromTimeStr(el[1]) - getMinsFromTimeStr(el[0])) -
-                                (getMinsFromTimeStr(group.Break[index].endTime) - getMinsFromTimeStr(group.Break[index].startTime))
-                        }))
-
-                } else {
-                    breaks = ts.times.slice(1, -1).reduce((acc: Array<Array<string | null>>, el) => {
-                        if (el.isEnter) {
-                            if (acc.at(-1)?.length === 2 || acc.length === 0) {
-                                acc.push([null, el.time])
-                            } else if (acc.at(-1)?.length === 1) {
-                                acc[acc.length - 1].push(el.time)
-                            }
-                        } else {
-                            if (acc.at(-1)?.length === 1) {
-                                acc[acc.length - 1].push(null)
-                            }
-                            acc.push([el.time])
-                        }
-                        return acc
-                    }, [])
-                        .map((el) => ({
-                            startTime: el[0],
-                            endTime: el[1],
-                            duration: null,
-                            minsExceeding: null
-                        }))
-                }
-            }
+            const { breaks, isNotAcceptableBreak: hasNonAcceptableBreaks } = getBreaks(ts.times, group)
 
             const exitTime = ts.times.slice(0).reverse().find(el => !el.isEnter)
 
-            return { name: ts.name, group: group?.name, overtime, timeLate, startTime: enterTime?.time, endTime: exitTime?.time, breaks }
+            return {
+                name: ts.name,
+                group: group ? group.name : null,
+                overtime, timeLate,
+                startTime: enterTime ? enterTime.time : null,
+                endTime: exitTime ? exitTime.time : null,
+                breaks,
+                hasNonAcceptableBreaks
+            }
         })
 
 
