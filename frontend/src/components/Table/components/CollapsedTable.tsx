@@ -10,6 +10,12 @@ import { CollapsedTableProps, CollapsedHeadCell } from '../../../types/table'
 
 const columns: Array<CollapsedHeadCell> = [
     {
+        id: 'isNotAcceptable',
+        label: '',
+        numeric: false,
+        isIcon: true
+    },
+    {
         id: 'startTime',
         label: 'Start Time',
         numeric: false
@@ -23,11 +29,6 @@ const columns: Array<CollapsedHeadCell> = [
         id: 'duration',
         label: 'Duration',
         numeric: false
-    },
-    {
-        id: 'isNotAcceptable',
-        label: '',
-        numeric: false
     }
 ]
 
@@ -36,11 +37,11 @@ export default function CollapsedTable(props: CollapsedTableProps) {
 
     return (
         <TableRow>
-            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={parentColumns.length + 1} >
+            <TableCell style={{ paddingBottom: 0, paddingTop: 0, borderBottomWidth: open ? "1px" : 0 }} colSpan={parentColumns.length} >
                 <Collapse in={open} timeout="auto" unmountOnExit>
-                    <Box sx={{ margin: 1 }}>
+                    <Box sx={{ margin: 2 }}>
                         <Typography>Breaks</Typography>
-                        <Table size="small">
+                        <Table size="small" sx={{ width: "auto" }}>
                             <TableHead>
                                 <TableRow>
                                     {columns.map(col => (
@@ -59,6 +60,7 @@ export default function CollapsedTable(props: CollapsedTableProps) {
                                     <TableRow>
                                         {columns.map(col => (
                                             <TableCell
+                                                sx={{ padding: col.isIcon ? "0 0 0 6px" : "auto" }}
                                                 align={col.numeric ? 'right' : 'left'}
                                             >
                                                 {row[col.id]}

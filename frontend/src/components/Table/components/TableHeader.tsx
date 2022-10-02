@@ -14,22 +14,27 @@ export default function TableHeader(props: TableHeaderProps) {
     return (
         <TableHead>
             <TableRow>
-                <TableCell />
                 {columns.map((col) => (
                     <TableCell
                         key={col.id}
                         align={col.numeric ? 'right' : 'left'}
                         sortDirection={orderBy === col.id ? order : false}
                     >
-                        <TableSortLabel
-                            active={orderBy === col.id}
-                            direction={orderBy === col.id ? order : 'asc'}
-                            onClick={createSortHandler(col.id)}
-                        >
-                            {col.label}
-                        </TableSortLabel>
+                        {(col.sortable === undefined || col.sortable) &&
+                            <TableSortLabel
+                                active={orderBy === col.id}
+                                direction={orderBy === col.id ? order : 'asc'}
+                                onClick={createSortHandler(col.id)}
+                            >
+                                {col.label}
+                            </TableSortLabel>
+                        }
+                        {col.sortable === false &&
+                            <>{col.label}</>
+                        }
                     </TableCell>
                 ))}
+                <TableCell />
             </TableRow>
         </TableHead>
     )

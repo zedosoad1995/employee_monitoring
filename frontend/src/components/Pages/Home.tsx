@@ -1,10 +1,21 @@
-import { useEffect, useState } from "react";
-import { getTimeStrFromMins } from "../../helpers/dateTime";
-import { getTimesheets } from "../../services/timesheet";
-import { HeadCell, Order, RowData } from "../../types/table";
+import { useEffect, useState } from "react"
+import { getTimeStrFromMins } from "../../helpers/dateTime"
+import { getTimesheets } from "../../services/timesheet"
+import { HeadCell, Order, RowData } from "../../types/table"
 import UsersTable from "../Table/Table"
+import WarningRoundedIcon from '@mui/icons-material/WarningRounded'
+import Tooltip from "@mui/material/Tooltip"
+import Typography from "@mui/material/Typography"
+import { getGroups } from "../../services/group"
 
 const columns: Array<HeadCell> = [
+    {
+        id: 'hasNonAcceptableBreaks',
+        label: '',
+        numeric: false,
+        sortable: false,
+        isIcon: true
+    },
     {
         id: 'name',
         label: 'Employee',
@@ -33,11 +44,6 @@ const columns: Array<HeadCell> = [
     {
         id: 'endTime',
         label: 'End Time',
-        numeric: false
-    },
-    {
-        id: 'hasNonAcceptableBreaks',
-        label: '',
         numeric: false
     }
 ]
@@ -73,16 +79,39 @@ function Home() {
 
     useEffect(() => {
         const getData = async () => {
+            const { groups } = await getGroups()
+
             const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order })
 
-            const rows = timesheets.map((ts: any) => ({
-                name: ts.name,
-                group: ts.group,
-                overtime: getTimeStrFromMins(ts.overtime),
-                timeLate: getTimeStrFromMins(ts.timeLate),
-                startTime: ts.startTime,
-                endTime: ts.endTime
-            }))
+            const rows = timesheets.map((ts: any, index: number) => {
+                const group = groups.find((g: any) => g.id === ts.group.id)
+
+                return {
+                    hasNonAcceptableBreaks: ts.hasNonAcceptableBreaks ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
+                    name: ts.name,
+                    group: <>
+                        {group &&
+                            <Tooltip
+                                key={index}
+                                title={<>
+                                    <Typography color="inherit">Schedule</Typography>
+                                    <p>{`Enter: ${group.startTime}`}</p>
+                                    {group.Break.map((b: any) =>
+                                        (<p>{`Break: ${b.startTime} - ${b.endTime}`}</p>)
+                                    )}
+                                    <p>{`Leave: ${group.endTime}`}</p>
+                                </>}
+                            >
+                                <div style={{ cursor: "pointer" }}>{ts.group.name}</div>
+                            </Tooltip>
+                        }
+                    </>,
+                    overtime: getTimeStrFromMins(ts.overtime),
+                    timeLate: getTimeStrFromMins(ts.timeLate),
+                    startTime: ts.startTime,
+                    endTime: ts.endTime
+                }
+            })
             setRows(rows)
 
             const collapsedRows = timesheets.map((ts: any) => {
@@ -90,7 +119,7 @@ function Home() {
                     startTime: b.startTime,
                     endTime: b.endTime,
                     duration: `${b.duration} (${b.minsExceeding > 0 ? '+' : ''}${b.minsExceeding})`,
-                    isNotAcceptable: b.isNotAcceptable
+                    isNotAcceptable: b.isNotAcceptable ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : ''
                 }))
             })
             setCollapsedRows(collapsedRows)

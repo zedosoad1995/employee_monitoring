@@ -13,6 +13,7 @@ export default function ({ rows, collapsedRows, columns, total, page, rowsPerPag
             <TableToolbar title='Timesheets' />
             <TableContainer component={Paper}>
                 <Table
+                    sx={{ width: "100%" }}
                     aria-labelledby="tableTitle"
                     size='small'
                 >

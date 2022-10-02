@@ -11,7 +11,9 @@ export interface RowData {
 export interface HeadCell {
     id: keyof RowData
     label: string
-    numeric: boolean
+    numeric: boolean,
+    sortable?: boolean,
+    isIcon?: boolean
 }
 
 export interface CollapsedRowData {
@@ -26,6 +28,7 @@ export interface CollapsedHeadCell {
     id: keyof CollapsedRowData
     label: string
     numeric: boolean
+    isIcon?: boolean
 }
 
 export type Order = 'asc' | 'desc'

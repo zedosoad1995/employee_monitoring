@@ -18,7 +18,10 @@ export default function Row(props: RowProps) {
             hover
             tabIndex={-1}
         >
-            <TableCell>
+            {columns.map(col => {
+                return <TableCell sx={{ padding: col.isIcon ? "0 0 0 16px" : "auto" }} align={col.numeric ? 'right' : 'left'}>{row[col.id]}</TableCell>
+            })}
+            <TableCell >
                 <IconButton
                     aria-label="expand row"
                     size="small"
@@ -27,9 +30,6 @@ export default function Row(props: RowProps) {
                     {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                 </IconButton>
             </TableCell>
-            {columns.map(col => {
-                return <TableCell align={col.numeric ? 'right' : 'left'}>{row[col.id]}</TableCell>
-            })}
         </TableRow>
         <CollapsedTable open={open} rows={collapsedRow} parentColumns={columns} />
     </>)

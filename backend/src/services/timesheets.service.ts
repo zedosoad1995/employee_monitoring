@@ -94,7 +94,7 @@ export const getMany = async (query: any) => {
 
             return {
                 name: ts.name,
-                group: group ? group.name : null,
+                group: group ? { id: group.id, name: group.name } : null,
                 overtime,
                 timeLate,
                 startTime: enterTime ? enterTime.time : null,
