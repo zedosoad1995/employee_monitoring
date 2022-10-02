@@ -2,12 +2,12 @@ import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
-import { RowData, TableHeaderProps } from '../../../types/table'
+import { TableHeaderProps } from '../../../types/table'
 
 export default function TableHeader(props: TableHeaderProps) {
-    const { order, orderBy, columns, onRequestSort } = props
+    const { order, orderBy, columns, collapsedcolumns, onRequestSort } = props
     const createSortHandler =
-        (property: keyof RowData) => (event: React.MouseEvent<unknown>) => {
+        (property: any) => (event: React.MouseEvent<unknown>) => {
             onRequestSort(event, property)
         }
 
@@ -34,7 +34,7 @@ export default function TableHeader(props: TableHeaderProps) {
                         }
                     </TableCell>
                 ))}
-                <TableCell />
+                {collapsedcolumns && <TableCell />}
             </TableRow>
         </TableHead>
     )

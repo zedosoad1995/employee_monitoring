@@ -1,31 +1,13 @@
-export interface RowData {
-    name: string,
-    group: string,
-    overtime: string,
-    timeLate: string,
-    startTime: string,
-    endTime: string,
-    hasNonAcceptableBreaks: boolean
-}
-
 export interface HeadCell {
-    id: keyof RowData
+    id: string
     label: string
     numeric: boolean,
     sortable?: boolean,
     isIcon?: boolean
 }
 
-export interface CollapsedRowData {
-    startTime: string,
-    endTime: string,
-    duration: string,
-    minsExceeding: number,
-    isNotAcceptable: boolean
-}
-
 export interface CollapsedHeadCell {
-    id: keyof CollapsedRowData
+    id: string
     label: string
     numeric: boolean
     isIcon?: boolean
@@ -34,17 +16,19 @@ export interface CollapsedHeadCell {
 export type Order = 'asc' | 'desc'
 
 export interface TableContentProps {
-    rows: Array<RowData>,
-    collapsedRows: Array<Array<CollapsedRowData>>,
+    rows: Array<any>,
+    collapsedRows: Array<Array<any>>,
     columns: Array<HeadCell>,
+    collapsedcolumns: Array<CollapsedHeadCell>
     rowsPerPage: number
 }
 
 export interface TableHeaderProps {
-    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof RowData) => void
+    onRequestSort: (event: React.MouseEvent<unknown>, property: any) => void
     order: Order
     orderBy: string
-    columns: Array<HeadCell>
+    columns: Array<HeadCell>,
+    collapsedcolumns: Array<CollapsedHeadCell>
 }
 
 export interface TableToolbarProps {
@@ -52,14 +36,16 @@ export interface TableToolbarProps {
 }
 
 export interface RowProps {
-    row: RowData,
-    collapsedRow: Array<CollapsedRowData>,
+    row: any,
+    collapsedRow: Array<any> | null,
     columns: Array<HeadCell>,
+    collapsedcolumns: Array<CollapsedHeadCell>
 }
 
 
 export interface CollapsedTableProps {
     open: boolean,
-    rows: Array<CollapsedRowData>,
+    rows: Array<any>,
     parentColumns: Array<HeadCell>
+    columns: Array<CollapsedHeadCell>
 }

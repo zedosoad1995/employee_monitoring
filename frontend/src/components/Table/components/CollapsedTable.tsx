@@ -6,34 +6,11 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { CollapsedTableProps, CollapsedHeadCell } from '../../../types/table'
+import { CollapsedTableProps } from '../../../types/table'
 
-const columns: Array<CollapsedHeadCell> = [
-    {
-        id: 'isNotAcceptable',
-        label: '',
-        numeric: false,
-        isIcon: true
-    },
-    {
-        id: 'startTime',
-        label: 'Start Time',
-        numeric: false
-    },
-    {
-        id: 'endTime',
-        label: 'End Time',
-        numeric: false
-    },
-    {
-        id: 'duration',
-        label: 'Duration',
-        numeric: false
-    }
-]
 
 export default function CollapsedTable(props: CollapsedTableProps) {
-    const { open, rows, parentColumns } = props
+    const { open, rows, parentColumns, columns } = props
 
     return (
         <TableRow>

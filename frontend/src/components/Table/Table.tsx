@@ -1,12 +1,11 @@
 import Table from '@mui/material/Table'
 import TableContainer from '@mui/material/TableContainer'
-import TablePagination from '@mui/material/TablePagination'
 import TableHeader from './components/TableHeader'
 import TableContent from './components/TableContent'
 import Paper from '@mui/material/Paper'
 
 
-export default function ({ rows, collapsedRows, columns, total, page, rowsPerPage, handleChangePage, handleChangeRowsPerPage, order, orderBy, handleRequestSort }: any) {
+export default function ({ rows, collapsedRows, columns, collapsedcolumns, rowsPerPage, order, orderBy, handleRequestSort }: any) {
     return (
         <>
             <TableContainer component={Paper}>
@@ -20,19 +19,11 @@ export default function ({ rows, collapsedRows, columns, total, page, rowsPerPag
                         orderBy={orderBy}
                         columns={columns}
                         onRequestSort={handleRequestSort}
+                        collapsedcolumns={collapsedcolumns}
                     />
-                    <TableContent rows={rows} collapsedRows={collapsedRows} columns={columns} rowsPerPage={rowsPerPage} />
+                    <TableContent rows={rows} collapsedRows={collapsedRows} columns={columns} collapsedcolumns={collapsedcolumns} rowsPerPage={rowsPerPage} />
                 </Table>
             </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={total}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
         </>
     )
 }

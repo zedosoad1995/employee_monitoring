@@ -1,18 +1,17 @@
-import AppBar from "@mui/material/AppBar"
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar"
-import Home from "./components/Pages/Home";
+import Home from "./components/Pages/Home"
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from 'react-router-dom'
 
 function App() {
   return (
-    <>
-      <AppBar position="static" >
-        <Toolbar />
-      </AppBar>
-      <Box sx={{ p: 4 }}>
-        <Home />
-      </Box>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="*" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
