@@ -1,7 +1,6 @@
 import Table from '@mui/material/Table'
 import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
-import TableToolbar from './components/TableToolbar'
 import TableHeader from './components/TableHeader'
 import TableContent from './components/TableContent'
 import Paper from '@mui/material/Paper'
@@ -10,7 +9,6 @@ import Paper from '@mui/material/Paper'
 export default function ({ rows, collapsedRows, columns, total, page, rowsPerPage, handleChangePage, handleChangeRowsPerPage, order, orderBy, handleRequestSort }: any) {
     return (
         <>
-            <TableToolbar title='Timesheets' />
             <TableContainer component={Paper}>
                 <Table
                     sx={{ width: "100%" }}

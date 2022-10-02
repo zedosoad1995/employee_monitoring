@@ -7,6 +7,14 @@ import WarningRoundedIcon from '@mui/icons-material/WarningRounded'
 import Tooltip from "@mui/material/Tooltip"
 import Typography from "@mui/material/Typography"
 import { getGroups } from "../../services/group"
+import TableToolbar from "../Table/components/TableToolbar"
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker'
+import TextField from "@mui/material/TextField"
+import { format } from 'date-fns'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import IconButton from "@mui/material/IconButton"
+import FilterListIcon from '@mui/icons-material/FilterList'
 
 const columns: Array<HeadCell> = [
     {
@@ -59,6 +67,12 @@ function Home() {
     const [order, setOrder] = useState<Order>('asc')
     const [orderBy, setOrderBy] = useState<keyof RowData>('overtime')
 
+    const [date, setDate] = useState(new Date())
+
+    const handleDateChange = (newValue: any) => {
+        setDate(newValue)
+    }
+
     const handleRequestSort = (
         event: React.MouseEvent<unknown>,
         property: keyof RowData,
@@ -81,7 +95,9 @@ function Home() {
         const getData = async () => {
             const { groups } = await getGroups()
 
-            const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order })
+            const dateStr = format(date, 'yyyy-MM-dd')
+
+            const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order, date: dateStr })
 
             const rows = timesheets.map((ts: any, index: number) => {
                 const group = groups.find((g: any) => g.id === ts.group.id)
@@ -128,22 +144,42 @@ function Home() {
         }
 
         getData()
-    }, [page, rowsPerPage, orderBy, order])
+    }, [page, rowsPerPage, orderBy, order, date])
 
     return (
-        <UsersTable
-            rows={rows}
-            collapsedRows={collapsedRows}
-            columns={columns}
-            total={total}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            handleChangePage={handleChangePage}
-            handleChangeRowsPerPage={handleChangeRowsPerPage}
-            order={order}
-            orderBy={orderBy}
-            handleRequestSort={handleRequestSort}
-        />
+        <>
+            <div style={{ marginBottom: "10px", marginTop: "10px", display: "flex", justifyContent: "space-between" }}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DesktopDatePicker
+                        label="Date"
+                        inputFormat="yyyy-MM-dd"
+                        value={date}
+                        onChange={handleDateChange}
+                        renderInput={(params) => <TextField {...params} />}
+                        disableFuture={true}
+                    />
+                </LocalizationProvider>
+                <Tooltip title="Filter list">
+                    <IconButton>
+                        <FilterListIcon />
+                    </IconButton>
+                </Tooltip>
+            </div>
+
+            <UsersTable
+                rows={rows}
+                collapsedRows={collapsedRows}
+                columns={columns}
+                total={total}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleChangePage={handleChangePage}
+                handleChangeRowsPerPage={handleChangeRowsPerPage}
+                order={order}
+                orderBy={orderBy}
+                handleRequestSort={handleRequestSort}
+            />
+        </>
     );
 }
 

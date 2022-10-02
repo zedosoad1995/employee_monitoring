@@ -28,7 +28,9 @@ import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
 } */
 
 export const getMany = async (query: any) => {
-    let timesheets = await prisma.timesheet.findMany({
+    const { date } = query
+
+    const mainQuery: Prisma.TimesheetFindManyArgs = {
         select: {
             id: true,
             date: true,
@@ -46,7 +48,15 @@ export const getMany = async (query: any) => {
                 }
             }
         }
-    })
+    }
+
+    if (date) {
+        mainQuery.where = {
+            date
+        }
+    }
+
+    const timesheets = await prisma.timesheet.findMany(mainQuery)
 
     let groups = await prisma.group.findMany({
         select: {
@@ -63,7 +73,7 @@ export const getMany = async (query: any) => {
         }
     })
 
-    const transformedTimesheets = Object.values(timesheets.reduce((acc: ITimesheetObj, el) => {
+    const transformedTimesheets = Object.values(timesheets.reduce((acc: ITimesheetObj, el: any) => {
         if (!(el.employee.id in acc)) {
             acc[el.employee.id] = {
                 times: [],
