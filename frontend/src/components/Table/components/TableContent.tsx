@@ -9,8 +9,6 @@ import Row from './Row'
 export default function TableContent(props: TableContentProps) {
     const { rows, collapsedRows, columns, collapsedcolumns, rowsPerPage } = props
 
-    if (rows) console.log(rows.map((row) => { return row }))
-
     const emptyRows = Math.max(0, rowsPerPage - (rows ? rows.length : 0))
 
     return (

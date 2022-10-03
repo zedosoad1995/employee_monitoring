@@ -17,6 +17,7 @@ import Toolbar from "@mui/material/Toolbar"
 import IconButton from "@mui/material/IconButton"
 import MenuIcon from '@mui/icons-material/Menu'
 import Box from "@mui/material/Box"
+import Employees from "./Employees"
 
 function Home() {
     const navigate = useNavigate()
@@ -54,7 +55,8 @@ function Home() {
                     <Routes>
                         <Route path="" element={<Timesheet />} />
                         <Route path="groups" element={<Groups />} />
-                        <Route path="/timesheet" element={<Navigate replace to="/" />} />
+                        <Route path="employees" element={<Employees />} />
+                        <Route path="timesheet" element={<Navigate replace to="/" />} />
                     </Routes>
                 </Box>
             </div>
@@ -64,7 +66,7 @@ function Home() {
                 onClose={handleCloseSideMenu}
             >
                 <List>
-                    {[{ id: 'timesheet', label: 'Timesheet' }, { id: 'users', label: 'Users' }, { id: 'groups', label: 'Groups' }].map((item) => (
+                    {[{ id: 'timesheet', label: 'Timesheet' }, { id: 'employees', label: 'Employees' }, { id: 'groups', label: 'Groups' }].map((item) => (
                         <ListItem key={item.id} disablePadding>
                             <ListItemButton onClick={handleClickMenuItem(item.id)}>
                                 <ListItemText primary={item.label} />

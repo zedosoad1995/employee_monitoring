@@ -15,7 +15,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import IconButton from "@mui/material/IconButton"
 import FilterListIcon from '@mui/icons-material/FilterList'
 import TablePagination from "@mui/material/TablePagination"
-import Box from "@mui/material/Box"
 
 const collapsedcolumns: Array<CollapsedHeadCell> = [
     {
