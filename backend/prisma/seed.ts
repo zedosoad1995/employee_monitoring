@@ -1,4 +1,4 @@
-import { groups, breaks, employees, timesheets } from './seed.json'
+import { groups, breaks, employees, timesheets } from './seed_test.json'
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 

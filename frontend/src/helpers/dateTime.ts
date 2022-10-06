@@ -1,3 +1,8 @@
+export const getMinsFromTimeStr = (str: string) => {
+    let [hh, mm] = str.split(':')
+    return Number(hh) * 60 + Number(mm)
+}
+
 export const getTimeStrFromMins = (totalMins: number) => {
     let tempMins = Math.abs(totalMins)
 

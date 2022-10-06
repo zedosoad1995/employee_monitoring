@@ -67,12 +67,12 @@ export const getBreaks = (
     }, [])
         .map((el, index) => {
             const duration = (isSameSchedule && el[0] && el[1]) ?
-                getTimeStrFromMins(getMinsFromTimeStr(el[1]) - getMinsFromTimeStr(el[0])) : null
+                getTimeStrFromMins(getMinsFromTimeStr(el[1]) - getMinsFromTimeStr(el[0])) : ''
 
             const minsExceeding = (isSameSchedule && group && el[0] && el[1]) ?
                 (getMinsFromTimeStr(el[1]) - getMinsFromTimeStr(el[0])) -
                 (getMinsFromTimeStr(group.Break[index].endTime) - getMinsFromTimeStr(group.Break[index].startTime))
-                : null
+                : ''
 
             return {
                 startTime: el[0],
@@ -85,6 +85,7 @@ export const getBreaks = (
 
     return {
         breaks,
-        isNotAcceptableBreak: breaks.some(b => b.isNotAcceptable)
+        isNotAcceptableBreak: breaks.some(b => b.isNotAcceptable),
+        hasMalfunction: !isSameSchedule
     }
 }

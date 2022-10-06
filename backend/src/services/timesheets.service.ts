@@ -31,6 +31,7 @@ export const getMany = async (query: any) => {
     const { date } = query
 
     const mainQuery: Prisma.TimesheetFindManyArgs = {
+        distinct: ['date', 'time', 'employeeId'],
         select: {
             id: true,
             date: true,
@@ -88,29 +89,30 @@ export const getMany = async (query: any) => {
         .map(ts => {
             const group = groups.find(el => el.id === ts.group)
 
-            // Calculate Overtime
-            const overtime = group ? getOvertime(ts.times, group) : null
-
             // Calculate Time late
-            const enterTime = ts.times.find(el => el.isEnter)
+            const enterTime = ts.times[0].isEnter ? ts.times[0].time : ''
             const timeLate = (group && enterTime) ?
-                getMinsFromTimeStr(enterTime.time) - getMinsFromTimeStr(group.startTime) :
-                null
+                getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(group.startTime) :
+                ''
 
             // Calculate Breaks Duration
-            const { breaks, isNotAcceptableBreak: hasNonAcceptableBreaks } = getBreaks(ts.times, group)
+            const { breaks, isNotAcceptableBreak: hasNonAcceptableBreaks, hasMalfunction } = getBreaks(ts.times, group)
 
-            const exitTime = ts.times.slice(0).reverse().find(el => !el.isEnter)
+            const exitTime = !ts.times.at(-1)?.isEnter ? ts.times.at(-1)?.time : ''
+
+            // Calculate Overtime
+            const overtime = (group && enterTime && exitTime) ? getOvertime(ts.times, group) : ''
 
             return {
                 name: ts.name,
-                group: group ? { id: group.id, name: group.name } : null,
+                group: group ? { id: group.id, name: group.name } : '',
                 overtime,
                 timeLate,
-                startTime: enterTime ? enterTime.time : null,
-                endTime: exitTime ? exitTime.time : null,
+                startTime: enterTime,
+                endTime: exitTime,
                 breaks,
-                hasNonAcceptableBreaks
+                hasNonAcceptableBreaks,
+                hasMalfunction
             }
         })
 

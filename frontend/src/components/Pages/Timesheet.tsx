@@ -14,7 +14,29 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import IconButton from "@mui/material/IconButton"
 import FilterListIcon from '@mui/icons-material/FilterList'
-import TablePagination from "@mui/material/TablePagination"
+import TablePagination from '@mui/material/TablePagination'
+import EditIcon from '@mui/icons-material/Edit'
+import Dialog from "@mui/material/Dialog"
+import DialogTitle from "@mui/material/DialogTitle"
+import DialogContent from "@mui/material/DialogContent"
+
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+
+const schema = yup.object().shape({
+    times: yup.array().of(
+        yup.object().shape({
+            time: yup
+                .date()
+                .typeError('Invalid Date')
+                .required(),
+            isEnter: yup
+                .boolean()
+                .required(),
+        })
+    )
+})
 
 const collapsedcolumns: Array<CollapsedHeadCell> = [
     {
@@ -59,6 +81,16 @@ const columns: Array<HeadCell> = [
         numeric: false
     },
     {
+        id: 'startTime',
+        label: 'Start Time',
+        numeric: false
+    },
+    {
+        id: 'endTime',
+        label: 'End Time',
+        numeric: false
+    },
+    {
         id: 'overtime',
         label: 'Overtime',
         numeric: false
@@ -69,14 +101,11 @@ const columns: Array<HeadCell> = [
         numeric: false
     },
     {
-        id: 'startTime',
-        label: 'Start Time',
-        numeric: false
-    },
-    {
-        id: 'endTime',
-        label: 'End Time',
-        numeric: false
+        id: 'edit',
+        label: '',
+        numeric: false,
+        sortable: false,
+        isIcon: true
     }
 ]
 
@@ -92,6 +121,16 @@ function Timesheet() {
     const [orderBy, setOrderBy] = useState('overtime')
 
     const [date, setDate] = useState(new Date())
+
+    const [openEditTime, setOpenEditTime] = useState(false)
+
+    const handleClickEditTime = () => {
+        setOpenEditTime(true)
+    }
+
+    const handleCloseEditTime = () => {
+        setOpenEditTime(false)
+    }
 
     const handleDateChange = (newValue: any) => {
         setDate(newValue)
@@ -127,7 +166,7 @@ function Timesheet() {
                 const group = groups.find((g: any) => g.id === ts.group.id)
 
                 return {
-                    hasNonAcceptableBreaks: ts.hasNonAcceptableBreaks ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
+                    hasNonAcceptableBreaks: ts.hasNonAcceptableBreaks || ts.hasMalfunction ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
                     name: ts.name,
                     group: <>
                         {group &&
@@ -146,10 +185,22 @@ function Timesheet() {
                             </Tooltip>
                         }
                     </>,
-                    overtime: getTimeStrFromMins(ts.overtime),
-                    timeLate: getTimeStrFromMins(ts.timeLate),
+                    overtime: ts.overtime ? getTimeStrFromMins(ts.overtime) : '',
+                    timeLate: ts.timeLate ? getTimeStrFromMins(ts.timeLate) : '',
                     startTime: ts.startTime,
-                    endTime: ts.endTime
+                    endTime: ts.endTime,
+                    edit: <>
+                        {group &&
+                            <Tooltip
+                                key={index}
+                                title="Edit Times"
+                            >
+                                <IconButton onClick={handleClickEditTime}>
+                                    <EditIcon />
+                                </IconButton>
+                            </Tooltip>
+                        }
+                    </>
                 }
             })
             setRows(rows)
@@ -158,7 +209,8 @@ function Timesheet() {
                 return ts.breaks.map((b: any) => ({
                     startTime: b.startTime,
                     endTime: b.endTime,
-                    duration: `${b.duration} (${b.minsExceeding > 0 ? '+' : ''}${b.minsExceeding})`,
+                    duration: (!ts.hasMalfunction && b.duration !== '' && b.minsExceeding !== '') ?
+                        `${b.duration} (${b.minsExceeding > 0 ? '+' : ''}${b.minsExceeding})` : '',
                     isNotAcceptable: b.isNotAcceptable ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : ''
                 }))
             })
@@ -169,6 +221,20 @@ function Timesheet() {
 
         getData()
     }, [page, rowsPerPage, orderBy, order, date])
+
+    const { register, control, handleSubmit, formState: { errors }, setValue } =
+        useForm<
+            { name: string, startTime: Date, endTime: Date, breaks: Array<{ startTime: Date, endTime: Date }> }
+        >({
+            defaultValues: {
+                name: '',
+                startTime: new Date(),
+                endTime: new Date(),
+                breaks: []
+            },
+            resolver: yupResolver(schema),
+            mode: 'onSubmit'
+        })
 
     return (
         <>
@@ -208,6 +274,10 @@ function Timesheet() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
+            <Dialog fullWidth onClose={handleCloseEditTime} open={openEditTime}>
+                <DialogTitle>Edit Time</DialogTitle>
+                <DialogContent sx={{ mt: 1, maxWidth: "600px" }}></DialogContent>
+            </Dialog>
         </>
     );
 }
