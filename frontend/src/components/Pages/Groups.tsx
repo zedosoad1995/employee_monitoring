@@ -151,16 +151,6 @@ function Groups() {
         setOpenCreateGroup(false)
     }
 
-    const getData = async () => {
-        const { groups } = await getGroups()
-        const rows = groups.map((g: any) => ({
-            name: g.name,
-            startTime: g.startTime,
-            endTime: g.endTime
-        }))
-        setRows(rows)
-    }
-
     useEffect(() => {
         const getData = async () => {
             const { groups } = await getGroups()

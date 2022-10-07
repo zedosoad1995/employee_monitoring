@@ -6,7 +6,9 @@ import { getBreaks, getOvertime } from "../helpers/timesheet"
 import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
 
 
-/* export const getMany = async () => {
+export const getManyRaw = async (query: any) => {
+    const { date, employeeId } = query
+
     let mainQuery: Prisma.TimesheetFindManyArgs = {
         select: {
             id: true,
@@ -15,20 +17,26 @@ import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
             isEnter: true,
             employee: {
                 select: {
+                    id: true,
                     name: true
                 }
             }
         }
     }
-    
+
+    mainQuery.where = {}
+    if (date) mainQuery.where.date = date
+    if (employeeId) mainQuery.where.employeeId = employeeId
+
+
     return {
         timesheets: await prisma.timesheet.findMany(mainQuery),
         total: await prisma.timesheet.count()
     }
-} */
+}
 
 export const getMany = async (query: any) => {
-    const { date } = query
+    const { date, employeeId } = query
 
     const mainQuery: Prisma.TimesheetFindManyArgs = {
         distinct: ['date', 'time', 'employeeId'],
@@ -51,11 +59,9 @@ export const getMany = async (query: any) => {
         }
     }
 
-    if (date) {
-        mainQuery.where = {
-            date
-        }
-    }
+    mainQuery.where = {}
+    if (date) mainQuery.where.date = date
+    if (employeeId) mainQuery.where.employeeId = employeeId
 
     const timesheets = await prisma.timesheet.findMany(mainQuery)
 
@@ -78,6 +84,7 @@ export const getMany = async (query: any) => {
         if (!(el.employee.id in acc)) {
             acc[el.employee.id] = {
                 times: [],
+                employeeId: el.employee.id,
                 name: el.employee.name,
                 group: el.employee.group.id
             }
@@ -104,6 +111,7 @@ export const getMany = async (query: any) => {
             const overtime = (group && enterTime && exitTime) ? getOvertime(ts.times, group) : ''
 
             return {
+                employeeId: ts.employeeId,
                 name: ts.name,
                 group: group ? { id: group.id, name: group.name } : '',
                 overtime,

@@ -11,7 +11,7 @@ import {
 } from 'react-router-dom'
 import Groups from "./Groups"
 import { useNavigate } from "react-router-dom"
-import Timesheet from "./Timesheet"
+import Timesheet from "./Timesheet/Timesheet"
 import AppBar from "@mui/material/AppBar"
 import Toolbar from "@mui/material/Toolbar"
 import IconButton from "@mui/material/IconButton"

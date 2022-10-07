@@ -8,6 +8,7 @@ export interface ICreateTimesheet {
 export interface ITimesheetObj {
     [key: string]: {
         times: Array<{ time: string, isEnter: boolean }>,
+        employeeId: string,
         name: string,
         group: string
     }

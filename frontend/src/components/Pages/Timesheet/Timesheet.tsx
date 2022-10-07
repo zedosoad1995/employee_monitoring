@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
-import { getTimeStrFromMins } from "../../helpers/dateTime"
-import { getTimesheets } from "../../services/timesheet"
-import { CollapsedHeadCell, HeadCell, Order } from "../../types/table"
-import TimesheetTable from "../Table/Table"
+import { getTimeStrFromMins } from "../../../helpers/dateTime"
+import { getTimesheetRaw, getTimesheets } from "../../../services/timesheet"
+import { CollapsedHeadCell, HeadCell, Order } from "../../../types/table"
+import TimesheetTable from "../../Table/Table"
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded'
 import Tooltip from "@mui/material/Tooltip"
 import Typography from "@mui/material/Typography"
-import { getGroups } from "../../services/group"
+import { getGroups } from "../../../services/group"
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker'
 import TextField from "@mui/material/TextField"
 import { format } from 'date-fns'
@@ -16,27 +16,8 @@ import IconButton from "@mui/material/IconButton"
 import FilterListIcon from '@mui/icons-material/FilterList'
 import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
-import Dialog from "@mui/material/Dialog"
-import DialogTitle from "@mui/material/DialogTitle"
-import DialogContent from "@mui/material/DialogContent"
+import TimeModal from "./TimeModal"
 
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
-
-const schema = yup.object().shape({
-    times: yup.array().of(
-        yup.object().shape({
-            time: yup
-                .date()
-                .typeError('Invalid Date')
-                .required(),
-            isEnter: yup
-                .boolean()
-                .required(),
-        })
-    )
-})
 
 const collapsedcolumns: Array<CollapsedHeadCell> = [
     {
@@ -123,17 +104,87 @@ function Timesheet() {
     const [date, setDate] = useState(new Date())
 
     const [openEditTime, setOpenEditTime] = useState(false)
+    const [times, setTimes] = useState<Array<{ time: Date, isEnter: boolean }>>([])
+    const [selectedEmployee, setSelectedEmployee] = useState("")
 
-    const handleClickEditTime = () => {
+    let dateStr: string
+    try {
+        dateStr = format(date, 'yyyy-MM-dd')
+    } catch (err) {
+        dateStr = ''
+    }
+
+    const handleChangeTime = (index: number, setValue: any) => (newValue: any, keyboardInputValue: any) => {
+        const newTime = (keyboardInputValue && keyboardInputValue.length !== 5) ?
+            new Date("") :
+            newValue
+
+        setTimes((t: any) => {
+            t[index].time = newTime
+            return [...t]
+        })
+
+        setValue(`times.${index}.time`, newTime)
+    }
+
+    const handleAddTime = (index: number) => () => {
+        let newTime = new Date()
+
+        if (times.length > 0) {
+            newTime = index >= times.length ?
+                new Date(`2019-02-11T${format(times[index - 1].time, "HH:mm")}`) :
+                new Date(`2019-02-11T${format(times[index].time, "HH:mm")}`)
+        }
+
+        setTimes((t: any) => {
+            t.splice(index, 0, { time: newTime, isEnter: false })
+            return [...t]
+        })
+    }
+
+    const handleRemoveTime = (index: number, setValue: any) => () => {
+        let timesUpdated
+        setTimes((t: any) => {
+            timesUpdated = t.filter((val: any, i: number) => i !== index)
+            for (let i = 0; i < timesUpdated.length; i++) {
+                setValue(`times.${i}.time`, timesUpdated[i].time);
+                setValue(`times.${i}.isEnter`, timesUpdated[i].isEnter);
+            }
+            return timesUpdated
+        })
+    }
+
+    useEffect(() => {
+        console.log(times)
+    }, [JSON.stringify(times)])
+
+    const prepareSubmit = (data: any) => {
+        console.log(data)
+    }
+
+    const handleClickEditTime = (employeeId: string) => async () => {
+        const times = (await getTimesheetRaw({ employeeId, date: dateStr })).timesheets
+
+        if (times.length === 0) return
+
+        setTimes((t: any) => [
+            ...t,
+            ...times.map((val: any) => ({ time: new Date(`2019-02-11T${val.time}`), isEnter: val.isEnter }))
+        ])
+
+        setSelectedEmployee(times[0].employee.name)
+
         setOpenEditTime(true)
     }
 
     const handleCloseEditTime = () => {
+        setTimes([])
+        setSelectedEmployee('')
         setOpenEditTime(false)
     }
 
     const handleDateChange = (newValue: any) => {
-        setDate(newValue)
+        if (!isNaN(newValue)) setDate(newValue)
     }
 
     const handleRequestSort = (
@@ -157,8 +208,6 @@ function Timesheet() {
     useEffect(() => {
         const getData = async () => {
             const { groups } = await getGroups()
-
-            const dateStr = format(date, 'yyyy-MM-dd')
 
             const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order, date: dateStr })
 
@@ -195,7 +244,7 @@ function Timesheet() {
                                 key={index}
                                 title="Edit Times"
                             >
-                                <IconButton onClick={handleClickEditTime}>
+                                <IconButton onClick={handleClickEditTime(ts.employeeId)}>
                                     <EditIcon />
                                 </IconButton>
                             </Tooltip>
@@ -222,19 +271,6 @@ function Timesheet() {
         getData()
     }, [page, rowsPerPage, orderBy, order, date])
 
-    const { register, control, handleSubmit, formState: { errors }, setValue } =
-        useForm<
-            { name: string, startTime: Date, endTime: Date, breaks: Array<{ startTime: Date, endTime: Date }> }
-        >({
-            defaultValues: {
-                name: '',
-                startTime: new Date(),
-                endTime: new Date(),
-                breaks: []
-            },
-            resolver: yupResolver(schema),
-            mode: 'onSubmit'
-        })
 
     return (
         <>
@@ -274,10 +310,16 @@ function Timesheet() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
-            <Dialog fullWidth onClose={handleCloseEditTime} open={openEditTime}>
-                <DialogTitle>Edit Time</DialogTitle>
-                <DialogContent sx={{ mt: 1, maxWidth: "600px" }}></DialogContent>
-            </Dialog>
+            <TimeModal
+                times={times}
+                handleClose={handleCloseEditTime}
+                onSubmit={prepareSubmit}
+                open={openEditTime}
+                handleChangeTime={handleChangeTime}
+                handleRemoveTime={handleRemoveTime}
+                handleAddTime={handleAddTime}
+                employee={selectedEmployee}
+            />
         </>
     );
 }
