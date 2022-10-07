@@ -33,10 +33,11 @@ export default function CollapsedTable(props: CollapsedTableProps) {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {rows.map(row => (
-                                    <TableRow>
-                                        {columns.map(col => (
+                                {rows.map((row, index) => (
+                                    <TableRow key={index}>
+                                        {columns.map((col, index2) => (
                                             <TableCell
+                                                key={`${index}-${index2}`}
                                                 sx={{ padding: col.isIcon ? "0 0 0 6px" : "auto" }}
                                                 align={col.numeric ? 'right' : 'left'}
                                             >

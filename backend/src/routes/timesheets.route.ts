@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { getMany, create, getManyRaw } from '../controllers/timesheets.controller'
+import { getMany, create, getManyRaw, editTimesFromEmployee } from '../controllers/timesheets.controller'
 
 
 const router = Router()
@@ -14,6 +14,10 @@ router.get('/raw',
 
 router.post('/',
     create
+)
+
+router.put('/editTimes/:employeeId',
+    editTimesFromEmployee
 )
 
 export default router

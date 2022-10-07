@@ -169,3 +169,28 @@ export const create = async (timesheet: ICreateTimesheet) => {
 
     return await prisma.timesheet.create(mainQuery)
 }
+
+export const editTimesFromEmployee = async (employeeId: string, date: any, times: any) => {
+    await prisma.$transaction([
+        prisma.timesheet.deleteMany({
+            where: {
+                date,
+                employeeId
+            }
+        }),
+        ...times.map((time: any) => prisma.timesheet.create({
+            data: {
+                date,
+                employee: {
+                    connect: {
+                        id: employeeId
+                    }
+                },
+                time: time.time,
+                isEnter: time.isEnter
+            }
+        }))
+    ])
+
+    return
+}

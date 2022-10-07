@@ -34,3 +34,15 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
 
     res.status(httpStatusCodes.CREATED).json(resp)
 }
+
+export const editTimesFromEmployee = async (req: Request, res: Response, next: NextFunction) => {
+    const { date, times } = req.body
+
+    try {
+        await timesheetsService.editTimesFromEmployee(req.params.employeeId, date, times)
+    } catch (err) {
+        return next(err)
+    }
+
+    res.status(httpStatusCodes.NO_CONTENT).json()
+}

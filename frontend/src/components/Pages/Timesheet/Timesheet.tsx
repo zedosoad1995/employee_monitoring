@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { getTimeStrFromMins } from "../../../helpers/dateTime"
-import { getTimesheetRaw, getTimesheets } from "../../../services/timesheet"
+import { editTimesFromEmployee, getTimesheetRaw, getTimesheets } from "../../../services/timesheet"
 import { CollapsedHeadCell, HeadCell, Order } from "../../../types/table"
 import TimesheetTable from "../../Table/Table"
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded'
@@ -106,6 +106,7 @@ function Timesheet() {
     const [openEditTime, setOpenEditTime] = useState(false)
     const [times, setTimes] = useState<Array<{ time: Date, isEnter: boolean }>>([])
     const [selectedEmployee, setSelectedEmployee] = useState("")
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState("")
 
     let dateStr: string
     try {
@@ -114,7 +115,7 @@ function Timesheet() {
         dateStr = ''
     }
 
-    const handleChangeTime = (index: number, setValue: any) => (newValue: any, keyboardInputValue: any) => {
+    const handleChangeTime = (index: number) => (newValue: any, keyboardInputValue: any) => {
         const newTime = (keyboardInputValue && keyboardInputValue.length !== 5) ?
             new Date("") :
             newValue
@@ -123,8 +124,6 @@ function Timesheet() {
             t[index].time = newTime
             return [...t]
         })
-
-        setValue(`times.${index}.time`, newTime)
     }
 
     const handleAddTime = (index: number) => () => {
@@ -142,24 +141,17 @@ function Timesheet() {
         })
     }
 
-    const handleRemoveTime = (index: number, setValue: any) => () => {
-        let timesUpdated
-        setTimes((t: any) => {
-            timesUpdated = t.filter((val: any, i: number) => i !== index)
-            for (let i = 0; i < timesUpdated.length; i++) {
-                setValue(`times.${i}.time`, timesUpdated[i].time);
-                setValue(`times.${i}.isEnter`, timesUpdated[i].isEnter);
-            }
-            return timesUpdated
-        })
+    const handleRemoveTime = (index: number) => () => {
+        setTimes((t: any) => t.filter((val: any, i: number) => i !== index))
     }
 
-    useEffect(() => {
+    /* useEffect(() => {
         console.log(times)
-    }, [JSON.stringify(times)])
+    }, [JSON.stringify(times)]) */
 
-    const prepareSubmit = (data: any) => {
-        console.log(data)
+    const prepareSubmit = async ({ times }: any) => {
+        await editTimesFromEmployee(selectedEmployeeId, dateStr, times.map((t: any) => ({ isEnter: t.isEnter, time: format(t.time, 'HH:mm') })))
+        handleCloseEditTime()
     }
 
     const handleClickEditTime = (employeeId: string) => async () => {
@@ -173,6 +165,7 @@ function Timesheet() {
         ])
 
         setSelectedEmployee(times[0].employee.name)
+        setSelectedEmployeeId(times[0].employee.id)
 
         setOpenEditTime(true)
     }

@@ -18,8 +18,8 @@ export default function Row(props: RowProps) {
             hover
             tabIndex={-1}
         >
-            {columns.map(col => {
-                return <TableCell sx={{ padding: col.isIcon ? "0 0 0 16px" : "auto" }} align={col.numeric ? 'right' : 'left'}>{row[col.id]}</TableCell>
+            {columns.map((col, index) => {
+                return <TableCell key={index} sx={{ padding: col.isIcon ? "0 0 0 16px" : "auto" }} align={col.numeric ? 'right' : 'left'}>{row[col.id]}</TableCell>
             })}
             {(collapsedRow && collapsedcolumns) &&
                 <TableCell >

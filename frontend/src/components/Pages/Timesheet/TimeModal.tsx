@@ -17,8 +17,9 @@ import IconButton from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 
 import AddIcon from '@mui/icons-material/Add'
-import Typography from "@mui/material/Typography"
 import Divider from "@mui/material/Divider"
+import DialogActions from "@mui/material/DialogActions"
+import Button from "@mui/material/Button"
 
 
 const schema = yup.object().shape({
@@ -32,7 +33,7 @@ const schema = yup.object().shape({
                 .boolean()
                 .required(),
         })
-    )
+    ).max(20, 'Cannot exceed 20 rows')
 })
 
 
@@ -40,9 +41,10 @@ function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handl
     { times: Array<{ time: Date, isEnter: boolean }>, handleClose: any, open: any, onSubmit: any, handleChangeTime: any, handleRemoveTime: any, handleAddTime: any, employee: string }) {
 
     useEffect(() => {
-    }, [])
+        setValue('times', times)
+    }, [JSON.stringify(times)])
 
-    const { register, control, handleSubmit, formState: { errors }, setValue } =
+    const { register, control, handleSubmit, formState: { errors }, setValue, getValues } =
         useForm<{ times: Array<{ time: Date, isEnter: boolean }> }>({
             resolver: yupResolver(schema),
             mode: 'onSubmit'
@@ -50,22 +52,29 @@ function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handl
 
     return (
         <Dialog fullWidth onClose={handleClose} open={open}>
-            <DialogTitle>Edit Times: {employee}</DialogTitle>
-            <DialogContent sx={{ maxWidth: "600px" }}>
+            <div style={{ padding: '16px 24px' }}>
+                <div style={{ fontWeight: 500, fontSize: '1.25rem', lineHeight: 1.6, letterSpacing: '0.0075em' }}>
+                    Edit Times: {employee}
+                </div>
+                <div style={{ color: "red", fontSize: 'small' }}>{errors.times?.message}</div>
+            </div>
+            <DialogContent sx={{ maxWidth: "600px", paddingTop: "10px" }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <form id="myForm" onSubmit={handleSubmit(onSubmit)} noValidate>
+                    <form id="timesForm" onSubmit={handleSubmit(onSubmit)} noValidate>
                         <Stack sx={{ mt: 1 }} spacing={2}>
-                            <div style={{ display: "flex", justifyContent: "space-between" }} >
-                                <Divider sx={{ flex: 1, height: 0, margin: 'auto' }} />
+                            <div style={{ display: "flex", justifyContent: "space-between", height: 10, alignItems: "center" }} >
+                                <Divider sx={{ flex: 1, height: 0, margin: 'auto', marginRight: '5px' }} />
                                 <Tooltip title="Add Time">
-                                    <IconButton onClick={handleAddTime(0)} >
-                                        <AddIcon />
-                                    </IconButton>
+                                    <div style={{ width: "40px", height: "40px" }}>
+                                        <IconButton onClick={handleAddTime(0)} >
+                                            <AddIcon />
+                                        </IconButton>
+                                    </div>
                                 </Tooltip>
                             </div>
                             {times.map((t, index) => {
                                 return <>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                                    <div key={index} style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                                         <Controller
                                             control={control}
                                             name={`times.${index}.time`}
@@ -74,7 +83,7 @@ function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handl
                                                 return <TimePicker
                                                     label="Start Time"
                                                     value={t.time}
-                                                    onChange={handleChangeTime(index, setValue)}
+                                                    onChange={handleChangeTime(index)}
                                                     renderInput={(params) => (
                                                         <TextField
                                                             id={`startTime${index}`}
@@ -90,18 +99,20 @@ function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handl
                                         />
 
                                         <Tooltip title="Delete Time">
-                                            <IconButton onClick={handleRemoveTime(index, setValue)} sx={{ height: "fit-content" }}>
+                                            <IconButton onClick={handleRemoveTime(index)} sx={{ height: "fit-content" }}>
                                                 <DeleteIcon />
                                             </IconButton>
                                         </Tooltip>
 
                                     </div>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }} >
-                                        <Divider sx={{ flex: 1, height: 0, margin: 'auto' }} />
+                                    <div style={{ display: "flex", justifyContent: "space-between", height: 10, alignItems: "center" }} >
+                                        <Divider sx={{ flex: 1, height: 0, margin: 'auto', marginRight: '5px' }} />
                                         <Tooltip title="Add Time">
-                                            <IconButton onClick={handleAddTime(index + 1)}>
-                                                <AddIcon />
-                                            </IconButton>
+                                            <div style={{ width: "40px", height: "40px" }}>
+                                                <IconButton onClick={handleAddTime(index + 1)} >
+                                                    <AddIcon />
+                                                </IconButton>
+                                            </div>
                                         </Tooltip>
                                     </div>
                                 </>
@@ -110,6 +121,10 @@ function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handl
                     </form>
                 </LocalizationProvider>
             </DialogContent>
+            <DialogActions >
+                <Button type="submit" form="timesForm" >Create</Button>
+                <Button onClick={handleClose}>Close</Button>
+            </DialogActions>
         </Dialog >
     );
 }

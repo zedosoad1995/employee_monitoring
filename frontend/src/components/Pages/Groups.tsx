@@ -207,7 +207,7 @@ function Groups() {
                 <DialogTitle>Create New Group</DialogTitle>
                 <DialogContent sx={{ mt: 1, maxWidth: "600px" }}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <form id="myForm" onSubmit={handleSubmit(prepareSubmit)} noValidate>
+                        <form id="groupsForm" onSubmit={handleSubmit(prepareSubmit)} noValidate>
                             <Box sx={{ mt: 1 }}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12}>
@@ -348,7 +348,7 @@ function Groups() {
                     </LocalizationProvider>
                 </DialogContent>
                 <DialogActions >
-                    <Button type="submit" form="myForm" >Create</Button>
+                    <Button type="submit" form="groupsForm" >Create</Button>
                     <Button onClick={handleCloseAddGroup}>Close</Button>
                 </DialogActions>
             </Dialog>
