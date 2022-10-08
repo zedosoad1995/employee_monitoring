@@ -50,16 +50,16 @@ export const getBreaks = (
         isSameSchedule = expectedMoves === moves
     }
 
-    const breaks = times.slice(1, -1).reduce((acc: Array<Array<string | null>>, el) => {
+    const breaks = times.slice(1, -1).reduce((acc: Array<Array<string>>, el) => {
         if (el.isEnter) {
             if (acc.at(-1)?.length === 2 || acc.length === 0) {
-                acc.push([null, el.time])
+                acc.push(['', el.time])
             } else if (acc.at(-1)?.length === 1) {
                 acc[acc.length - 1].push(el.time)
             }
         } else {
             if (acc.at(-1)?.length === 1) {
-                acc[acc.length - 1].push(null)
+                acc[acc.length - 1].push('')
             }
             acc.push([el.time])
         }

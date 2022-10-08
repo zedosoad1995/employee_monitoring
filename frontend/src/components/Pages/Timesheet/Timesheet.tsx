@@ -18,6 +18,8 @@ import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
 import TimeModal from "./TimeModal"
 import SaveIcon from '@mui/icons-material/Save'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { Menu, MenuItem } from "@mui/material"
 
 
 const collapsedcolumns: Array<CollapsedHeadCell> = [
@@ -41,6 +43,12 @@ const collapsedcolumns: Array<CollapsedHeadCell> = [
         id: 'duration',
         label: 'Duration',
         numeric: false
+    },
+    {
+        id: 'options',
+        label: '',
+        numeric: false,
+        isIcon: true
     }
 ]
 
@@ -109,6 +117,10 @@ function Timesheet() {
     const [selectedEmployee, setSelectedEmployee] = useState({ id: '', name: '' })
 
     const [isSaving, setIsSaving] = useState(false)
+    const [selectedRow, setSelectedRow] = useState<number | undefined>()
+
+    const [anchorEl, setAnchorEl] = useState()
+    const openMenu = Boolean(anchorEl)
 
     let dateStr: string
     try {
@@ -209,13 +221,14 @@ function Timesheet() {
         })
         setRows(rows)
 
-        const collapsedRows = timesheets.map((ts: any) => {
-            return ts.breaks.map((b: any) => ({
+        const collapsedRows = timesheets.map((ts: any, index: number) => {
+            return ts.breaks.map((b: any, index2: number) => ({
                 startTime: b.startTime,
                 endTime: b.endTime,
                 duration: (!ts.hasMalfunction && b.duration !== '' && b.minsExceeding !== '') ?
                     `${b.duration} (${b.minsExceeding > 0 ? '+' : ''}${b.minsExceeding})` : '',
-                isNotAcceptable: b.isNotAcceptable ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : ''
+                isNotAcceptable: b.isNotAcceptable ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
+                options: <IconButton data-row1={`${index}`} data-row2={`${index2}`} onClick={handleMoreClick}><MoreVertIcon /></IconButton>
             }))
         })
         setCollapsedRows(collapsedRows)
@@ -228,27 +241,111 @@ function Timesheet() {
     }
 
     const editRows = (index: number) => (key: string) => (e: any) => {
+        if (selectedRow === undefined) setSelectedRow(index)
+
         setRows((rows) => {
             if (rows === null) return null
             rows[index][key] = e.target.value
-            console.log(rows[index])
             return [...rows]
         })
     }
 
     const editCollapsedRows = (index: number) => (row: number, key: string) => (e: any) => {
+        if (selectedRow === undefined) setSelectedRow(index)
+
         setCollapsedRows((collapsedRows) => {
             if (collapsedRows === null) return null
             collapsedRows[index][row][key] = e.target.value
-            console.log(collapsedRows[index])
             return [...collapsedRows]
         })
+    }
+
+    const handleSave = () => {
+        if (selectedRow !== undefined && rows) {
+
+            const data = {
+                startTime: rows[selectedRow]['startTime'],
+                endTime: rows[selectedRow]['endTime'],
+                breaks: collapsedRows ? collapsedRows[selectedRow] : []
+            }
+
+            console.log(data)
+        }
+
+        setIsSaving(true)
+        setSelectedRow(undefined)
+    }
+
+    const handleMoreClick = (e: any) => {
+        console.log(e.currentTarget, e.currentTarget.getAttribute("data-value"))
+        setAnchorEl(e.currentTarget)
+    }
+
+    const handleCloseMenu = () => {
+        setAnchorEl(undefined)
+    }
+
+    const handleDeleteCollapsedRow = () => {
+        if (!anchorEl) return
+
+        // @ts-ignore
+        if (selectedRow === undefined) setSelectedRow(Number(anchorEl.getAttribute("data-row1")))
+
+        setCollapsedRows((collapsedRows) => {
+            if (collapsedRows === null) return null
+            // @ts-ignore
+            collapsedRows[anchorEl.getAttribute("data-row1")].splice(anchorEl.getAttribute("data-row2"), 1)
+
+            // @ts-ignore
+            for (let i = 0; i < collapsedRows[anchorEl.getAttribute("data-row1")].length; i++) {
+                // @ts-ignore
+                collapsedRows[anchorEl.getAttribute("data-row1")][`${i}`].options = <IconButton data-row1={anchorEl.getAttribute("data-row1")} data-row2={`${i}`} onClick={handleMoreClick}><MoreVertIcon /></IconButton>
+            }
+
+            return [...collapsedRows]
+        })
+
+        handleCloseMenu()
+    }
+
+    const handleAddRow = (isAbove: boolean) => () => {
+        if (!anchorEl) return
+
+        // @ts-ignore
+        if (selectedRow === undefined) setSelectedRow(Number(anchorEl.getAttribute("data-row1")))
+
+        const newItem = {
+            startTime: '',
+            endTime: '',
+            duration: '',
+            isNotAcceptable: '',
+            options: <IconButton onClick={handleMoreClick}><MoreVertIcon /></IconButton>
+        }
+
+        if (collapsedRows === null) return null
+        if (isAbove) {
+            // @ts-ignore
+            collapsedRows[anchorEl.getAttribute("data-row1")].splice(Number(anchorEl.getAttribute("data-row2")), 0, { ...newItem })
+        } else {
+            // @ts-ignore
+            collapsedRows[anchorEl.getAttribute("data-row1")].splice(Number(anchorEl.getAttribute("data-row2")) + 1, 0, { ...newItem })
+        }
+
+        // @ts-ignore
+        for (let i = 0; i < collapsedRows[anchorEl.getAttribute("data-row1")].length; i++) {
+            // @ts-ignore
+            collapsedRows[anchorEl.getAttribute("data-row1")][`${i}`].options = <IconButton data-row1={anchorEl.getAttribute("data-row1")} data-row2={`${i}`} onClick={handleMoreClick}><MoreVertIcon /></IconButton>
+        }
+
+
+        setCollapsedRows([...collapsedRows])
+
+        handleCloseMenu()
     }
 
     useEffect(() => {
         getData()
     }, [page, rowsPerPage, orderBy, order, date])
-
 
     return (
         <>
@@ -265,7 +362,7 @@ function Timesheet() {
                 </LocalizationProvider>
                 <div>
                     <Tooltip title="Save Changes">
-                        <IconButton onClick={() => { setIsSaving(true) }}>
+                        <IconButton onClick={handleSave}>
                             <SaveIcon />
                         </IconButton>
                     </Tooltip>
@@ -306,6 +403,16 @@ function Timesheet() {
                 employee={selectedEmployee}
                 dateStr={dateStr}
             />
+            <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={openMenu}
+                onClose={handleCloseMenu}
+            >
+                <MenuItem onClick={handleDeleteCollapsedRow}>Delete Row</MenuItem>
+                <MenuItem onClick={handleAddRow(true)}>Add Row Above</MenuItem>
+                <MenuItem onClick={handleAddRow(false)}>Add Row Below</MenuItem>
+            </Menu>
         </>
     );
 }

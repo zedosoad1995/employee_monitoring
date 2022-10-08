@@ -15,6 +15,12 @@ export default function CollapsedTable(props: CollapsedTableProps) {
 
     const [isEditing, setIsEditing] = useState(rows.map(() => columns.map(() => false)))
 
+    if (rows.length !== isEditing.length) {
+        console.log('lololo')
+        setIsEditing(rows.map(() => columns.map(() => false)))
+    }
+
+
     useEffect(() => {
         if (isSaving) {
             setIsEditing(rows.map(() => columns.map(() => false)))
@@ -55,13 +61,13 @@ export default function CollapsedTable(props: CollapsedTableProps) {
                                         {columns.map((col, index2) => (
                                             <TableCell
                                                 key={`${index}-${index2}`}
-                                                sx={{ padding: col.isIcon ? "0 0 0 6px" : (isEditing[index][index2] ? "0" : "auto") }}
+                                                sx={{ padding: col.isIcon ? "0 0 0 6px" : ((isEditing[index] !== undefined && !isEditing[index][index2]) ? "0" : "auto") }}
                                                 /* sx={{ padding: col.isIcon ? "0 0 0 6px" : "auto" }} */
                                                 align={col.numeric ? 'right' : 'left'}
                                                 onDoubleClick={handleDoubleClick(index, index2)}
                                             >
-                                                {!isEditing[index][index2] && row[col.id]}
-                                                {isEditing[index][index2] &&
+                                                {(isEditing[index] === undefined || !isEditing[index][index2]) && row[col.id]}
+                                                {(isEditing[index] !== undefined && isEditing[index][index2]) &&
                                                     <TextField
                                                         id="name"
                                                         value={row[col.id]}
