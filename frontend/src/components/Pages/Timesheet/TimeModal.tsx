@@ -20,6 +20,9 @@ import AddIcon from '@mui/icons-material/Add'
 import Divider from "@mui/material/Divider"
 import DialogActions from "@mui/material/DialogActions"
 import Button from "@mui/material/Button"
+import { Checkbox, FormControlLabel } from "@mui/material"
+import { format } from "date-fns"
+import { editTimesFromEmployee } from "../../../services/timesheet"
 
 
 const schema = yup.object().shape({
@@ -37,12 +40,16 @@ const schema = yup.object().shape({
 })
 
 
-function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handleRemoveTime, handleAddTime, employee }:
-    { times: Array<{ time: Date, isEnter: boolean }>, handleClose: any, open: any, onSubmit: any, handleChangeTime: any, handleRemoveTime: any, handleAddTime: any, employee: string }) {
+function TimeModal({ timesObj, handleClose, open, employee, dateStr }:
+    { timesObj: Array<{ time: Date, isEnter: boolean }>, handleClose: any, open: any, employee: any, dateStr: string }) {
+
+    const [times, setTimes] = useState<Array<{ time: Date, isEnter: boolean }>>([])
 
     useEffect(() => {
-        setValue('times', times)
-    }, [JSON.stringify(times)])
+        setValue('times', timesObj)
+        setTimes(timesObj)
+    }, [open])
+
 
     const { register, control, handleSubmit, formState: { errors }, setValue, getValues } =
         useForm<{ times: Array<{ time: Date, isEnter: boolean }> }>({
@@ -50,17 +57,58 @@ function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handl
             mode: 'onSubmit'
         })
 
+    const handleChangeTime = (index: number) => (newValue: any, keyboardInputValue: any) => {
+        const newTime = (keyboardInputValue && keyboardInputValue.length !== 5) ?
+            new Date("") :
+            newValue
+
+        setTimes((t: any) => {
+            t[index].time = newTime
+            setValue('times', t)
+            return [...t]
+        })
+    }
+
+    const handleAddTime = (index: number) => () => {
+        let newTime = new Date()
+
+        if (times.length > 0) {
+            newTime = index >= times.length ?
+                new Date(`2019-02-11T${format(times[index - 1].time, "HH:mm")}`) :
+                new Date(`2019-02-11T${format(times[index].time, "HH:mm")}`)
+        }
+
+        setTimes((t: any) => {
+            t.splice(index, 0, { time: newTime, isEnter: false })
+            setValue('times', t)
+            return [...t]
+        })
+    }
+
+    const handleRemoveTime = (index: number) => () => {
+        setTimes((t: any) => {
+            const ret = t.filter((val: any, i: number) => i !== index)
+            setValue('times', ret)
+            return ret
+        })
+    }
+
+    const prepareSubmit = async ({ times }: any) => {
+        await editTimesFromEmployee(employee.id, dateStr, times.map((t: any) => ({ isEnter: t.isEnter, time: format(t.time, 'HH:mm') })))
+        handleClose()
+    }
+
     return (
         <Dialog fullWidth onClose={handleClose} open={open}>
             <div style={{ padding: '16px 24px' }}>
                 <div style={{ fontWeight: 500, fontSize: '1.25rem', lineHeight: 1.6, letterSpacing: '0.0075em' }}>
-                    Edit Times: {employee}
+                    Edit Times: {employee.name}
                 </div>
                 <div style={{ color: "red", fontSize: 'small' }}>{errors.times?.message}</div>
             </div>
             <DialogContent sx={{ maxWidth: "600px", paddingTop: "10px" }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <form id="timesForm" onSubmit={handleSubmit(onSubmit)} noValidate>
+                    <form id="timesForm" onSubmit={handleSubmit(prepareSubmit)} noValidate>
                         <Stack sx={{ mt: 1 }} spacing={2}>
                             <div style={{ display: "flex", justifyContent: "space-between", height: 10, alignItems: "center" }} >
                                 <Divider sx={{ flex: 1, height: 0, margin: 'auto', marginRight: '5px' }} />
@@ -98,6 +146,27 @@ function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handl
                                             }}
                                         />
 
+                                        <Controller
+                                            name={`times.${index}.isEnter`}
+                                            control={control}
+                                            render={({ field: props }) => (
+                                                <FormControlLabel control={
+                                                    <Checkbox
+                                                        {...props}
+                                                        checked={props.value}
+                                                        onChange={(e) => {
+                                                            props.onChange(e.target.checked)
+                                                            setTimes((times) => {
+                                                                times[index].isEnter = e.target.checked
+                                                                return [...times]
+                                                            })
+                                                        }}
+                                                    />}
+                                                    label="Enter"
+                                                />
+                                            )}
+                                        />
+
                                         <Tooltip title="Delete Time">
                                             <IconButton onClick={handleRemoveTime(index)} sx={{ height: "fit-content" }}>
                                                 <DeleteIcon />
@@ -122,7 +191,7 @@ function TimeModal({ times, handleClose, open, onSubmit, handleChangeTime, handl
                 </LocalizationProvider>
             </DialogContent>
             <DialogActions >
-                <Button type="submit" form="timesForm" >Create</Button>
+                <Button type="submit" form="timesForm" >Edit</Button>
                 <Button onClick={handleClose}>Close</Button>
             </DialogActions>
         </Dialog >

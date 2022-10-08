@@ -105,53 +105,13 @@ function Timesheet() {
 
     const [openEditTime, setOpenEditTime] = useState(false)
     const [times, setTimes] = useState<Array<{ time: Date, isEnter: boolean }>>([])
-    const [selectedEmployee, setSelectedEmployee] = useState("")
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState("")
+    const [selectedEmployee, setSelectedEmployee] = useState({ id: '', name: '' })
 
     let dateStr: string
     try {
         dateStr = format(date, 'yyyy-MM-dd')
     } catch (err) {
         dateStr = ''
-    }
-
-    const handleChangeTime = (index: number) => (newValue: any, keyboardInputValue: any) => {
-        const newTime = (keyboardInputValue && keyboardInputValue.length !== 5) ?
-            new Date("") :
-            newValue
-
-        setTimes((t: any) => {
-            t[index].time = newTime
-            return [...t]
-        })
-    }
-
-    const handleAddTime = (index: number) => () => {
-        let newTime = new Date()
-
-        if (times.length > 0) {
-            newTime = index >= times.length ?
-                new Date(`2019-02-11T${format(times[index - 1].time, "HH:mm")}`) :
-                new Date(`2019-02-11T${format(times[index].time, "HH:mm")}`)
-        }
-
-        setTimes((t: any) => {
-            t.splice(index, 0, { time: newTime, isEnter: false })
-            return [...t]
-        })
-    }
-
-    const handleRemoveTime = (index: number) => () => {
-        setTimes((t: any) => t.filter((val: any, i: number) => i !== index))
-    }
-
-    /* useEffect(() => {
-        console.log(times)
-    }, [JSON.stringify(times)]) */
-
-    const prepareSubmit = async ({ times }: any) => {
-        await editTimesFromEmployee(selectedEmployeeId, dateStr, times.map((t: any) => ({ isEnter: t.isEnter, time: format(t.time, 'HH:mm') })))
-        handleCloseEditTime()
     }
 
     const handleClickEditTime = (employeeId: string) => async () => {
@@ -164,15 +124,15 @@ function Timesheet() {
             ...times.map((val: any) => ({ time: new Date(`2019-02-11T${val.time}`), isEnter: val.isEnter }))
         ])
 
-        setSelectedEmployee(times[0].employee.name)
-        setSelectedEmployeeId(times[0].employee.id)
+        setSelectedEmployee(times[0].employee)
 
         setOpenEditTime(true)
     }
 
     const handleCloseEditTime = () => {
+        getData()
         setTimes([])
-        setSelectedEmployee('')
+        setSelectedEmployee({ id: '', name: '' })
         setOpenEditTime(false)
     }
 
@@ -198,69 +158,69 @@ function Timesheet() {
         setPage(0)
     }
 
+    const getData = async () => {
+        const { groups } = await getGroups()
+
+        const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order, date: dateStr })
+
+        const rows = timesheets.map((ts: any, index: number) => {
+            const group = groups.find((g: any) => g.id === ts.group.id)
+
+            return {
+                hasNonAcceptableBreaks: ts.hasNonAcceptableBreaks || ts.hasMalfunction ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
+                name: ts.name,
+                group: <>
+                    {group &&
+                        <Tooltip
+                            key={index}
+                            title={<>
+                                <Typography color="inherit">Schedule</Typography>
+                                <p>{`Enter: ${group.startTime}`}</p>
+                                {group.Break.map((b: any) =>
+                                    (<p>{`Break: ${b.startTime} - ${b.endTime}`}</p>)
+                                )}
+                                <p>{`Leave: ${group.endTime}`}</p>
+                            </>}
+                        >
+                            <div style={{ cursor: "pointer" }}>{ts.group.name}</div>
+                        </Tooltip>
+                    }
+                </>,
+                overtime: ts.overtime ? getTimeStrFromMins(ts.overtime) : '',
+                timeLate: ts.timeLate ? getTimeStrFromMins(ts.timeLate) : '',
+                startTime: ts.startTime,
+                endTime: ts.endTime,
+                edit: <>
+                    {group &&
+                        <Tooltip
+                            key={index}
+                            title="Edit Times"
+                        >
+                            <IconButton onClick={handleClickEditTime(ts.employeeId)}>
+                                <EditIcon />
+                            </IconButton>
+                        </Tooltip>
+                    }
+                </>
+            }
+        })
+        setRows(rows)
+
+        const collapsedRows = timesheets.map((ts: any) => {
+            return ts.breaks.map((b: any) => ({
+                startTime: b.startTime,
+                endTime: b.endTime,
+                duration: (!ts.hasMalfunction && b.duration !== '' && b.minsExceeding !== '') ?
+                    `${b.duration} (${b.minsExceeding > 0 ? '+' : ''}${b.minsExceeding})` : '',
+                isNotAcceptable: b.isNotAcceptable ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : ''
+            }))
+        })
+        setCollapsedRows(collapsedRows)
+
+        setTotal(total)
+    }
+
     useEffect(() => {
-        const getData = async () => {
-            const { groups } = await getGroups()
-
-            const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order, date: dateStr })
-
-            const rows = timesheets.map((ts: any, index: number) => {
-                const group = groups.find((g: any) => g.id === ts.group.id)
-
-                return {
-                    hasNonAcceptableBreaks: ts.hasNonAcceptableBreaks || ts.hasMalfunction ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
-                    name: ts.name,
-                    group: <>
-                        {group &&
-                            <Tooltip
-                                key={index}
-                                title={<>
-                                    <Typography color="inherit">Schedule</Typography>
-                                    <p>{`Enter: ${group.startTime}`}</p>
-                                    {group.Break.map((b: any) =>
-                                        (<p>{`Break: ${b.startTime} - ${b.endTime}`}</p>)
-                                    )}
-                                    <p>{`Leave: ${group.endTime}`}</p>
-                                </>}
-                            >
-                                <div style={{ cursor: "pointer" }}>{ts.group.name}</div>
-                            </Tooltip>
-                        }
-                    </>,
-                    overtime: ts.overtime ? getTimeStrFromMins(ts.overtime) : '',
-                    timeLate: ts.timeLate ? getTimeStrFromMins(ts.timeLate) : '',
-                    startTime: ts.startTime,
-                    endTime: ts.endTime,
-                    edit: <>
-                        {group &&
-                            <Tooltip
-                                key={index}
-                                title="Edit Times"
-                            >
-                                <IconButton onClick={handleClickEditTime(ts.employeeId)}>
-                                    <EditIcon />
-                                </IconButton>
-                            </Tooltip>
-                        }
-                    </>
-                }
-            })
-            setRows(rows)
-
-            const collapsedRows = timesheets.map((ts: any) => {
-                return ts.breaks.map((b: any) => ({
-                    startTime: b.startTime,
-                    endTime: b.endTime,
-                    duration: (!ts.hasMalfunction && b.duration !== '' && b.minsExceeding !== '') ?
-                        `${b.duration} (${b.minsExceeding > 0 ? '+' : ''}${b.minsExceeding})` : '',
-                    isNotAcceptable: b.isNotAcceptable ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : ''
-                }))
-            })
-            setCollapsedRows(collapsedRows)
-
-            setTotal(total)
-        }
-
         getData()
     }, [page, rowsPerPage, orderBy, order, date])
 
@@ -304,14 +264,11 @@ function Timesheet() {
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
             <TimeModal
-                times={times}
+                timesObj={times}
                 handleClose={handleCloseEditTime}
-                onSubmit={prepareSubmit}
                 open={openEditTime}
-                handleChangeTime={handleChangeTime}
-                handleRemoveTime={handleRemoveTime}
-                handleAddTime={handleAddTime}
                 employee={selectedEmployee}
+                dateStr={dateStr}
             />
         </>
     );
