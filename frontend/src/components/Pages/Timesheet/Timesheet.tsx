@@ -17,6 +17,7 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
 import TimeModal from "./TimeModal"
+import SaveIcon from '@mui/icons-material/Save'
 
 
 const collapsedcolumns: Array<CollapsedHeadCell> = [
@@ -92,8 +93,8 @@ const columns: Array<HeadCell> = [
 
 
 function Timesheet() {
-    const [rows, setRows] = useState(null)
-    const [collapsedRows, setCollapsedRows] = useState(null)
+    const [rows, setRows] = useState<any[] | null>(null)
+    const [collapsedRows, setCollapsedRows] = useState<any[] | null>(null)
     const [total, setTotal] = useState(0)
 
     const [page, setPage] = useState(0)
@@ -106,6 +107,8 @@ function Timesheet() {
     const [openEditTime, setOpenEditTime] = useState(false)
     const [times, setTimes] = useState<Array<{ time: Date, isEnter: boolean }>>([])
     const [selectedEmployee, setSelectedEmployee] = useState({ id: '', name: '' })
+
+    const [isSaving, setIsSaving] = useState(false)
 
     let dateStr: string
     try {
@@ -220,6 +223,28 @@ function Timesheet() {
         setTotal(total)
     }
 
+    const finishSaving = () => {
+        setIsSaving(false)
+    }
+
+    const editRows = (index: number) => (key: string) => (e: any) => {
+        setRows((rows) => {
+            if (rows === null) return null
+            rows[index][key] = e.target.value
+            console.log(rows[index])
+            return [...rows]
+        })
+    }
+
+    const editCollapsedRows = (index: number) => (row: number, key: string) => (e: any) => {
+        setCollapsedRows((collapsedRows) => {
+            if (collapsedRows === null) return null
+            collapsedRows[index][row][key] = e.target.value
+            console.log(collapsedRows[index])
+            return [...collapsedRows]
+        })
+    }
+
     useEffect(() => {
         getData()
     }, [page, rowsPerPage, orderBy, order, date])
@@ -238,11 +263,18 @@ function Timesheet() {
                         disableFuture={true}
                     />
                 </LocalizationProvider>
-                <Tooltip title="Filter list">
-                    <IconButton>
-                        <FilterListIcon />
-                    </IconButton>
-                </Tooltip>
+                <div>
+                    <Tooltip title="Save Changes">
+                        <IconButton onClick={() => { setIsSaving(true) }}>
+                            <SaveIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Filter list">
+                        <IconButton>
+                            <FilterListIcon />
+                        </IconButton>
+                    </Tooltip>
+                </div>
             </div>
 
             <TimesheetTable
@@ -253,6 +285,10 @@ function Timesheet() {
                 order={order}
                 orderBy={orderBy}
                 handleRequestSort={handleRequestSort}
+                isSaving={isSaving}
+                finishSaving={finishSaving}
+                editRows={editRows}
+                editCollapsedRows={editCollapsedRows}
             />
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}

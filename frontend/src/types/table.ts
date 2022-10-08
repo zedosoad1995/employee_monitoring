@@ -20,7 +20,11 @@ export interface TableContentProps {
     collapsedRows: Array<Array<any>>,
     columns: Array<HeadCell>,
     collapsedcolumns: Array<CollapsedHeadCell>
-    rowsPerPage: number
+    rowsPerPage: number,
+    isSaving?: boolean,
+    finishSaving?: any
+    editRows: any
+    editCollapsedRows: any
 }
 
 export interface TableHeaderProps {
@@ -39,7 +43,11 @@ export interface RowProps {
     row: any,
     collapsedRow: Array<any> | null,
     columns: Array<HeadCell>,
-    collapsedcolumns: Array<CollapsedHeadCell>
+    collapsedcolumns: Array<CollapsedHeadCell>,
+    isSaving?: boolean,
+    finishSaving?: any,
+    editRows: any
+    editCollapsedRows: any
 }
 
 
@@ -48,4 +56,7 @@ export interface CollapsedTableProps {
     rows: Array<any>,
     parentColumns: Array<HeadCell>
     columns: Array<CollapsedHeadCell>
+    isSaving?: boolean
+    finishSaving?: any
+    editCollapsedRows: any
 }

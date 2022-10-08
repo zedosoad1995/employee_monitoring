@@ -5,7 +5,7 @@ import TableContent from './components/TableContent'
 import Paper from '@mui/material/Paper'
 
 
-export default function ({ rows, collapsedRows, columns, collapsedcolumns, rowsPerPage, order, orderBy, handleRequestSort }: any) {
+export default function ({ rows, collapsedRows, columns, collapsedcolumns, rowsPerPage, order, orderBy, handleRequestSort, isSaving, finishSaving, editRows, editCollapsedRows }: any) {
     return (
         <>
             <TableContainer component={Paper}>
@@ -21,7 +21,7 @@ export default function ({ rows, collapsedRows, columns, collapsedcolumns, rowsP
                         onRequestSort={handleRequestSort}
                         collapsedcolumns={collapsedcolumns}
                     />
-                    <TableContent rows={rows} collapsedRows={collapsedRows} columns={columns} collapsedcolumns={collapsedcolumns} rowsPerPage={rowsPerPage} />
+                    <TableContent rows={rows} collapsedRows={collapsedRows} columns={columns} collapsedcolumns={collapsedcolumns} rowsPerPage={rowsPerPage} isSaving={isSaving} finishSaving={finishSaving} editRows={editRows} editCollapsedRows={editCollapsedRows} />
                 </Table>
             </TableContainer>
         </>

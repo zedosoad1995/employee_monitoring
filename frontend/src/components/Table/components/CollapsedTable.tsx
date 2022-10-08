@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { TextField, Typography } from '@mui/material'
 import Box from '@mui/material/Box'
 import Collapse from '@mui/material/Collapse'
 import Table from '@mui/material/Table'
@@ -6,11 +6,28 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
+import { useEffect, useState } from 'react'
 import { CollapsedTableProps } from '../../../types/table'
 
 
 export default function CollapsedTable(props: CollapsedTableProps) {
-    const { open, rows, parentColumns, columns } = props
+    const { open, rows, parentColumns, columns, isSaving, finishSaving, editCollapsedRows } = props
+
+    const [isEditing, setIsEditing] = useState(rows.map(() => columns.map(() => false)))
+
+    useEffect(() => {
+        if (isSaving) {
+            setIsEditing(rows.map(() => columns.map(() => false)))
+            finishSaving()
+        }
+    }, [isSaving])
+
+    const handleDoubleClick = (row: number, col: number) => () => {
+        setIsEditing((val) => {
+            val[row][col] = true
+            return [...val]
+        })
+    }
 
     return (
         <TableRow>
@@ -38,10 +55,19 @@ export default function CollapsedTable(props: CollapsedTableProps) {
                                         {columns.map((col, index2) => (
                                             <TableCell
                                                 key={`${index}-${index2}`}
-                                                sx={{ padding: col.isIcon ? "0 0 0 6px" : "auto" }}
+                                                sx={{ padding: col.isIcon ? "0 0 0 6px" : (isEditing[index][index2] ? "0" : "auto") }}
+                                                /* sx={{ padding: col.isIcon ? "0 0 0 6px" : "auto" }} */
                                                 align={col.numeric ? 'right' : 'left'}
+                                                onDoubleClick={handleDoubleClick(index, index2)}
                                             >
-                                                {row[col.id]}
+                                                {!isEditing[index][index2] && row[col.id]}
+                                                {isEditing[index][index2] &&
+                                                    <TextField
+                                                        id="name"
+                                                        value={row[col.id]}
+                                                        onChange={editCollapsedRows(index, col.id)}
+                                                    />
+                                                }
                                             </TableCell>
                                         ))}
                                     </TableRow>
