@@ -38,8 +38,8 @@ function Home() {
 
     return (
         <>
-            <AppBar position="static" >
-                <Toolbar>
+            <AppBar position="static">
+                <Toolbar variant="dense">
                     <IconButton
                         color="inherit"
                         edge="start"

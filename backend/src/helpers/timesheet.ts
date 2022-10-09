@@ -40,7 +40,9 @@ export const getOvertime = (
 
 export const getBreaks = (
     times: Array<ITime>,
-    group?: IGroup
+    group?: IGroup,
+    hasStart?: boolean,
+    hasEnd?: boolean
 ) => {
     let isSameSchedule = false
     if (group) {
@@ -51,7 +53,10 @@ export const getBreaks = (
         isSameSchedule = expectedMoves === moves
     }
 
-    const breaks = times.slice(1, -1).reduce((acc: Array<Array<any>>, el) => {
+    const breaksIni = hasStart ? 1 : 0
+    const timesSliced = hasEnd ? times.slice(breaksIni, -1) : times.slice(breaksIni)
+
+    const breaks = timesSliced.reduce((acc: Array<Array<any>>, el) => {
         if (el.isEnter) {
             if (acc.length === 0 || acc.at(-1)?.at(1).length === 2) {
                 acc.push([el.id, ['', el.time]])

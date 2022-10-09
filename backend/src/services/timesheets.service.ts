@@ -102,10 +102,10 @@ export const getMany = async (query: any) => {
                 getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(group.startTime) :
                 ''
 
-            // Calculate Breaks Duration
-            const { breaks, isNotAcceptableBreak: hasNonAcceptableBreaks, hasMalfunction } = getBreaks(ts.times, group)
-
             const exitTime = !ts.times.at(-1)?.isEnter ? ts.times.at(-1)?.time : ''
+
+            // Calculate Breaks Duration
+            const { breaks, isNotAcceptableBreak: hasNonAcceptableBreaks, hasMalfunction } = getBreaks(ts.times, group, enterTime !== '', exitTime != '')
 
             // Calculate Overtime
             const overtime = (group && enterTime && exitTime) ? getOvertime(ts.times, group) : ''
@@ -178,7 +178,7 @@ export const editTimesFromEmployee = async (employeeId: string, date: any, times
                 employeeId
             }
         }),
-        ...times.map((time: any) => prisma.timesheet.create({
+        times.startTime && prisma.timesheet.create({
             data: {
                 date,
                 employee: {
@@ -186,11 +186,34 @@ export const editTimesFromEmployee = async (employeeId: string, date: any, times
                         id: employeeId
                     }
                 },
-                time: time.time,
-                isEnter: time.isEnter
+                time: times.startTime,
+                isEnter: true
             }
-        }))
-    ])
+        }),
+        ...times.breaks.map((b: any) => ['startTime', 'endTime'].map((k: string) => b[k] && prisma.timesheet.create({
+            data: {
+                date,
+                employee: {
+                    connect: {
+                        id: employeeId
+                    }
+                },
+                time: b[k],
+                isEnter: k === 'endTime'
+            }
+        })).filter(val => val !== '')).flat().flat(),
+        times.endTime && prisma.timesheet.create({
+            data: {
+                date,
+                employee: {
+                    connect: {
+                        id: employeeId
+                    }
+                },
+                time: times.endTime,
+                isEnter: false
+            }
+        })].filter(val => val))
 
     return
 }

@@ -33,7 +33,7 @@ export default function Row(props: RowProps) {
                                 renderInput={(params) => (
                                     <TextField
                                         id="name"
-                                        sx={{ '& .MuiInputBase-root': { fontSize: 'inherit' } }}
+                                        sx={{ '& .MuiInputBase-root': { fontSize: 'inherit' }, minWidth: '110px' }}
                                         size='small'
                                         {...params}
                                     />

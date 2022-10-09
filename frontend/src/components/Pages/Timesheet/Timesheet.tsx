@@ -117,7 +117,6 @@ function Timesheet() {
     const [date, setDate] = useState(new Date())
 
     const [openEditTime, setOpenEditTime] = useState(false)
-    const [times, setTimes] = useState<Array<{ time: Date, isEnter: boolean }>>([])
     const [selectedEmployee, setSelectedEmployee] = useState({ id: '', name: '' })
 
     const [selectedRow, setSelectedRow] = useState<number | undefined>()
@@ -142,17 +141,18 @@ function Timesheet() {
             setSelectedRow(index)
             return index
         })
-    }
 
-    const handleCloseEditTime = () => {
-        getData()
-        setTimes([])
-        setSelectedEmployee({ id: '', name: '' })
-        setOpenEditTime(false)
+        setRows((r) => {
+            if (r) setSelectedEmployee({ id: r[index].employeeId, name: '' })
+            return r
+        })
     }
 
     const handleDateChange = (newValue: any) => {
         if (!isNaN(newValue)) setDate(newValue)
+        setSelectedEmployee({ id: '', name: '' })
+        setSelectedRow(undefined)
+        setEditRowNum(undefined)
     }
 
     const handleRequestSort = (
@@ -162,15 +162,24 @@ function Timesheet() {
         const isAsc = orderBy === property && order === 'asc'
         setOrder(isAsc ? 'desc' : 'asc')
         setOrderBy(property)
+        setSelectedEmployee({ id: '', name: '' })
+        setSelectedRow(undefined)
+        setEditRowNum(undefined)
     }
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage)
+        setSelectedEmployee({ id: '', name: '' })
+        setSelectedRow(undefined)
+        setEditRowNum(undefined)
     }
 
     const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
         setRowsPerPage(parseInt(event.target.value, 10))
         setPage(0)
+        setSelectedEmployee({ id: '', name: '' })
+        setSelectedRow(undefined)
+        setEditRowNum(undefined)
     }
 
     const getData = async () => {
@@ -182,6 +191,7 @@ function Timesheet() {
             const group = groups.find((g: any) => g.id === ts.group.id)
 
             return {
+                employeeId: ts.employeeId,
                 hasNonAcceptableBreaks: ts.hasNonAcceptableBreaks || ts.hasMalfunction ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
                 name: ts.name,
                 group: <>
@@ -222,6 +232,7 @@ function Timesheet() {
         setRows(rows)
 
         const collapsedRows = timesheets.map((ts: any, index: number) => {
+            console.log(index, ts.breaks)
             return ts.breaks.map((b: any, index2: number) => ({
                 id: b.id,
                 startTime: b.startTime,
@@ -240,7 +251,7 @@ function Timesheet() {
     const editRows = (index: number) => (key: string) => (newValue: any, keyboardInputValue: any) => {
         setRows((rows) => {
             if (rows === null) return null
-            rows[index][key] = keyboardInputValue ? keyboardInputValue : format(newValue, 'HH:mm')
+            rows[index][key] = keyboardInputValue ? keyboardInputValue : (newValue ? format(newValue, 'HH:mm') : '')
             return [...rows]
         })
     }
@@ -248,7 +259,7 @@ function Timesheet() {
     const editCollapsedRows = (index: number) => (row: number, key: string) => (newValue: any, keyboardInputValue: any) => {
         setCollapsedRows((collapsedRows) => {
             if (collapsedRows === null) return null
-            collapsedRows[index][row][key] = keyboardInputValue ? keyboardInputValue : format(newValue, 'HH:mm')
+            collapsedRows[index][row][key] = keyboardInputValue ? keyboardInputValue : (newValue ? format(newValue, 'HH:mm') : '')
             return [...collapsedRows]
         })
     }
@@ -261,9 +272,12 @@ function Timesheet() {
                 breaks: collapsedRows ? collapsedRows[selectedRow] : []
             }
 
-            console.log(data)
+            editTimesFromEmployee(selectedEmployee.id, dateStr, data)
+
+            getData()
         }
 
+        setSelectedEmployee({ id: '', name: '' })
         setSelectedRow(undefined)
         setEditRowNum(undefined)
     }
@@ -295,6 +309,9 @@ function Timesheet() {
 
             return [...collapsedRows]
         })
+
+        // @ts-ignore
+        if (rows) setSelectedEmployee({ id: rows[Number(anchorEl.getAttribute("data-row1"))].employeeId, name: '' })
 
         handleCloseMenu()
     }
@@ -330,6 +347,9 @@ function Timesheet() {
 
         setCollapsedRows([...collapsedRows])
 
+        // @ts-ignore
+        if (rows) setSelectedEmployee({ id: rows[Number(anchorEl.getAttribute("data-row1"))].employeeId, name: '' })
+
         handleCloseMenu()
     }
 
@@ -349,6 +369,9 @@ function Timesheet() {
         collapsedRows[index].push({ ...newItem })
 
         setCollapsedRows([...collapsedRows])
+
+        // @ts-ignore
+        if (rows) setSelectedEmployee({ id: rows[index].employeeId, name: '' })
     }
 
     useEffect(() => {
@@ -403,13 +426,6 @@ function Timesheet() {
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-            <TimeModal
-                timesObj={times}
-                handleClose={handleCloseEditTime}
-                open={openEditTime}
-                employee={selectedEmployee}
-                dateStr={dateStr}
             />
             <Menu
                 id="basic-menu"

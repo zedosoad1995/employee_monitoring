@@ -51,7 +51,7 @@ export default function CollapsedTable(props: CollapsedTableProps) {
                                     <TableRow key={row.id}>
                                         {columns.map((col, index2) => {
                                             return <TableCell
-                                                key={`${index}-${index2}`}
+                                                key={`${row.id}-${index2}`}
                                                 sx={{ padding: col.isIcon ? "0 0 0 6px" : ((isEditing !== undefined && !isEditing) ? "auto" : "auto") }}
                                                 /* sx={{ padding: col.isIcon ? "0 0 0 6px" : "auto" }} */
                                                 align={col.numeric ? 'right' : 'left'}
