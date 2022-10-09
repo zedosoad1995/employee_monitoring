@@ -50,8 +50,8 @@ function Home() {
                     </IconButton>
                 </Toolbar>
             </AppBar>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-                <Box sx={{ p: 4, width: "fit-content" }}>
+            <div>
+                <Box sx={{ p: 4, width: "auto" }}>
                     <Routes>
                         <Route path="" element={<Timesheet />} />
                         <Route path="groups" element={<Groups />} />

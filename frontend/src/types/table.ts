@@ -3,7 +3,8 @@ export interface HeadCell {
     label: string
     numeric: boolean,
     sortable?: boolean,
-    isIcon?: boolean
+    isIcon?: boolean,
+    isEdit?: boolean
 }
 
 export interface CollapsedHeadCell {
@@ -11,6 +12,7 @@ export interface CollapsedHeadCell {
     label: string
     numeric: boolean
     isIcon?: boolean
+    isEdit?: boolean
 }
 
 export type Order = 'asc' | 'desc'
@@ -21,10 +23,10 @@ export interface TableContentProps {
     columns: Array<HeadCell>,
     collapsedcolumns: Array<CollapsedHeadCell>
     rowsPerPage: number,
-    isSaving?: boolean,
-    finishSaving?: any
     editRows: any
-    editCollapsedRows: any
+    editCollapsedRows: any,
+    editRowNum?: number,
+    addCollapsedRow?: any
 }
 
 export interface TableHeaderProps {
@@ -44,10 +46,10 @@ export interface RowProps {
     collapsedRow: Array<any> | null,
     columns: Array<HeadCell>,
     collapsedcolumns: Array<CollapsedHeadCell>,
-    isSaving?: boolean,
-    finishSaving?: any,
     editRows: any
     editCollapsedRows: any
+    isEditing: boolean
+    addCollapsedRow: any
 }
 
 
@@ -56,7 +58,7 @@ export interface CollapsedTableProps {
     rows: Array<any>,
     parentColumns: Array<HeadCell>
     columns: Array<CollapsedHeadCell>
-    isSaving?: boolean
-    finishSaving?: any
     editCollapsedRows: any
+    isEditing?: boolean
+    addRow?: any
 }

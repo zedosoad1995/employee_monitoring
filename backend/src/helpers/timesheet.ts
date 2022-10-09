@@ -9,6 +9,7 @@ interface IGroup {
 }
 
 interface ITime {
+    id: string,
     time: string,
     isEnter: boolean
 }
@@ -50,33 +51,34 @@ export const getBreaks = (
         isSameSchedule = expectedMoves === moves
     }
 
-    const breaks = times.slice(1, -1).reduce((acc: Array<Array<string>>, el) => {
+    const breaks = times.slice(1, -1).reduce((acc: Array<Array<any>>, el) => {
         if (el.isEnter) {
-            if (acc.at(-1)?.length === 2 || acc.length === 0) {
-                acc.push(['', el.time])
-            } else if (acc.at(-1)?.length === 1) {
-                acc[acc.length - 1].push(el.time)
+            if (acc.length === 0 || acc.at(-1)?.at(1).length === 2) {
+                acc.push([el.id, ['', el.time]])
+            } else if (acc.at(-1)?.at(1).length === 1) {
+                acc[acc.length - 1][1].push(el.time)
             }
         } else {
-            if (acc.at(-1)?.length === 1) {
-                acc[acc.length - 1].push('')
+            if (acc.at(-1)?.at(1).length === 1) {
+                acc[acc.length - 1][1].push('')
             }
-            acc.push([el.time])
+            acc.push([el.id, [el.time]])
         }
         return acc
     }, [])
         .map((el, index) => {
-            const duration = (isSameSchedule && el[0] && el[1]) ?
-                getTimeStrFromMins(getMinsFromTimeStr(el[1]) - getMinsFromTimeStr(el[0])) : ''
+            const duration = (isSameSchedule && el[1][0] && el[1][1]) ?
+                getTimeStrFromMins(getMinsFromTimeStr(el[1][1]) - getMinsFromTimeStr(el[1][0])) : ''
 
-            const minsExceeding = (isSameSchedule && group && el[0] && el[1]) ?
-                (getMinsFromTimeStr(el[1]) - getMinsFromTimeStr(el[0])) -
+            const minsExceeding = (isSameSchedule && group && el[1][0] && el[1][1]) ?
+                (getMinsFromTimeStr(el[1][1]) - getMinsFromTimeStr(el[1][0])) -
                 (getMinsFromTimeStr(group.Break[index].endTime) - getMinsFromTimeStr(group.Break[index].startTime))
                 : ''
 
             return {
-                startTime: el[0],
-                endTime: el[1],
+                id: el[0],
+                startTime: el[1][0],
+                endTime: el[1][1],
                 duration,
                 minsExceeding,
                 isNotAcceptable: minsExceeding ? minsExceeding > BREAK_DURATION_TH : false

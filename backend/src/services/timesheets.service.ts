@@ -90,7 +90,7 @@ export const getMany = async (query: any) => {
             }
         }
 
-        acc[el.employee.id].times.push({ time: el.time, isEnter: el.isEnter })
+        acc[el.employee.id].times.push({ id: el.id, time: el.time, isEnter: el.isEnter })
         return acc
     }, {}))
         .map(ts => {

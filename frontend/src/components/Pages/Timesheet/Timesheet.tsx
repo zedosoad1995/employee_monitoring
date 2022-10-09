@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { getTimeStrFromMins } from "../../../helpers/dateTime"
 import { editTimesFromEmployee, getTimesheetRaw, getTimesheets } from "../../../services/timesheet"
 import { CollapsedHeadCell, HeadCell, Order } from "../../../types/table"
@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography"
 import { getGroups } from "../../../services/group"
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker'
 import TextField from "@mui/material/TextField"
-import { format } from 'date-fns'
+import { format, parse } from 'date-fns'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import IconButton from "@mui/material/IconButton"
@@ -32,12 +32,14 @@ const collapsedcolumns: Array<CollapsedHeadCell> = [
     {
         id: 'startTime',
         label: 'Start Time',
-        numeric: false
+        numeric: false,
+        isEdit: true
     },
     {
         id: 'endTime',
         label: 'End Time',
-        numeric: false
+        numeric: false,
+        isEdit: true
     },
     {
         id: 'duration',
@@ -73,12 +75,14 @@ const columns: Array<HeadCell> = [
     {
         id: 'startTime',
         label: 'Start Time',
-        numeric: false
+        numeric: false,
+        isEdit: true
     },
     {
         id: 'endTime',
         label: 'End Time',
-        numeric: false
+        numeric: false,
+        isEdit: true
     },
     {
         id: 'overtime',
@@ -116,8 +120,8 @@ function Timesheet() {
     const [times, setTimes] = useState<Array<{ time: Date, isEnter: boolean }>>([])
     const [selectedEmployee, setSelectedEmployee] = useState({ id: '', name: '' })
 
-    const [isSaving, setIsSaving] = useState(false)
     const [selectedRow, setSelectedRow] = useState<number | undefined>()
+    const [editRowNum, setEditRowNum] = useState<number | undefined>()
 
     const [anchorEl, setAnchorEl] = useState()
     const openMenu = Boolean(anchorEl)
@@ -129,19 +133,15 @@ function Timesheet() {
         dateStr = ''
     }
 
-    const handleClickEditTime = (employeeId: string) => async () => {
-        const times = (await getTimesheetRaw({ employeeId, date: dateStr })).timesheets
-
-        if (times.length === 0) return
-
-        setTimes((t: any) => [
-            ...t,
-            ...times.map((val: any) => ({ time: new Date(`2019-02-11T${val.time}`), isEnter: val.isEnter }))
-        ])
-
-        setSelectedEmployee(times[0].employee)
-
-        setOpenEditTime(true)
+    const handleClickEditTime = (index: number) => () => {
+        setEditRowNum((val) => {
+            if (val === index) {
+                setSelectedRow(undefined)
+                return undefined
+            }
+            setSelectedRow(index)
+            return index
+        })
     }
 
     const handleCloseEditTime = () => {
@@ -211,7 +211,7 @@ function Timesheet() {
                             key={index}
                             title="Edit Times"
                         >
-                            <IconButton onClick={handleClickEditTime(ts.employeeId)}>
+                            <IconButton onClick={handleClickEditTime(index)}>
                                 <EditIcon />
                             </IconButton>
                         </Tooltip>
@@ -223,6 +223,7 @@ function Timesheet() {
 
         const collapsedRows = timesheets.map((ts: any, index: number) => {
             return ts.breaks.map((b: any, index2: number) => ({
+                id: b.id,
                 startTime: b.startTime,
                 endTime: b.endTime,
                 duration: (!ts.hasMalfunction && b.duration !== '' && b.minsExceeding !== '') ?
@@ -236,33 +237,24 @@ function Timesheet() {
         setTotal(total)
     }
 
-    const finishSaving = () => {
-        setIsSaving(false)
-    }
-
-    const editRows = (index: number) => (key: string) => (e: any) => {
-        if (selectedRow === undefined) setSelectedRow(index)
-
+    const editRows = (index: number) => (key: string) => (newValue: any, keyboardInputValue: any) => {
         setRows((rows) => {
             if (rows === null) return null
-            rows[index][key] = e.target.value
+            rows[index][key] = keyboardInputValue ? keyboardInputValue : format(newValue, 'HH:mm')
             return [...rows]
         })
     }
 
-    const editCollapsedRows = (index: number) => (row: number, key: string) => (e: any) => {
-        if (selectedRow === undefined) setSelectedRow(index)
-
+    const editCollapsedRows = (index: number) => (row: number, key: string) => (newValue: any, keyboardInputValue: any) => {
         setCollapsedRows((collapsedRows) => {
             if (collapsedRows === null) return null
-            collapsedRows[index][row][key] = e.target.value
+            collapsedRows[index][row][key] = keyboardInputValue ? keyboardInputValue : format(newValue, 'HH:mm')
             return [...collapsedRows]
         })
     }
 
     const handleSave = () => {
         if (selectedRow !== undefined && rows) {
-
             const data = {
                 startTime: rows[selectedRow]['startTime'],
                 endTime: rows[selectedRow]['endTime'],
@@ -272,12 +264,11 @@ function Timesheet() {
             console.log(data)
         }
 
-        setIsSaving(true)
         setSelectedRow(undefined)
+        setEditRowNum(undefined)
     }
 
     const handleMoreClick = (e: any) => {
-        console.log(e.currentTarget, e.currentTarget.getAttribute("data-value"))
         setAnchorEl(e.currentTarget)
     }
 
@@ -337,10 +328,27 @@ function Timesheet() {
             collapsedRows[anchorEl.getAttribute("data-row1")][`${i}`].options = <IconButton data-row1={anchorEl.getAttribute("data-row1")} data-row2={`${i}`} onClick={handleMoreClick}><MoreVertIcon /></IconButton>
         }
 
-
         setCollapsedRows([...collapsedRows])
 
         handleCloseMenu()
+    }
+
+    const addCollapsedRow = (index: number) => () => {
+        if (selectedRow === undefined) setSelectedRow(index)
+
+        if (collapsedRows === null) return null
+
+        const newItem = {
+            startTime: '',
+            endTime: '',
+            duration: '',
+            isNotAcceptable: '',
+            options: <IconButton data-row1={`${index}`} data-row2={`${collapsedRows[index].length}`} onClick={handleMoreClick}><MoreVertIcon /></IconButton>
+        }
+
+        collapsedRows[index].push({ ...newItem })
+
+        setCollapsedRows([...collapsedRows])
     }
 
     useEffect(() => {
@@ -362,7 +370,7 @@ function Timesheet() {
                 </LocalizationProvider>
                 <div>
                     <Tooltip title="Save Changes">
-                        <IconButton onClick={handleSave}>
+                        <IconButton onClick={handleSave} disabled={selectedRow === undefined}>
                             <SaveIcon />
                         </IconButton>
                     </Tooltip>
@@ -382,10 +390,10 @@ function Timesheet() {
                 order={order}
                 orderBy={orderBy}
                 handleRequestSort={handleRequestSort}
-                isSaving={isSaving}
-                finishSaving={finishSaving}
                 editRows={editRows}
                 editCollapsedRows={editCollapsedRows}
+                editRowNum={editRowNum}
+                addCollapsedRow={addCollapsedRow}
             />
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}

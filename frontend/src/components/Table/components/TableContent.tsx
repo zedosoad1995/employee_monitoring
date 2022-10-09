@@ -7,14 +7,14 @@ import Row from './Row'
 
 
 export default function TableContent(props: TableContentProps) {
-    const { rows, collapsedRows, columns, collapsedcolumns, rowsPerPage, isSaving, finishSaving, editRows, editCollapsedRows } = props
+    const { rows, collapsedRows, columns, collapsedcolumns, rowsPerPage, editRows, editCollapsedRows, editRowNum, addCollapsedRow } = props
 
     const emptyRows = Math.max(0, rowsPerPage - (rows ? rows.length : 0))
 
     return (
         <TableBody>
             {rows && rows.map((row, index) => {
-                return <Row key={index} row={row} collapsedRow={collapsedRows ? collapsedRows[index] : null} columns={columns} collapsedcolumns={collapsedcolumns} isSaving={isSaving} finishSaving={finishSaving} editRows={editRows(index)} editCollapsedRows={editCollapsedRows(index)} />
+                return <Row key={index} row={row} collapsedRow={collapsedRows ? collapsedRows[index] : null} columns={columns} collapsedcolumns={collapsedcolumns} editRows={editRows(index)} editCollapsedRows={editCollapsedRows(index)} isEditing={editRowNum === index} addCollapsedRow={addCollapsedRow(index)} />
             })}
             {/* {emptyRows > 0 && (
                 <TableRow
