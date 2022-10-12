@@ -151,17 +151,17 @@ function Groups() {
         setOpenCreateGroup(false)
     }
 
-    useEffect(() => {
-        const getData = async () => {
-            const { groups } = await getGroups()
-            const rows = groups.map((g: any) => ({
-                name: g.name,
-                startTime: g.startTime,
-                endTime: g.endTime
-            }))
-            setRows(rows)
-        }
+    const getData = async () => {
+        const { groups } = await getGroups()
+        const rows = groups.map((g: any) => ({
+            name: g.name,
+            startTime: g.startTime,
+            endTime: g.endTime
+        }))
+        setRows(rows)
+    }
 
+    useEffect(() => {
         getData()
     }, [openCreateGroup])
 
@@ -179,14 +179,15 @@ function Groups() {
             mode: 'onSubmit'
         })
 
-    const prepareSubmit = (data: any) => {
+    const prepareSubmit = async (data: any) => {
         data.startTime = format(data.startTime, "HH:mm")
         data.endTime = format(data.endTime, "HH:mm")
         for (let i = 0; i < data.breaks.length; i++) {
             data.breaks[i].startTime = format(data.breaks[i].startTime, "HH:mm")
             data.breaks[i].endTime = format(data.breaks[i].endTime, "HH:mm")
         }
-        createGroup(data)
+        await createGroup(data)
+        await getData()
         setOpenCreateGroup(false)
     }
 
