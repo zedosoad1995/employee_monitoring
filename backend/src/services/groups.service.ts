@@ -100,3 +100,13 @@ export const create = async (group: ICreateGroup) => {
 
     return await prisma.group.create(mainQuery)
 }
+
+export const deleteOne = async (groupId: string) => {
+    let mainQuery: Prisma.GroupDeleteArgs = {
+        where: {
+            id: groupId
+        }
+    }
+
+    return await prisma.group.delete(mainQuery)
+}

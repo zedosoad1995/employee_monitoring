@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { getMany, create, getOne, update } from '../controllers/groups.controller'
+import { getMany, create, getOne, update, deleteOne } from '../controllers/groups.controller'
 
 const router = Router()
 
@@ -17,6 +17,10 @@ router.put('/:id',
 
 router.post('/',
     create
+)
+
+router.delete('/:id',
+    deleteOne
 )
 
 export default router

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react"
 import IconButton from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
-import { createGroup, getGroup, getGroups, updateGroup } from "../../services/group"
+import { createGroup, deleteGroup, getGroup, getGroups, updateGroup } from "../../services/group"
 import { HeadCell } from "../../types/table"
 import GroupsTable from "../Table/Table"
 import AddIcon from '@mui/icons-material/Add'
 import DialogTitle from '@mui/material/DialogTitle'
 import Dialog from '@mui/material/Dialog'
 import TextField from "@mui/material/TextField"
-import { Button, DialogActions, Divider, Grid, Stack, Typography } from "@mui/material"
+import { Button, DialogActions, DialogContentText, Divider, Grid, Stack, Typography } from "@mui/material"
 import { DialogContent } from '@mui/material'
 import Box from "@mui/system/Box"
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
@@ -95,6 +95,13 @@ const columns: Array<HeadCell> = [
         numeric: false,
         sortable: false,
         isIcon: true
+    },
+    {
+        id: 'delete',
+        label: '',
+        numeric: false,
+        sortable: false,
+        isIcon: true
     }
 ]
 
@@ -102,6 +109,7 @@ const columns: Array<HeadCell> = [
 function Groups() {
     const [rows, setRows] = useState(null)
     const [openCreateGroup, setOpenCreateGroup] = useState(false)
+    const [openDeleteGroup, setOpenDeleteGroup] = useState(false)
 
     const [startTime, setStartTime] = useState(new Date())
     const [endTime, setEndTime] = useState(new Date())
@@ -194,6 +202,21 @@ function Groups() {
         setOpenCreateGroup(true)
     }
 
+    const handleClickDeleteGroup = (groupId: string) => async () => {
+        setSelectedGroup(groupId)
+        setOpenDeleteGroup(true)
+    }
+
+    const handleDeleteGroup = async () => {
+        if (selectedGroup !== undefined) await deleteGroup(selectedGroup)
+        await getData()
+        setOpenDeleteGroup(false)
+    }
+
+    const handleCloseDeleteGroup = () => {
+        setOpenDeleteGroup(false)
+    }
+
     const getData = async () => {
         const { groups } = await getGroups()
         const rows = groups.map((g: any, index: number) => ({
@@ -207,6 +230,17 @@ function Groups() {
                 >
                     <IconButton onClick={handleClickEditGroup(g.id)}>
                         <EditIcon />
+                    </IconButton>
+                </Tooltip>
+                }
+            </>,
+            delete: <>
+                {<Tooltip
+                    key={g.id}
+                    title="Delete Group"
+                >
+                    <IconButton onClick={handleClickDeleteGroup(g.id)}>
+                        <DeleteIcon />
                     </IconButton>
                 </Tooltip>
                 }
@@ -416,6 +450,20 @@ function Groups() {
                     <Button onClick={handleCloseAddGroup}>Close</Button>
                 </DialogActions>
             </Dialog>
+            <Dialog fullWidth onClose={handleCloseDeleteGroup} open={openDeleteGroup}>
+                <DialogTitle>
+                    Delete Group
+                </DialogTitle>
+                <DialogContent sx={{ mt: 1, maxWidth: "600px" }}>
+                    <DialogContentText>
+                        Are you sure you want to delete the group?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions >
+                    <Button onClick={handleDeleteGroup}>Delete</Button>
+                    <Button onClick={handleCloseDeleteGroup}>Close</Button>
+                </DialogActions>
+            </Dialog >
         </>
     );
 }

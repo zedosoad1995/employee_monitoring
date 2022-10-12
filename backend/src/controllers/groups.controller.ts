@@ -45,3 +45,14 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
 
     res.status(httpStatusCodes.CREATED).json(resp)
 }
+
+export const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
+    let resp
+    try {
+        resp = await groupsService.deleteOne(req.params.id)
+    } catch (err) {
+        return next(err)
+    }
+
+    res.status(httpStatusCodes.NO_CONTENT).json({})
+}

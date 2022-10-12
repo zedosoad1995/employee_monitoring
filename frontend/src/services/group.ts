@@ -17,3 +17,7 @@ export const updateGroup = (groupId: string, data: any) => {
 export const createGroup = (data: { name: string, startTime: string, endTime: string, breaks: Array<{ startTime: string, endTime: string }> }) => {
     return axios.post(`${process.env.REACT_APP_API_URL}/groups`, data)
 }
+
+export const deleteGroup = (groupId: string) => {
+    return axios.delete(`${process.env.REACT_APP_API_URL}/groups/${groupId}`)
+}
