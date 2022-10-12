@@ -30,6 +30,32 @@ export const getMany = async () => {
     }
 }
 
+export const getOne = async (groupId: string) => {
+    let mainQuery: Prisma.GroupFindFirstArgs = {
+        select: {
+            id: true,
+            name: true,
+            startTime: true,
+            endTime: true,
+            Employee: {
+                select: {
+                    name: true
+                }
+            },
+            Break: {
+                select: {
+                    startTime: true,
+                    endTime: true
+                }
+            }
+        },
+        where: {
+            id: groupId
+        }
+    }
+
+    return await prisma.group.findFirst(mainQuery)
+}
 
 export const create = async (group: ICreateGroup) => {
     let mainQuery: Prisma.GroupCreateArgs = {

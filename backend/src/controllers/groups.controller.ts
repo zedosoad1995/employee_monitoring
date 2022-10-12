@@ -13,6 +13,17 @@ export const getMany = async (req: Request, res: Response, next: NextFunction) =
     res.status(httpStatusCodes.OK).json(resp)
 }
 
+export const getOne = async (req: Request, res: Response, next: NextFunction) => {
+    let resp
+    try {
+        resp = await groupsService.getOne(req.params.id)
+    } catch (err) {
+        return next(err)
+    }
+
+    res.status(httpStatusCodes.OK).json(resp)
+}
+
 export const create = async (req: Request, res: Response, next: NextFunction) => {
     let resp
     try {

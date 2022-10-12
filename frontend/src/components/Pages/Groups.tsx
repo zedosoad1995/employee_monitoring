@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react"
 import IconButton from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
-import { createGroup, getGroups } from "../../services/group"
+import { createGroup, getGroup, getGroups } from "../../services/group"
 import { HeadCell } from "../../types/table"
 import GroupsTable from "../Table/Table"
 import AddIcon from '@mui/icons-material/Add'
 import DialogTitle from '@mui/material/DialogTitle'
 import Dialog from '@mui/material/Dialog'
 import TextField from "@mui/material/TextField"
-import { Button, DialogActions, Divider, Grid, Paper, Stack, Typography } from "@mui/material"
+import { Button, DialogActions, Divider, Grid, Stack, Typography } from "@mui/material"
 import { DialogContent } from '@mui/material'
 import Box from "@mui/system/Box"
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
 
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
 
 const schema = yup.object().shape({
     name: yup.string().required(),
@@ -87,6 +88,13 @@ const columns: Array<HeadCell> = [
         id: 'endTime',
         label: 'End Time',
         numeric: false
+    },
+    {
+        id: 'edit',
+        label: '',
+        numeric: false,
+        sortable: false,
+        isIcon: true
     }
 ]
 
@@ -151,12 +159,45 @@ function Groups() {
         setOpenCreateGroup(false)
     }
 
+    const handleClickEditGroup = (groupId: string) => async () => {
+        const group = await getGroup(groupId)
+
+        const currStartTime = parse(group.startTime, 'HH:mm', new Date())
+        const currEndTime = parse(group.endTime, 'HH:mm', new Date())
+        const currBreaks = group.Break.map((b: any) => ({
+            startTime: parse(b.endTime, 'HH:mm', new Date()),
+            endTime: parse(b.endTime, 'HH:mm', new Date())
+        }))
+
+        setValue('name', group.name)
+        setValue('startTime', currStartTime)
+        setValue('endTime', currEndTime)
+        setValue('breaks', currBreaks)
+
+        setStartTime(currStartTime)
+        setEndTime(currEndTime)
+        setBreaks(currBreaks)
+
+        setOpenCreateGroup(true)
+    }
+
     const getData = async () => {
         const { groups } = await getGroups()
-        const rows = groups.map((g: any) => ({
+        const rows = groups.map((g: any, index: number) => ({
             name: g.name,
             startTime: g.startTime,
-            endTime: g.endTime
+            endTime: g.endTime,
+            edit: <>
+                {<Tooltip
+                    key={g.id}
+                    title="Edit Group"
+                >
+                    <IconButton onClick={handleClickEditGroup(g.id)}>
+                        <EditIcon />
+                    </IconButton>
+                </Tooltip>
+                }
+            </>
         }))
         setRows(rows)
     }
