@@ -23,6 +23,42 @@ export const getMany = async () => {
     }
 }
 
+export const getOne = async (employeeId: string) => {
+    let mainQuery: Prisma.EmployeeFindFirstArgs = {
+        select: {
+            id: true,
+            name: true,
+            cardId: true,
+            group: {
+                select: {
+                    name: true
+                }
+            }
+        },
+        where: {
+            id: employeeId
+        }
+    }
+
+    return await prisma.employee.findFirst(mainQuery)
+}
+
+export const update = async (employeeId: string, data: any) => {
+    return prisma.employee.update({
+        data: {
+            name: data.name,
+            cardId: data.cardId,
+            group: {
+                connect: {
+                    id: data.groupId
+                }
+            }
+        },
+        where: {
+            id: employeeId
+        }
+    })
+}
 
 export const create = async (employee: ICreateEmployee) => {
     let mainQuery: Prisma.EmployeeCreateArgs = {
@@ -38,4 +74,14 @@ export const create = async (employee: ICreateEmployee) => {
     }
 
     return await prisma.employee.create(mainQuery)
+}
+
+export const deleteOne = async (employeeId: string) => {
+    let mainQuery: Prisma.EmployeeDeleteArgs = {
+        where: {
+            id: employeeId
+        }
+    }
+
+    return await prisma.employee.delete(mainQuery)
 }
