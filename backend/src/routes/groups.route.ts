@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { getMany, create, getOne } from '../controllers/groups.controller'
+import { getMany, create, getOne, update } from '../controllers/groups.controller'
 
 const router = Router()
 
@@ -9,6 +9,10 @@ router.get('/',
 
 router.get('/:id',
     getOne
+)
+
+router.put('/:id',
+    update
 )
 
 router.post('/',

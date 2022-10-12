@@ -24,6 +24,17 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
     res.status(httpStatusCodes.OK).json(resp)
 }
 
+export const update = async (req: Request, res: Response, next: NextFunction) => {
+    let resp
+    try {
+        resp = await groupsService.update(req.params.id, req.body)
+    } catch (err) {
+        return next(err)
+    }
+
+    res.status(httpStatusCodes.OK).json(resp)
+}
+
 export const create = async (req: Request, res: Response, next: NextFunction) => {
     let resp
     try {

@@ -57,6 +57,33 @@ export const getOne = async (groupId: string) => {
     return await prisma.group.findFirst(mainQuery)
 }
 
+export const update = async (groupId: string, data: any) => {
+    await prisma.$transaction([
+        prisma.break.deleteMany({
+            where: {
+                groupId: groupId
+            }
+        }),
+        prisma.group.update({
+            data: {
+                name: data.name,
+                startTime: data.startTime,
+                endTime: data.endTime,
+                Break: {
+                    createMany: {
+                        data: data.breaks
+                    }
+                }
+            },
+            where: {
+                id: groupId
+            }
+        })
+    ])
+
+    return
+}
+
 export const create = async (group: ICreateGroup) => {
     let mainQuery: Prisma.GroupCreateArgs = {
         data: {

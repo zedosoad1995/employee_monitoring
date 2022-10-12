@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import IconButton from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
-import { createGroup, getGroup, getGroups } from "../../services/group"
+import { createGroup, getGroup, getGroups, updateGroup } from "../../services/group"
 import { HeadCell } from "../../types/table"
 import GroupsTable from "../Table/Table"
 import AddIcon from '@mui/icons-material/Add'
@@ -108,6 +108,9 @@ function Groups() {
 
     const [breaks, setBreaks] = useState<Array<{ startTime: any, endTime: any }>>([])
 
+    const [isCreateGroup, setIsCreateGroup] = useState<boolean>(false)
+    const [selectedGroup, setSelectedGroup] = useState<string | undefined>()
+
     const handleChangeStartBreak = (index: number) => (newValue: any, keyboardInputValue: any) => {
         const newTime = (keyboardInputValue && keyboardInputValue.length !== 5) ?
             new Date("") :
@@ -152,6 +155,13 @@ function Groups() {
     }
 
     const handleClickAddGroup = () => {
+        clearErrors()
+        reset()
+        setStartTime(new Date())
+        setEndTime(new Date())
+        setBreaks([])
+
+        setIsCreateGroup(true)
         setOpenCreateGroup(true)
     }
 
@@ -160,12 +170,15 @@ function Groups() {
     }
 
     const handleClickEditGroup = (groupId: string) => async () => {
+        clearErrors()
+        setSelectedGroup(groupId)
+        setIsCreateGroup(false)
         const group = await getGroup(groupId)
 
         const currStartTime = parse(group.startTime, 'HH:mm', new Date())
         const currEndTime = parse(group.endTime, 'HH:mm', new Date())
         const currBreaks = group.Break.map((b: any) => ({
-            startTime: parse(b.endTime, 'HH:mm', new Date()),
+            startTime: parse(b.startTime, 'HH:mm', new Date()),
             endTime: parse(b.endTime, 'HH:mm', new Date())
         }))
 
@@ -206,7 +219,7 @@ function Groups() {
         getData()
     }, [openCreateGroup])
 
-    const { register, control, handleSubmit, formState: { errors }, setValue } =
+    const { register, control, handleSubmit, formState: { errors }, setValue, reset, clearErrors } =
         useForm<
             { name: string, startTime: Date, endTime: Date, breaks: Array<{ startTime: Date, endTime: Date }> }
         >({
@@ -227,7 +240,12 @@ function Groups() {
             data.breaks[i].startTime = format(data.breaks[i].startTime, "HH:mm")
             data.breaks[i].endTime = format(data.breaks[i].endTime, "HH:mm")
         }
-        await createGroup(data)
+
+        if (isCreateGroup) {
+            await createGroup(data)
+        } else if (selectedGroup) {
+            await updateGroup(selectedGroup, data)
+        }
         await getData()
         setOpenCreateGroup(false)
     }
@@ -246,7 +264,11 @@ function Groups() {
                 columns={columns}
             />
             <Dialog fullWidth onClose={handleCloseAddGroup} open={openCreateGroup}>
-                <DialogTitle>Create New Group</DialogTitle>
+                <DialogTitle>
+                    {isCreateGroup && <>Create New Group</>}
+                    {!isCreateGroup && <>Edit Group</>}
+
+                </DialogTitle>
                 <DialogContent sx={{ mt: 1, maxWidth: "600px" }}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <form id="groupsForm" onSubmit={handleSubmit(prepareSubmit)} noValidate>
@@ -390,7 +412,7 @@ function Groups() {
                     </LocalizationProvider>
                 </DialogContent>
                 <DialogActions >
-                    <Button type="submit" form="groupsForm" >Create</Button>
+                    <Button type="submit" form="groupsForm" >{isCreateGroup ? 'Create' : 'Edit'}</Button>
                     <Button onClick={handleCloseAddGroup}>Close</Button>
                 </DialogActions>
             </Dialog>
