@@ -15,27 +15,10 @@ interface ITime {
 }
 
 export const getOvertime = (
-    times: Array<ITime>,
+    endTime: string,
     group: IGroup
 ) => {
-    const { totalMins } = times.reduce((acc: any, el) => {
-        if (acc.hasEntered && !el.isEnter) {
-            acc.totalMins += getMinsFromTimeStr(el.time) - acc.prevMins
-            acc.hasEntered = false
-        } else if (!acc.hasEntered && el.isEnter) {
-            acc.prevMins = getMinsFromTimeStr(el.time)
-            acc.hasEntered = true
-        }
-
-        return acc
-    }, { totalMins: 0, hasEntered: false, prevMins: 0 })
-
-    const totalTimeDiff = getMinsFromTimeStr(group.endTime) - getMinsFromTimeStr(group.startTime)
-    const timeInBreaks = group.Break.reduce((acc: number, el) => {
-        return acc + getMinsFromTimeStr(el.endTime) - getMinsFromTimeStr(el.startTime)
-    }, 0)
-    const expectedMins = totalTimeDiff - timeInBreaks
-    return totalMins - expectedMins
+    return getMinsFromTimeStr(endTime) - getMinsFromTimeStr(group.endTime)
 }
 
 export const getBreaks = (

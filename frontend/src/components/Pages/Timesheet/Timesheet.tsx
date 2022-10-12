@@ -16,7 +16,6 @@ import IconButton from "@mui/material/IconButton"
 import FilterListIcon from '@mui/icons-material/FilterList'
 import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
-import TimeModal from "./TimeModal"
 import SaveIcon from '@mui/icons-material/Save'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { Menu, MenuItem } from "@mui/material"
@@ -116,7 +115,6 @@ function Timesheet() {
 
     const [date, setDate] = useState(new Date())
 
-    const [openEditTime, setOpenEditTime] = useState(false)
     const [selectedEmployee, setSelectedEmployee] = useState({ id: '', name: '' })
 
     const [selectedRow, setSelectedRow] = useState<number | undefined>()
@@ -211,8 +209,8 @@ function Timesheet() {
                         </Tooltip>
                     }
                 </>,
-                overtime: ts.overtime ? getTimeStrFromMins(ts.overtime) : '',
-                timeLate: ts.timeLate ? getTimeStrFromMins(ts.timeLate) : '',
+                overtime: ts.overtime !== null ? getTimeStrFromMins(ts.overtime) : '',
+                timeLate: ts.timeLate !== null ? getTimeStrFromMins(ts.timeLate) : '',
                 startTime: ts.startTime,
                 endTime: ts.endTime,
                 edit: <>
@@ -232,7 +230,6 @@ function Timesheet() {
         setRows(rows)
 
         const collapsedRows = timesheets.map((ts: any, index: number) => {
-            console.log(index, ts.breaks)
             return ts.breaks.map((b: any, index2: number) => ({
                 id: b.id,
                 startTime: b.startTime,
@@ -264,15 +261,15 @@ function Timesheet() {
         })
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (selectedRow !== undefined && rows) {
             const data = {
                 startTime: rows[selectedRow]['startTime'],
                 endTime: rows[selectedRow]['endTime'],
-                breaks: collapsedRows ? collapsedRows[selectedRow] : []
+                breaks: collapsedRows ? collapsedRows[selectedRow].map((el: any) => ({ startTime: el.startTime, endTime: el.endTime })) : []
             }
 
-            editTimesFromEmployee(selectedEmployee.id, dateStr, data)
+            await editTimesFromEmployee(selectedEmployee.id, dateStr, data)
 
             getData()
         }
@@ -298,6 +295,7 @@ function Timesheet() {
 
         setCollapsedRows((collapsedRows) => {
             if (collapsedRows === null) return null
+
             // @ts-ignore
             collapsedRows[anchorEl.getAttribute("data-row1")].splice(anchorEl.getAttribute("data-row2"), 1)
 

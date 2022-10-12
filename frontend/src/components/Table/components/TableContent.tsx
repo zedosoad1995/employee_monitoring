@@ -1,6 +1,4 @@
 import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableRow from '@mui/material/TableRow'
 import { TableContentProps } from '../../../types/table'
 
 import Row from './Row'
@@ -14,7 +12,7 @@ export default function TableContent(props: TableContentProps) {
     return (
         <TableBody>
             {rows && rows.map((row, index) => {
-                return <Row key={index} row={row} collapsedRow={collapsedRows ? collapsedRows[index] : null} columns={columns} collapsedcolumns={collapsedcolumns} editRows={editRows(index)} editCollapsedRows={editCollapsedRows(index)} isEditing={editRowNum === index} addCollapsedRow={addCollapsedRow(index)} />
+                return <Row key={index} row={row} collapsedRow={collapsedRows ? collapsedRows[index] : null} columns={columns} collapsedcolumns={collapsedcolumns} editRows={editRows && editRows(index)} editCollapsedRows={editCollapsedRows && editCollapsedRows(index)} isEditing={editRowNum === index} addCollapsedRow={addCollapsedRow && addCollapsedRow(index)} />
             })}
             {/* {emptyRows > 0 && (
                 <TableRow

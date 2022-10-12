@@ -100,7 +100,7 @@ export const getMany = async (query: any) => {
             const enterTime = ts.times[0].isEnter ? ts.times[0].time : ''
             const timeLate = (group && enterTime) ?
                 getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(group.startTime) :
-                ''
+                null
 
             const exitTime = !ts.times.at(-1)?.isEnter ? ts.times.at(-1)?.time : ''
 
@@ -108,7 +108,7 @@ export const getMany = async (query: any) => {
             const { breaks, isNotAcceptableBreak: hasNonAcceptableBreaks, hasMalfunction } = getBreaks(ts.times, group, enterTime !== '', exitTime != '')
 
             // Calculate Overtime
-            const overtime = (group && enterTime && exitTime) ? getOvertime(ts.times, group) : ''
+            const overtime = (group && exitTime) ? getOvertime(exitTime, group) : null
 
             return {
                 employeeId: ts.employeeId,
@@ -126,6 +126,8 @@ export const getMany = async (query: any) => {
 
     let { page, limit, sortBy, order }: { page: string, limit: string, sortBy: string, order: string } = query
 
+
+
     const allowedSortFields = ['name', 'group', 'overtime', 'timeLate', 'startTime', 'endTime']
     if (allowedSortFields.includes(sortBy)) {
         transformedTimesheets.sort((a, b) => {
@@ -135,7 +137,19 @@ export const getMany = async (query: any) => {
                 return order === 'desc' ? b[sortBy].localeCompare(a[sortBy]) : a[sortBy].localeCompare(b[sortBy])
             } else {
                 // @ts-ignore
-                return order === 'desc' ? b[sortBy] - a[sortBy] : a[sortBy] - b[sortBy]
+                if (a[sortBy] === b[sortBy]) return 0
+                // @ts-ignore
+                if (a[sortBy] === null) return 1
+                // @ts-ignore
+                if (b[sortBy] === null) return -1
+
+                if (order === 'desc') {
+                    // @ts-ignore
+                    return b[sortBy] - a[sortBy]
+                } else {
+                    // @ts-ignore
+                    return a[sortBy] - b[sortBy]
+                }
             }
         })
     }
