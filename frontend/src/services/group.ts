@@ -5,6 +5,11 @@ export const getGroups = () => {
         .then((res) => res.data)
 }
 
+export const getGroupsShort = () => {
+    return axios.get(`${process.env.REACT_APP_API_URL}/groups/short`)
+        .then((res) => res.data)
+}
+
 export const getGroup = (groupId: string) => {
     return axios.get(`${process.env.REACT_APP_API_URL}/groups/${groupId}`)
         .then((res) => res.data)

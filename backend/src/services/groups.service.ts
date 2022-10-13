@@ -30,6 +30,20 @@ export const getMany = async () => {
     }
 }
 
+export const getManyShort = async () => {
+    let mainQuery: Prisma.GroupFindManyArgs = {
+        select: {
+            id: true,
+            name: true
+        }
+    }
+
+    return {
+        groups: await prisma.group.findMany(mainQuery),
+        total: await prisma.group.count()
+    }
+}
+
 export const getOne = async (groupId: string) => {
     let mainQuery: Prisma.GroupFindFirstArgs = {
         select: {
