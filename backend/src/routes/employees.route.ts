@@ -1,10 +1,14 @@
 import { Router } from 'express'
-import { getMany, create, getOne, update, deleteOne } from '../controllers/employees.controller'
+import { getMany, create, getOne, update, deleteOne, getManyShort } from '../controllers/employees.controller'
 
 const router = Router()
 
 router.get('/',
     getMany
+)
+
+router.get('/short',
+    getManyShort
 )
 
 router.get('/:id',

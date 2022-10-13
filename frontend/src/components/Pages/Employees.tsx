@@ -1,13 +1,13 @@
 import IconButton from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import { useEffect, useState } from "react"
-import { createEmployee, getEmployees } from "../../services/employees"
+import { createEmployee, deleteEmployee, getEmployee, getEmployees, updateEmployee } from "../../services/employees"
 import { HeadCell } from "../../types/table"
 import EmployeesTable from "../Table/Table"
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material"
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material"
 import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -55,9 +55,11 @@ const columns: Array<HeadCell> = [
 function Employees() {
     const [rows, setRows] = useState(null)
     const [openEmployeeModal, setOpenEmployeeModal] = useState(false)
+    const [openDeleteEmployeeModal, setOpenDeleteEmployeeModal] = useState(false)
     const [groups, setGroups] = useState<Array<{ id: string, name: string }>>([])
 
-    const [isCreateGroup, setIsCreateGroup] = useState<boolean>(false)
+    const [isCreateEmployee, setIsCreateEmployee] = useState<boolean>(false)
+    const [selectedEmployee, setSelectedEmployee] = useState<string | undefined>()
 
     const getData = async () => {
         const { employees } = await getEmployees()
@@ -70,7 +72,7 @@ function Employees() {
                     key={e.id}
                     title="Edit Employee"
                 >
-                    <IconButton>
+                    <IconButton onClick={handleClickEditEmployee(e.id)}>
                         <EditIcon />
                     </IconButton>
                 </Tooltip>
@@ -81,7 +83,7 @@ function Employees() {
                     key={e.id}
                     title="Delete Employee"
                 >
-                    <IconButton>
+                    <IconButton onClick={handleClickDeleteEmployee(e.id)}>
                         <DeleteIcon />
                     </IconButton>
                 </Tooltip>
@@ -101,6 +103,35 @@ function Employees() {
         getData()
     }, [])
 
+    const handleDeleteEmployee = async () => {
+        if (selectedEmployee !== undefined) await deleteEmployee(selectedEmployee)
+        await getData()
+        setOpenDeleteEmployeeModal(false)
+    }
+
+    const handleCloseDeleteEmployee = () => {
+        setOpenDeleteEmployeeModal(false)
+    }
+
+    const handleClickDeleteEmployee = (employeeId: string) => async () => {
+        setSelectedEmployee(employeeId)
+        setOpenDeleteEmployeeModal(true)
+    }
+
+    const handleClickEditEmployee = (employeeId: string) => async () => {
+        clearErrors()
+        setSelectedEmployee(employeeId)
+        setIsCreateEmployee(false)
+        const employee = await getEmployee(employeeId)
+
+        setValue('name', employee.name)
+        setValue('cardId', employee.cardId)
+        setValue('groupId', employee.group.id)
+
+        setOpenEmployeeModal(true)
+    }
+
+
     const handleCloseEmployeeModal = () => {
         setOpenEmployeeModal(false)
     }
@@ -108,12 +139,17 @@ function Employees() {
     const handleClickAddEmployee = () => {
         reset()
         clearErrors()
-        setIsCreateGroup(true)
+        setIsCreateEmployee(true)
         setOpenEmployeeModal(true)
     }
 
     const prepareSubmit = async (data: any) => {
-        await createEmployee(data)
+        if (isCreateEmployee) {
+            await createEmployee(data)
+        } else if (selectedEmployee) {
+            await updateEmployee(selectedEmployee, data)
+        }
+
         await getData()
         setOpenEmployeeModal(false)
     }
@@ -144,8 +180,8 @@ function Employees() {
             />
             <Dialog fullWidth onClose={handleCloseEmployeeModal} open={openEmployeeModal}>
                 <DialogTitle>
-                    {isCreateGroup && <>Create New Employee</>}
-                    {!isCreateGroup && <>Edit Employee</>}
+                    {isCreateEmployee && <>Create New Employee</>}
+                    {!isCreateEmployee && <>Edit Employee</>}
 
                 </DialogTitle>
                 <DialogContent sx={{ mt: 1, maxWidth: "600px" }}>
@@ -200,10 +236,24 @@ function Employees() {
                     </form>
                 </DialogContent>
                 <DialogActions >
-                    <Button type="submit" form="employeesForm" >{isCreateGroup ? 'Create' : 'Edit'}</Button>
+                    <Button type="submit" form="employeesForm" >{isCreateEmployee ? 'Create' : 'Edit'}</Button>
                     <Button onClick={handleCloseEmployeeModal}>Close</Button>
                 </DialogActions>
             </Dialog>
+            <Dialog fullWidth onClose={handleCloseDeleteEmployee} open={openDeleteEmployeeModal}>
+                <DialogTitle>
+                    Delete Employee
+                </DialogTitle>
+                <DialogContent sx={{ mt: 1, maxWidth: "600px" }}>
+                    <DialogContentText>
+                        Are you sure you want to delete the employee?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions >
+                    <Button onClick={handleDeleteEmployee}>Delete</Button>
+                    <Button onClick={handleCloseDeleteEmployee}>Close</Button>
+                </DialogActions>
+            </Dialog >
         </>
     );
 }

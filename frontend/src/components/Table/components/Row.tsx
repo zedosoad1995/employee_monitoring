@@ -7,15 +7,40 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { RowProps } from '../../../types/table'
 import CollapsedTable from './CollapsedTable'
-import { TextField } from '@mui/material'
+import { Link, TextField } from '@mui/material'
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { format, isValid, parse } from 'date-fns'
+import { parse } from 'date-fns'
 
 export default function Row(props: RowProps) {
     const { row, columns, collapsedcolumns, collapsedRow, editRows, editCollapsedRows, isEditing, addCollapsedRow } = props
 
     const [open, setOpen] = useState(false)
+
+    const CellComponent = (col: any) => {
+        if (col.isLink) return <Link href='#'>{row[col.id]}</Link>
+
+        return <>
+            {(!isEditing || !col.isEdit) && row[col.id]}
+            {(isEditing && col.isEdit) &&
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <TimePicker
+                        value={parse(row[col.id], "HH:mm", new Date())}
+                        onChange={editRows(col.id)}
+                        renderInput={(params) => (
+                            <TextField
+                                id="name"
+                                sx={{ '& .MuiInputBase-root': { fontSize: 'inherit' }, minWidth: '110px' }}
+                                size='small'
+                                {...params}
+                            />
+                        )}
+                        ampm={false}
+                    />
+                </LocalizationProvider>
+            }
+        </>
+    }
 
     return (<>
         <TableRow
@@ -24,24 +49,7 @@ export default function Row(props: RowProps) {
         >
             {columns.map((col, index) => {
                 return <TableCell key={index} sx={{ padding: col.isIcon ? "0 0 0 16px" : (isEditing ? "auto" : "auto") }} align={col.numeric ? 'right' : 'left'}>
-                    {(!isEditing || !col.isEdit) && row[col.id]}
-                    {(isEditing && col.isEdit) &&
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                            <TimePicker
-                                value={parse(row[col.id], "HH:mm", new Date())}
-                                onChange={editRows(col.id)}
-                                renderInput={(params) => (
-                                    <TextField
-                                        id="name"
-                                        sx={{ '& .MuiInputBase-root': { fontSize: 'inherit' }, minWidth: '110px' }}
-                                        size='small'
-                                        {...params}
-                                    />
-                                )}
-                                ampm={false}
-                            />
-                        </LocalizationProvider>
-                    }
+                    {CellComponent(col)}
                 </TableCell>
             })}
             {(collapsedRow && collapsedcolumns) &&

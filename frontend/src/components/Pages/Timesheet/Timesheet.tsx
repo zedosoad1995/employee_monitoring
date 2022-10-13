@@ -18,7 +18,9 @@ import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
 import SaveIcon from '@mui/icons-material/Save'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { Menu, MenuItem } from "@mui/material"
+import { FormControl, InputLabel, Menu, MenuItem, Select } from "@mui/material"
+import { getEmployeesShort } from "../../../services/employees"
+import FilterSelectList from "./FilterSelectList"
 
 
 const collapsedcolumns: Array<CollapsedHeadCell> = [
@@ -64,7 +66,8 @@ const columns: Array<HeadCell> = [
     {
         id: 'name',
         label: 'Employee',
-        numeric: false
+        numeric: false,
+        isLink: true
     },
     {
         id: 'group',
@@ -102,6 +105,18 @@ const columns: Array<HeadCell> = [
     }
 ]
 
+const filters = [
+    {
+        id: 'employees',
+        label: 'Employee',
+        getData: getEmployeesShort
+    },
+    {
+        id: 'groups',
+        label: 'Group',
+        getData: getGroups
+    }
+]
 
 function Timesheet() {
     const [rows, setRows] = useState<any[] | null>(null)
@@ -122,6 +137,12 @@ function Timesheet() {
 
     const [anchorEl, setAnchorEl] = useState()
     const openMenu = Boolean(anchorEl)
+    const [anchorElFilter, setAnchorElFilter] = useState()
+    const openFilterMenu = Boolean(anchorElFilter)
+
+    const [displayedFilters, setDisplayedFilters] = useState<Array<any>>([])
+    const [listedFilters, setListedFilters] = useState<Array<any>>([])
+
 
     let dateStr: string
     try {
@@ -287,6 +308,25 @@ function Timesheet() {
         setAnchorEl(undefined)
     }
 
+    const handleFilterClick = (e: any) => {
+        setAnchorElFilter(e.currentTarget)
+    }
+
+    const handleCloseFilterMenu = () => {
+        setAnchorElFilter(undefined)
+    }
+
+    const handleClickListedFilter = (id: string) => () => {
+        const currFilter = filters.find((f) => f.id === id)
+        setDisplayedFilters((f) => [...f, currFilter])
+        setListedFilters((f) => f.filter((val) => val.id !== id))
+    }
+
+    const handleClickClearFilters = () => {
+        setDisplayedFilters([])
+        setListedFilters(filters)
+    }
+
     const handleDeleteCollapsedRow = () => {
         if (!anchorEl) return
 
@@ -373,30 +413,38 @@ function Timesheet() {
     }
 
     useEffect(() => {
+        setListedFilters(filters)
+    }, [])
+
+    useEffect(() => {
         getData()
     }, [page, rowsPerPage, orderBy, order, date])
 
     return (
         <>
             <div style={{ marginBottom: "10px", marginTop: "10px", display: "flex", justifyContent: "space-between" }}>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DesktopDatePicker
-                        label="Date"
-                        inputFormat="yyyy-MM-dd"
-                        value={date}
-                        onChange={handleDateChange}
-                        renderInput={(params) => <TextField {...params} />}
-                        disableFuture={true}
-                    />
-                </LocalizationProvider>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DesktopDatePicker
+                            label="Date"
+                            inputFormat="yyyy-MM-dd"
+                            value={date}
+                            onChange={handleDateChange}
+                            renderInput={(params) => <TextField sx={{ minWidth: "150px" }} {...params} />}
+                            disableFuture={true}
+                        />
+                    </LocalizationProvider>
+                    {displayedFilters.map((e: any) => (<FilterSelectList id={e.id} label={e.label} getData={e.getData} />))}
+                </div>
+                <div style={{ flexGrow: 1 }} />
                 <div>
                     <Tooltip title="Save Changes">
                         <IconButton onClick={handleSave} disabled={selectedRow === undefined}>
                             <SaveIcon />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Filter list">
-                        <IconButton>
+                    <Tooltip title="Filter table">
+                        <IconButton onClick={handleFilterClick}>
                             <FilterListIcon />
                         </IconButton>
                     </Tooltip>
@@ -426,7 +474,6 @@ function Timesheet() {
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
             <Menu
-                id="basic-menu"
                 anchorEl={anchorEl}
                 open={openMenu}
                 onClose={handleCloseMenu}
@@ -434,6 +481,14 @@ function Timesheet() {
                 <MenuItem onClick={handleDeleteCollapsedRow}>Delete Row</MenuItem>
                 <MenuItem onClick={handleAddRow(true)}>Add Row Above</MenuItem>
                 <MenuItem onClick={handleAddRow(false)}>Add Row Below</MenuItem>
+            </Menu>
+            <Menu
+                anchorEl={anchorElFilter}
+                open={openFilterMenu}
+                onClose={handleCloseFilterMenu}
+            >
+                {listedFilters.map((f) => (<MenuItem onClick={handleClickListedFilter(f.id)}>{f.label}</MenuItem>))}
+                <MenuItem onClick={handleClickClearFilters}>Clear Filters</MenuItem>
             </Menu>
         </>
     );

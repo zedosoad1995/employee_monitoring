@@ -4,7 +4,8 @@ export interface HeadCell {
     numeric: boolean,
     sortable?: boolean,
     isIcon?: boolean,
-    isEdit?: boolean
+    isEdit?: boolean,
+    isLink?: boolean
 }
 
 export interface CollapsedHeadCell {

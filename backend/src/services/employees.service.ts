@@ -23,6 +23,20 @@ export const getMany = async () => {
     }
 }
 
+export const getManyShort = async () => {
+    let mainQuery: Prisma.EmployeeFindManyArgs = {
+        select: {
+            id: true,
+            name: true
+        }
+    }
+
+    return {
+        employees: await prisma.employee.findMany(mainQuery),
+        total: await prisma.employee.count()
+    }
+}
+
 export const getOne = async (employeeId: string) => {
     let mainQuery: Prisma.EmployeeFindFirstArgs = {
         select: {
@@ -31,6 +45,7 @@ export const getOne = async (employeeId: string) => {
             cardId: true,
             group: {
                 select: {
+                    id: true,
                     name: true
                 }
             }
