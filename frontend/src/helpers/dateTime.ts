@@ -1,3 +1,5 @@
+import { format } from "date-fns"
+
 export const getMinsFromTimeStr = (str: string) => {
     let [hh, mm] = str.split(':')
     return Number(hh) * 60 + Number(mm)
@@ -13,4 +15,12 @@ export const getTimeStrFromMins = (totalMins: number) => {
     }
 
     return `+${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`
+}
+
+export const dateToStr = (date: any) => {
+    try {
+        return format(date, 'yyyy-MM-dd')
+    } catch (err) {
+        return ''
+    }
 }

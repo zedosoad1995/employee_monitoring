@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { getTimeStrFromMins } from "../../../helpers/dateTime"
+import { dateToStr, getTimeStrFromMins } from "../../../helpers/dateTime"
 import { editTimesFromEmployee, getTimesheetRaw, getTimesheets } from "../../../services/timesheet"
 import { CollapsedHeadCell, HeadCell, Order } from "../../../types/table"
 import TimesheetTable from "../../Table/Table"
@@ -67,7 +67,14 @@ const columns: Array<HeadCell> = [
         id: 'name',
         label: 'Employee',
         numeric: false,
-        isLink: true
+        isLink: true,
+        canBeHidden: true
+    },
+    {
+        id: 'date',
+        label: 'Date',
+        numeric: false,
+        canBeHidden: true
     },
     {
         id: 'group',
@@ -108,11 +115,13 @@ const columns: Array<HeadCell> = [
 const filters = [
     {
         id: 'employees',
+        filterId: 'employeeId',
         label: 'Employee',
         getData: getEmployeesShort
     },
     {
         id: 'groups',
+        filterId: 'groupId',
         label: 'Group',
         getData: getGroups
     }
@@ -128,7 +137,7 @@ function Timesheet() {
     const [order, setOrder] = useState<Order>('asc')
     const [orderBy, setOrderBy] = useState('overtime')
 
-    const [date, setDate] = useState(new Date())
+    const [date, setDate] = useState<any>(new Date())
 
     const [selectedEmployee, setSelectedEmployee] = useState({ id: '', name: '' })
 
@@ -143,13 +152,12 @@ function Timesheet() {
     const [displayedFilters, setDisplayedFilters] = useState<Array<any>>([])
     const [listedFilters, setListedFilters] = useState<Array<any>>([])
 
+    const [selectedFilters, setSelectedFilters] = useState<any>({ date: dateToStr(new Date()) })
 
-    let dateStr: string
-    try {
-        dateStr = format(date, 'yyyy-MM-dd')
-    } catch (err) {
-        dateStr = ''
-    }
+    const [isDateFilterDisabled, setIsDateFilterDisabled] = useState(false)
+
+    const [hiddenCols, setHiddenCols] = useState({ name: false, date: true })
+
 
     const handleClickEditTime = (index: number) => () => {
         setEditRowNum((val) => {
@@ -204,7 +212,7 @@ function Timesheet() {
     const getData = async () => {
         const { groups } = await getGroups()
 
-        const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order, date: dateStr })
+        const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order, ...selectedFilters })
 
         const rows = timesheets.map((ts: any, index: number) => {
             const group = groups.find((g: any) => g.id === ts.group.id)
@@ -234,6 +242,7 @@ function Timesheet() {
                 timeLate: ts.timeLate !== null ? getTimeStrFromMins(ts.timeLate) : '',
                 startTime: ts.startTime,
                 endTime: ts.endTime,
+                date: ts.date,
                 edit: <>
                     {group &&
                         <Tooltip
@@ -290,7 +299,7 @@ function Timesheet() {
                 breaks: collapsedRows ? collapsedRows[selectedRow].map((el: any) => ({ startTime: el.startTime, endTime: el.endTime })) : []
             }
 
-            await editTimesFromEmployee(selectedEmployee.id, dateStr, data)
+            await editTimesFromEmployee(selectedEmployee.id, dateToStr(date), data)
 
             getData()
         }
@@ -323,8 +332,11 @@ function Timesheet() {
     }
 
     const handleClickClearFilters = () => {
+        setHiddenCols({ name: false, date: true })
+        setIsDateFilterDisabled(false)
         setDisplayedFilters([])
         setListedFilters(filters)
+        setSelectedFilters({ date: dateToStr(date) })
     }
 
     const handleDeleteCollapsedRow = () => {
@@ -412,13 +424,36 @@ function Timesheet() {
         if (rows) setSelectedEmployee({ id: rows[index].employeeId, name: '' })
     }
 
+    const editFilter = (key: string) => (value: string) => {
+        if (key === 'employeeId' && 'date' in selectedFilters) {
+            setSelectedFilters((f: any) => {
+                const { date, ...otherFilters } = f
+                otherFilters[key] = value
+                return { ...otherFilters }
+            })
+            setIsDateFilterDisabled(true)
+            setHiddenCols({ name: true, date: false })
+            setOrderBy('date')
+            setOrder('desc')
+        } else {
+            setSelectedFilters((f: any) => {
+                f[key] = value
+                return { ...f }
+            })
+        }
+    }
+
     useEffect(() => {
         setListedFilters(filters)
     }, [])
 
     useEffect(() => {
+        setSelectedFilters((f: any) => ({ ...f, date: dateToStr(date) }))
+    }, [date])
+
+    useEffect(() => {
         getData()
-    }, [page, rowsPerPage, orderBy, order, date])
+    }, [page, rowsPerPage, orderBy, order, selectedFilters])
 
     return (
         <>
@@ -426,15 +461,16 @@ function Timesheet() {
                 <div style={{ display: 'flex', gap: '4px' }}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DesktopDatePicker
+                            disabled={isDateFilterDisabled}
                             label="Date"
                             inputFormat="yyyy-MM-dd"
-                            value={date}
+                            value={!isDateFilterDisabled ? date : null}
                             onChange={handleDateChange}
-                            renderInput={(params) => <TextField sx={{ minWidth: "150px" }} {...params} />}
+                            renderInput={({ error, onError, ...params }) => <TextField sx={{ minWidth: "150px" }} {...params} />}
                             disableFuture={true}
                         />
                     </LocalizationProvider>
-                    {displayedFilters.map((e: any) => (<FilterSelectList id={e.id} label={e.label} getData={e.getData} />))}
+                    {displayedFilters.map((e: any) => (<FilterSelectList id={e.id} label={e.label} getData={e.getData} editFilter={editFilter(e.filterId)} />))}
                 </div>
                 <div style={{ flexGrow: 1 }} />
                 <div>
@@ -463,6 +499,7 @@ function Timesheet() {
                 editCollapsedRows={editCollapsedRows}
                 editRowNum={editRowNum}
                 addCollapsedRow={addCollapsedRow}
+                hiddenCols={hiddenCols}
             />
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}

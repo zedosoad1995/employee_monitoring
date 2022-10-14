@@ -13,7 +13,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { parse } from 'date-fns'
 
 export default function Row(props: RowProps) {
-    const { row, columns, collapsedcolumns, collapsedRow, editRows, editCollapsedRows, isEditing, addCollapsedRow } = props
+    const { row, columns, collapsedcolumns, collapsedRow, editRows, editCollapsedRows, isEditing, addCollapsedRow, hiddenCols } = props
 
     const [open, setOpen] = useState(false)
 
@@ -48,9 +48,12 @@ export default function Row(props: RowProps) {
             tabIndex={-1}
         >
             {columns.map((col, index) => {
-                return <TableCell key={index} sx={{ padding: col.isIcon ? "0 0 0 16px" : (isEditing ? "auto" : "auto") }} align={col.numeric ? 'right' : 'left'}>
-                    {CellComponent(col)}
-                </TableCell>
+                return <>
+                    {!hiddenCols[col.id] && <TableCell key={index} sx={{ padding: col.isIcon ? "0 0 0 16px" : (isEditing ? "auto" : "auto") }} align={col.numeric ? 'right' : 'left'}>
+                        {CellComponent(col)}
+                    </TableCell>}
+                    {hiddenCols[col.id] && <TableCell key={index} sx={{ padding: "0px" }} />}
+                </>
             })}
             {(collapsedRow && collapsedcolumns) &&
                 <TableCell >

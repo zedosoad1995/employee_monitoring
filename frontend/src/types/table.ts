@@ -5,7 +5,8 @@ export interface HeadCell {
     sortable?: boolean,
     isIcon?: boolean,
     isEdit?: boolean,
-    isLink?: boolean
+    isLink?: boolean,
+    canBeHidden?: boolean
 }
 
 export interface CollapsedHeadCell {
@@ -27,7 +28,8 @@ export interface TableContentProps {
     editRows: any
     editCollapsedRows: any,
     editRowNum?: number,
-    addCollapsedRow?: any
+    addCollapsedRow?: any,
+    hiddenCols: any
 }
 
 export interface TableHeaderProps {
@@ -36,6 +38,7 @@ export interface TableHeaderProps {
     orderBy: string
     columns: Array<HeadCell>,
     collapsedcolumns: Array<CollapsedHeadCell>
+    hiddenCols: any
 }
 
 export interface TableToolbarProps {
@@ -51,6 +54,7 @@ export interface RowProps {
     editCollapsedRows: any
     isEditing: boolean
     addCollapsedRow: any
+    hiddenCols: any
 }
 
 

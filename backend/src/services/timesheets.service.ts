@@ -36,7 +36,7 @@ export const getManyRaw = async (query: any) => {
 }
 
 export const getMany = async (query: any) => {
-    const { date, employeeId } = query
+    const { date, employeeId, groupId } = query
 
     const mainQuery: Prisma.TimesheetFindManyArgs = {
         distinct: ['date', 'time', 'employeeId'],
@@ -62,6 +62,7 @@ export const getMany = async (query: any) => {
     mainQuery.where = {}
     if (date) mainQuery.where.date = date
     if (employeeId) mainQuery.where.employeeId = employeeId
+    if (groupId) mainQuery.where.employee = { groupId }
 
     const timesheets = await prisma.timesheet.findMany(mainQuery)
 
@@ -81,16 +82,17 @@ export const getMany = async (query: any) => {
     })
 
     const transformedTimesheets = Object.values(timesheets.reduce((acc: ITimesheetObj, el: any) => {
-        if (!(el.employee.id in acc)) {
-            acc[el.employee.id] = {
+        if (!((el.employee.id + el.date) in acc)) {
+            acc[el.employee.id + el.date] = {
                 times: [],
                 employeeId: el.employee.id,
                 name: el.employee.name,
-                group: el.employee.group.id
+                group: el.employee.group.id,
+                date: el.date
             }
         }
 
-        acc[el.employee.id].times.push({ id: el.id, time: el.time, isEnter: el.isEnter })
+        acc[el.employee.id + el.date].times.push({ id: el.id, time: el.time, isEnter: el.isEnter })
         return acc
     }, {}))
         .map(ts => {
@@ -118,6 +120,7 @@ export const getMany = async (query: any) => {
                 timeLate,
                 startTime: enterTime,
                 endTime: exitTime,
+                date: ts.date,
                 breaks,
                 hasNonAcceptableBreaks,
                 hasMalfunction
@@ -128,7 +131,7 @@ export const getMany = async (query: any) => {
 
 
 
-    const allowedSortFields = ['name', 'group', 'overtime', 'timeLate', 'startTime', 'endTime']
+    const allowedSortFields = ['name', 'group', 'overtime', 'timeLate', 'startTime', 'endTime', 'date']
     if (allowedSortFields.includes(sortBy)) {
         transformedTimesheets.sort((a, b) => {
             // @ts-ignore

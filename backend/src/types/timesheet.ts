@@ -10,6 +10,7 @@ export interface ITimesheetObj {
         times: Array<{ id: string, time: string, isEnter: boolean }>,
         employeeId: string,
         name: string,
-        group: string
+        group: string,
+        date: string
     }
 }

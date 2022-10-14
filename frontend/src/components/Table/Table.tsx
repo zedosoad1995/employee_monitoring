@@ -5,7 +5,7 @@ import TableContent from './components/TableContent'
 import Paper from '@mui/material/Paper'
 
 
-export default function ({ rows, collapsedRows, columns, collapsedcolumns, rowsPerPage, order, orderBy, handleRequestSort, editRows, editCollapsedRows, editRowNum, addCollapsedRow }: any) {
+export default function ({ rows, collapsedRows, columns, collapsedcolumns, rowsPerPage, order, orderBy, handleRequestSort, editRows, editCollapsedRows, editRowNum, addCollapsedRow, hiddenCols = {} }: any) {
     return (
         <>
             <TableContainer component={Paper}>
@@ -20,8 +20,9 @@ export default function ({ rows, collapsedRows, columns, collapsedcolumns, rowsP
                         columns={columns}
                         onRequestSort={handleRequestSort}
                         collapsedcolumns={collapsedcolumns}
+                        hiddenCols={hiddenCols}
                     />
-                    <TableContent rows={rows} collapsedRows={collapsedRows} columns={columns} collapsedcolumns={collapsedcolumns} rowsPerPage={rowsPerPage} editRows={editRows} editCollapsedRows={editCollapsedRows} editRowNum={editRowNum} addCollapsedRow={addCollapsedRow} />
+                    <TableContent rows={rows} collapsedRows={collapsedRows} columns={columns} collapsedcolumns={collapsedcolumns} rowsPerPage={rowsPerPage} editRows={editRows} editCollapsedRows={editCollapsedRows} editRowNum={editRowNum} addCollapsedRow={addCollapsedRow} hiddenCols={hiddenCols} />
                 </Table>
             </TableContainer>
         </>
