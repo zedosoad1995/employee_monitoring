@@ -224,7 +224,7 @@ function Timesheet() {
                 employeeId: ts.employeeId,
                 hasNonAcceptableBreaks: ts.hasNonAcceptableBreaks || ts.hasMalfunction ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
                 name: ts.name,
-                nameLink: <Link onClick={handleClickEmployeeLink(ts.employeeId)}>{ts.name}</Link>,
+                nameLink: <Link sx={{ cursor: 'pointer' }} onClick={handleClickEmployeeLink(ts.employeeId)}>{ts.name}</Link>,
                 group: <>
                     {group &&
                         <Tooltip

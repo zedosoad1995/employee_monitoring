@@ -100,7 +100,13 @@ export const getMany = async (query: any) => {
 
             // Calculate Time late
             const enterTime = ts.times[0].isEnter ? ts.times[0].time : ''
-            const timeLate = (group && enterTime) ?
+            let timeLate = null
+            if (group && enterTime) {
+                const val = getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(group.startTime)
+                if (val > 0) timeLate = val
+            }
+
+            (group && enterTime) ?
                 getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(group.startTime) :
                 null
 
