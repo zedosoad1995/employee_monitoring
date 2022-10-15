@@ -8,7 +8,11 @@ function FilterSelectList({ getData, id, label, editFilter, value }: any) {
     useEffect(() => {
         const setData = async () => {
             const data = await getData()
-            setRows(data[id])
+            if ('id' in data) {
+                setRows(data[id])
+            } else {
+                setRows(data)
+            }
         }
 
         setData()

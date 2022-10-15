@@ -127,6 +127,13 @@ const filters = [
         label: 'Group',
         getData: getGroups,
         value: ''
+    },
+    {
+        id: 'isLate',
+        filterId: 'isLate',
+        label: 'Is Late?',
+        getData: () => [{ id: true, name: 'True' }, { id: false, name: 'False' }],
+        value: ''
     }
 ]
 

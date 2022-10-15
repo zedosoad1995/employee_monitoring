@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client"
 import prisma from "../../prisma/prisma-client"
 import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from "../constants"
 import { getMinsFromTimeStr } from "../helpers/dateTime"
+import { parseBoolean } from "../helpers/parser"
 import { getBreaks, getOvertime } from "../helpers/timesheet"
 import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
 
@@ -37,6 +38,7 @@ export const getManyRaw = async (query: any) => {
 
 export const getMany = async (query: any) => {
     const { date, employeeId, groupId } = query
+    const isLate = parseBoolean(query.isLate)
 
     const mainQuery: Prisma.TimesheetFindManyArgs = {
         distinct: ['date', 'time', 'employeeId'],
@@ -95,7 +97,7 @@ export const getMany = async (query: any) => {
         acc[el.employee.id + el.date].times.push({ id: el.id, time: el.time, isEnter: el.isEnter })
         return acc
     }, {}))
-        .map(ts => {
+        .reduce((acc: any, ts) => {
             const group = groups.find(el => el.id === ts.group)
 
             // Calculate Time late
@@ -103,12 +105,12 @@ export const getMany = async (query: any) => {
             let timeLate = null
             if (group && enterTime) {
                 const val = getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(group.startTime)
+
+                if ((isLate === true && val <= 0) || (isLate === false && val > 0)) return acc
+
                 if (val > 0) timeLate = val
             }
 
-            (group && enterTime) ?
-                getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(group.startTime) :
-                null
 
             const exitTime = !ts.times.at(-1)?.isEnter ? ts.times.at(-1)?.time : ''
 
@@ -118,7 +120,7 @@ export const getMany = async (query: any) => {
             // Calculate Overtime
             const overtime = (group && exitTime) ? getOvertime(exitTime, group) : null
 
-            return {
+            acc.push({
                 employeeId: ts.employeeId,
                 name: ts.name,
                 group: group ? { id: group.id, name: group.name } : '',
@@ -130,16 +132,16 @@ export const getMany = async (query: any) => {
                 breaks,
                 hasNonAcceptableBreaks,
                 hasMalfunction
-            }
-        })
+            })
 
-    let { page, limit, sortBy, order }: { page: string, limit: string, sortBy: string, order: string } = query
+            return acc
+        }, [])
 
-
+    let { page, limit, sortBy, order }: any = query
 
     const allowedSortFields = ['name', 'group', 'overtime', 'timeLate', 'startTime', 'endTime', 'date']
     if (allowedSortFields.includes(sortBy)) {
-        transformedTimesheets.sort((a, b) => {
+        transformedTimesheets.sort((a: any, b: any) => {
             // @ts-ignore
             if (typeof a[sortBy] === 'string') {
                 // @ts-ignore
