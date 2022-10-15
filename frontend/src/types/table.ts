@@ -6,7 +6,8 @@ export interface HeadCell {
     isIcon?: boolean,
     isEdit?: boolean,
     isLink?: boolean,
-    canBeHidden?: boolean
+    canBeHidden?: boolean,
+    filterId?: string
 }
 
 export interface CollapsedHeadCell {

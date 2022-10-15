@@ -1,10 +1,9 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material"
 import { useEffect, useState } from "react"
 
-function FilterSelectList({ getData, id, label, editFilter }: any) {
+function FilterSelectList({ getData, id, label, editFilter, value }: any) {
     const [rows, setRows] = useState<Array<any>>([])
     const [selectedValue, setSelectedValue] = useState('')
-
 
     useEffect(() => {
         const setData = async () => {
@@ -15,9 +14,13 @@ function FilterSelectList({ getData, id, label, editFilter }: any) {
         setData()
     }, [])
 
-    const handleChange = (e: any) => {
-        setSelectedValue(e.target.value)
-        editFilter(e.target.value)
+    useEffect(() => {
+        handleChange(value)
+    }, [value])
+
+    const handleChange = (value: string) => {
+        setSelectedValue(value)
+        editFilter(value)
     };
 
     return <FormControl fullWidth>
@@ -25,7 +28,7 @@ function FilterSelectList({ getData, id, label, editFilter }: any) {
         <Select
             label={label}
             value={selectedValue}
-            onChange={handleChange}
+            onChange={(e: any) => { handleChange(e.target.value) }}
         >
             {rows.map((row) => (<MenuItem value={row.id}>{row.name}</MenuItem>))}
         </Select>

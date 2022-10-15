@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc -p .",
     "dev": "nodemon ./src/bin/www.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "generate-seed-data": "ts-node prisma/data/generateData.ts",
+    "generate": "npx prisma generate"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts",

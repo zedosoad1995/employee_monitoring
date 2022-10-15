@@ -7,7 +7,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { RowProps } from '../../../types/table'
 import CollapsedTable from './CollapsedTable'
-import { Link, TextField } from '@mui/material'
+import { TextField } from '@mui/material'
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { parse } from 'date-fns'
@@ -18,7 +18,7 @@ export default function Row(props: RowProps) {
     const [open, setOpen] = useState(false)
 
     const CellComponent = (col: any) => {
-        if (col.isLink) return <Link href='#'>{row[col.id]}</Link>
+        if (col.isLink) return row[col.filterId]
 
         return <>
             {(!isEditing || !col.isEdit) && row[col.id]}

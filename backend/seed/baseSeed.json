@@ -1,0 +1,48 @@
+{
+    "groups": [
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1ee",
+            "name": "Factory Workers",
+            "startTime": "7:30",
+            "endTime": "17:30"
+        },
+        {
+            "id": "04ea9489-fa9a-413d-896e-754422f5a1ed",
+            "name": "Office Workers",
+            "startTime": "8:00",
+            "endTime": "17:30"
+        }
+    ],
+    "breaks": [
+        {
+            "startTime": "10:30",
+            "endTime": "10:45",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "startTime": "12:30",
+            "endTime": "13:30",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "startTime": "15:30",
+            "endTime": "15:45",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ee"
+        },
+        {
+            "startTime": "10:00",
+            "endTime": "10:10",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        },
+        {
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        },
+        {
+            "startTime": "15:15",
+            "endTime": "15:30",
+            "groupId": "04ea9489-fa9a-413d-896e-754422f5a1ed"
+        }
+    ]
+}

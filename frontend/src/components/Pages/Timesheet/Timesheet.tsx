@@ -18,7 +18,7 @@ import TablePagination from '@mui/material/TablePagination'
 import EditIcon from '@mui/icons-material/Edit'
 import SaveIcon from '@mui/icons-material/Save'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { FormControl, InputLabel, Menu, MenuItem, Select } from "@mui/material"
+import { FormControl, InputLabel, Link, Menu, MenuItem, Select } from "@mui/material"
 import { getEmployeesShort } from "../../../services/employees"
 import FilterSelectList from "./FilterSelectList"
 
@@ -68,7 +68,8 @@ const columns: Array<HeadCell> = [
         label: 'Employee',
         numeric: false,
         isLink: true,
-        canBeHidden: true
+        canBeHidden: true,
+        filterId: 'nameLink'
     },
     {
         id: 'date',
@@ -117,13 +118,15 @@ const filters = [
         id: 'employees',
         filterId: 'employeeId',
         label: 'Employee',
-        getData: getEmployeesShort
+        getData: getEmployeesShort,
+        value: ''
     },
     {
         id: 'groups',
         filterId: 'groupId',
         label: 'Group',
-        getData: getGroups
+        getData: getGroups,
+        value: ''
     }
 ]
 
@@ -133,7 +136,7 @@ function Timesheet() {
     const [total, setTotal] = useState(0)
 
     const [page, setPage] = useState(0)
-    const [rowsPerPage, setRowsPerPage] = useState(5)
+    const [rowsPerPage, setRowsPerPage] = useState(10)
     const [order, setOrder] = useState<Order>('asc')
     const [orderBy, setOrderBy] = useState('overtime')
 
@@ -221,6 +224,7 @@ function Timesheet() {
                 employeeId: ts.employeeId,
                 hasNonAcceptableBreaks: ts.hasNonAcceptableBreaks || ts.hasMalfunction ? <WarningRoundedIcon sx={{ color: "#eed202" }} /> : '',
                 name: ts.name,
+                nameLink: <Link onClick={handleClickEmployeeLink(ts.employeeId)}>{ts.name}</Link>,
                 group: <>
                     {group &&
                         <Tooltip
@@ -329,6 +333,7 @@ function Timesheet() {
         const currFilter = filters.find((f) => f.id === id)
         setDisplayedFilters((f) => [...f, currFilter])
         setListedFilters((f) => f.filter((val) => val.id !== id))
+        setAnchorElFilter(undefined)
     }
 
     const handleClickClearFilters = () => {
@@ -337,6 +342,8 @@ function Timesheet() {
         setDisplayedFilters([])
         setListedFilters(filters)
         setSelectedFilters({ date: dateToStr(date) })
+        setAnchorElFilter(undefined)
+        setPage(0)
     }
 
     const handleDeleteCollapsedRow = () => {
@@ -424,7 +431,24 @@ function Timesheet() {
         if (rows) setSelectedEmployee({ id: rows[index].employeeId, name: '' })
     }
 
+    const handleClickEmployeeLink = (employeeId: string) => () => {
+        setDisplayedFilters((f) => {
+            let employeesFilterIdx = f.findIndex((f) => f.id === 'employees')
+            if (employeesFilterIdx === -1) {
+                setListedFilters((f) => f.filter((val) => val.id !== 'employees'))
+
+                const currFilter = filters.find((f) => f.id === 'employees')
+                f = [...f, currFilter]
+                employeesFilterIdx = f.length - 1
+            }
+
+            f[employeesFilterIdx].value = employeeId
+            return f
+        })
+    }
+
     const editFilter = (key: string) => (value: string) => {
+        setPage(0)
         if (key === 'employeeId' && 'date' in selectedFilters) {
             setSelectedFilters((f: any) => {
                 const { date, ...otherFilters } = f
@@ -470,7 +494,7 @@ function Timesheet() {
                             disableFuture={true}
                         />
                     </LocalizationProvider>
-                    {displayedFilters.map((e: any) => (<FilterSelectList id={e.id} label={e.label} getData={e.getData} editFilter={editFilter(e.filterId)} />))}
+                    {displayedFilters.map((e: any) => (<FilterSelectList id={e.id} label={e.label} getData={e.getData} editFilter={editFilter(e.filterId)} value={e.value} />))}
                 </div>
                 <div style={{ flexGrow: 1 }} />
                 <div>
