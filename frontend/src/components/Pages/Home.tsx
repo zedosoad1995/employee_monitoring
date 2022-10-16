@@ -7,7 +7,8 @@ import ListItemText from "@mui/material/ListItemText"
 import {
     Routes,
     Route,
-    Navigate
+    Navigate,
+    useLocation
 } from 'react-router-dom'
 import Groups from "./Groups"
 import { useNavigate } from "react-router-dom"
@@ -18,8 +19,12 @@ import IconButton from "@mui/material/IconButton"
 import MenuIcon from '@mui/icons-material/Menu'
 import Box from "@mui/material/Box"
 import Employees from "./Employees"
+import { Typography } from "@mui/material"
+
+const NAVBAR_TEXTS = [{ page: "/", text: "Timesheet" }, { page: "/employees", text: "Employees" }, { page: "/groups", text: "Groups" }]
 
 function Home() {
+    const location = useLocation()
     const navigate = useNavigate()
 
     const [openSideMenu, setOpenSideMenu] = useState(false)
@@ -34,6 +39,7 @@ function Home() {
 
     const handleClickMenuItem = (url: string) => () => {
         navigate(`/${url}`)
+        setOpenSideMenu(false)
     }
 
     return (
@@ -48,6 +54,9 @@ function Home() {
                     >
                         <MenuIcon />
                     </IconButton>
+                    <Typography variant="h6" component="div">
+                        {NAVBAR_TEXTS.find(n => n.page === location.pathname)?.text}
+                    </Typography>
                 </Toolbar>
             </AppBar>
             <div>

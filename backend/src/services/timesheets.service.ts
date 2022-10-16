@@ -109,6 +109,8 @@ export const getMany = async (query: any) => {
                 if ((isLate === true && val <= 0) || (isLate === false && val > 0)) return acc
 
                 if (val > 0) timeLate = val
+            } else if (isLate !== undefined) {
+                return acc
             }
 
 

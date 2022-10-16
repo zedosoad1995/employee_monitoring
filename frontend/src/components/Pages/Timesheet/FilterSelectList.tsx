@@ -23,17 +23,18 @@ function FilterSelectList({ getData, id, label, editFilter, value, hasAutoComple
     }, [value])
 
     const handleChange = (value: any) => {
-        console.log(value)
         setSelectedValue(value)
         editFilter(value)
     }
 
     if (hasAutoComplete) {
         return <Autocomplete
+            key={id}
+            value={rows.find(r => r.id === selectedValue)?.name ?? ''}
             fullWidth
             disablePortal
             options={rows}
-            onChange={(e, val) => { handleChange(val.id) }}
+            onChange={(e, val) => { handleChange(val?.id) }}
             renderInput={(params) => (<TextField {...params} label={label} />)}
             getOptionLabel={(option) => option.name ?? option}
         />
