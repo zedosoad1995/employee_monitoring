@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "electron": "^21.2.0",
+    "electron-prebuilt": "^1.4.13"
+  },
+  "devDependencies": {
+    "electron-builder": "^23.6.0"
+  },
+  "name": "employees_monitor",
+  "version": "1.0.0",
+  "main": "main.ts",
+  "repository": "https://github.com/zedosoad1995/employee_monitoring.git",
+  "author": "João Queiroz <joao.pires.queiroz@gmail.com>",
+  "license": "MIT"
+}
