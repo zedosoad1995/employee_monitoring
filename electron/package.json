@@ -1,0 +1,14 @@
+{
+    "name": "costumer-monitoring",
+    "version": "0.1.0",
+    "private": true,
+    "devDependencies": {
+        "electron": "^21.2.0",
+        "electron-is-dev": "^2.0.0"
+    },
+    "scripts": {
+        "electron": "electron ."
+    },
+    "main": "./main.js",
+    "homepage": "./"
+}
