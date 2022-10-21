@@ -55,6 +55,14 @@ export const getMany = async (query: any) => {
                         select: {
                             id: true
                         }
+                    },
+                    hasIrregularShifts: true,
+                    WorkShift: {
+                        select: {
+                            id: true,
+                            date: true,
+                            groupId: true
+                        }
                     }
                 }
             }
@@ -85,11 +93,15 @@ export const getMany = async (query: any) => {
 
     const transformedTimesheets = Object.values(timesheets.reduce((acc: ITimesheetObj, el: any) => {
         if (!((el.employee.id + el.date) in acc)) {
+            const group = el.employee.hasIrregularShifts ?
+                el.employee.WorkShift.find((w: any) => w.date === el.date)?.groupId :
+                el.employee.group.id
+
             acc[el.employee.id + el.date] = {
                 times: [],
                 employeeId: el.employee.id,
                 name: el.employee.name,
-                group: el.employee.group.id,
+                group,
                 date: el.date
             }
         }
@@ -112,7 +124,6 @@ export const getMany = async (query: any) => {
             } else if (isLate !== undefined) {
                 return acc
             }
-
 
             const exitTime = !ts.times.at(-1)?.isEnter ? ts.times.at(-1)?.time : ''
 
