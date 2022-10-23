@@ -4,9 +4,13 @@ const url = require('url')
 const path = require('path')
 const server = require('../backend/dist/src/bin/www')
 
+const { hello } = require('./build/Release/addon')
+
 let win
 
 function createWindow() {
+    console.log(hello())
+
     win = new BrowserWindow({
         width: 800, height: 600
     })

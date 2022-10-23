@@ -4,11 +4,15 @@
     "private": true,
     "devDependencies": {
         "electron": "^21.2.0",
-        "electron-is-dev": "^2.0.0"
+        "electron-is-dev": "^2.0.0",
+        "electron-rebuild": "^3.2.9"
     },
     "scripts": {
         "electron": "electron ."
     },
     "main": "./main.js",
-    "homepage": "./"
+    "homepage": "./",
+    "dependencies": {
+        "node-gyp": "^9.3.0"
+    }
 }

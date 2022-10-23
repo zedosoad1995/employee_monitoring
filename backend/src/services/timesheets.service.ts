@@ -6,7 +6,6 @@ import { parseBoolean } from "../helpers/parser"
 import { getBreaks, getOvertime } from "../helpers/timesheet"
 import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet"
 
-
 export const getManyRaw = async (query: any) => {
     const { date, employeeId } = query
 
