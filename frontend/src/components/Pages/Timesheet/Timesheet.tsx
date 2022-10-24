@@ -223,7 +223,8 @@ function Timesheet() {
     const getData = async () => {
         const { groups } = await getGroups()
 
-        const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order, ...selectedFilters })
+        //const { timesheets, total } = await getTimesheets({ page, limit: rowsPerPage, sortBy: orderBy, order, ...selectedFilters })
+        const { timesheets, total } = await getTimesheets({ sortBy: orderBy, order, ...selectedFilters })
 
         const rows = timesheets.map((ts: any, index: number) => {
             const group = groups.find((g: any) => g.id === ts.group.id)
@@ -456,7 +457,9 @@ function Timesheet() {
     }
 
     const editFilter = (key: string) => (value: string) => {
-        if (value === '') return
+        console.log(value)
+        if (['', undefined].includes(value)) return
+        console.log(value)
 
         setPage(0)
         if (key === 'employeeId' && 'date' in selectedFilters) {
@@ -535,7 +538,7 @@ function Timesheet() {
                 addCollapsedRow={addCollapsedRow}
                 hiddenCols={hiddenCols}
             />
-            <TablePagination
+            {/* <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
                 count={total}
@@ -543,7 +546,7 @@ function Timesheet() {
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+            /> */}
             <Menu
                 anchorEl={anchorEl}
                 open={openMenu}

@@ -8,7 +8,7 @@ import Paper from '@mui/material/Paper'
 export default function ({ rows, collapsedRows, columns, collapsedcolumns, rowsPerPage, order, orderBy, handleRequestSort, editRows, editCollapsedRows, editRowNum, addCollapsedRow, hiddenCols = {} }: any) {
     return (
         <>
-            <TableContainer sx={{ height: "60vh" }} component={Paper}>
+            <TableContainer sx={{ height: "68vh" }} component={Paper}>
                 <Table
                     sx={{ width: "100%", borderCollapse: 'initial' }}
                     aria-labelledby="tableTitle"

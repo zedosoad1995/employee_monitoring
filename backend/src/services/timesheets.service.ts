@@ -185,7 +185,7 @@ export const getMany = async (query: any) => {
     const fin = ini + _limit
 
     return {
-        timesheets: transformedTimesheets.slice(ini, fin),
+        timesheets: (page === undefined && limit === undefined) ? transformedTimesheets : transformedTimesheets.slice(ini, fin),
         total: transformedTimesheets.length
     }
 }
