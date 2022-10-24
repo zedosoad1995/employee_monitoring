@@ -31,7 +31,7 @@ export default function TableHeader(props: TableHeaderProps) {
     }
 
     return (
-        <TableHead>
+        <TableHead sx={{ position: 'sticky', backgroundColor: 'white', zIndex: 100, top: 0 }}>
             <TableRow>
                 {columns.map((col) => (
                     <TableCell
