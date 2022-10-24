@@ -2,21 +2,23 @@ const { app, BrowserWindow } = require('electron')
 const isDev = require('electron-is-dev')
 const url = require('url')
 const path = require('path')
-const server = require('../backend/dist/src/bin/www')
+const server = require('./dist_backend/backend/src/bin/www')
 
-const { hello } = require('./build/Release/addon')
+const { start } = require('./build/Release/addon')
 
 let win
 
 function createWindow() {
-    console.log(hello())
+    start(function () {
+        console.log("JavaScript callback called with arguments", Array.from(arguments));
+    }, 500);
 
     win = new BrowserWindow({
         width: 800, height: 600
     })
     win.loadURL(
         isDev
-            ? 'http://localhost:3000'
+            ? `file://${__dirname}/frontend/build/index.html`
             : `file://${path.join(__dirname, './frontend/build/index.html')}`
     )
 

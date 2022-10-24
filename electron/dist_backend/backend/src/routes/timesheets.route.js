@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const timesheets_controller_1 = require("../controllers/timesheets.controller");
+const router = (0, express_1.Router)();
+router.get('/', timesheets_controller_1.getMany);
+router.get('/raw', timesheets_controller_1.getManyRaw);
+router.post('/', timesheets_controller_1.create);
+router.put('/editTimes/:employeeId', timesheets_controller_1.editTimesFromEmployee);
+exports.default = router;
