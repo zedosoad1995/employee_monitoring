@@ -19,6 +19,9 @@ export const getMany = async () => {
                 select: {
                     startTime: true,
                     endTime: true
+                },
+                orderBy: {
+                    startTime: 'asc'
                 }
             }
         }

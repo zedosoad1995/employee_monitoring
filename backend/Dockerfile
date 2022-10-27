@@ -16,7 +16,7 @@ WORKDIR /usr/src
 
 COPY package*.json ./
 
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 COPY --from=0 /usr/src/dist .
 COPY --from=0 /usr/src/prisma ./prisma
 
@@ -27,6 +27,4 @@ RUN npm install pm2 -g
 ARG PORT
 
 EXPOSE ${PORT}
-#CMD ["npx", "prisma", "migrate", "deploy"]
-#CMD ["npx", "prisma", "generate"]
 CMD ["pm2-runtime","src/bin/www.js"]

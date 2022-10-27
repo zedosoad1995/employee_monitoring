@@ -510,7 +510,7 @@ function Timesheet() {
                     {displayedFilters.map((e: any) => (<FilterSelectList id={e.id} label={e.label} getData={e.getData} editFilter={editFilter(e.filterId)} value={e.value} hasAutoComplete={e.hasAutoComplete} />))}
                 </div>
                 <div style={{ flexGrow: 1 }} />
-                <div>
+                <div style={{ marginTop: 'auto' }} >
                     <Tooltip title="Save Changes">
                         <IconButton onClick={handleSave} disabled={selectedRow === undefined}>
                             <SaveIcon />

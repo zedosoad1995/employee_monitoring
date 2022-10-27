@@ -43,3 +43,5 @@ yarn.lock
 prisma/data/baseSeed.json
 prisma/data/employees_sample.xlsx
 prisma/data/generatedSeed.json
+fly.toml
+seed/generatedSeed.json

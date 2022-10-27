@@ -65,6 +65,9 @@ export const getMany = async (query: any) => {
                     }
                 }
             }
+        },
+        orderBy: {
+            time: 'asc'
         }
     }
 
@@ -85,9 +88,12 @@ export const getMany = async (query: any) => {
                 select: {
                     startTime: true,
                     endTime: true
+                },
+                orderBy: {
+                    startTime: 'asc'
                 }
             }
-        }
+        },
     })
 
     const transformedTimesheets = Object.values(timesheets.reduce((acc: ITimesheetObj, el: any) => {
