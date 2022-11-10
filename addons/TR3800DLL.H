@@ -1,0 +1,68 @@
+HINSTANCE lib;
+typedef char *(*OPENTCPIP)(const char *A, const char *B);
+typedef char *(*CLOSETCPIP)();
+typedef char *(*OPENCOM)(const char *A, const char *B);
+typedef char *(*CLOSECOM)();
+typedef char *(*SETTIMEOUT)(const char *A);
+typedef char *(*SETTIME)(const char *id, const char *A);
+typedef char *(*GETTIME)(const char *id);
+typedef char *(*GETRECSTART)(const char *id);
+typedef char *(*GETRECNEXT)(const char *id);
+typedef char *(*CLRREC)(const char *id);
+typedef char *(*GETSHTM1)(const char *id);
+typedef char *(*SETSHTM1)(const char *id, const char *A, const char *B);
+typedef char *(*GETALARM)(const char *id);
+typedef char *(*SETALARM)(const char *id, const char *A, const char *B);
+//
+typedef char *(*TRGSEC)(const char *id, const char *A);
+typedef char *(*FREEMEM)(const char *id);
+typedef char *(*ALARMOFF)(const char *id);
+typedef char *(*SETUPCARD)(const char *id, const char *A);
+typedef char *(*SYSRST)(const char *id);
+typedef char *(*ALARMDUR)(const char *id, const char *A);
+typedef char *(*ACCESSDUR)(const char *id, const char *A);
+typedef char *(*TRGALARM)(const char *id, const char *A);
+typedef char *(*BIOS)(const char *id);
+typedef char *(*PERRST)(const char *id);
+typedef char *(*SETMEMDIS)(const char *id, const char *A);
+typedef char *(*GETMEMDIS)(const char *id);
+typedef char *(*SHOWMESSAGE)(const char *id, const char *A, const char *B);
+typedef char *(*REALREC1)(const char *id);
+typedef char *(*REALREC2)(const char *id);
+typedef char *(*CURRENTTIME)(const char *id);
+typedef char *(*FACTORYRST)(const char *id);
+
+OPENTCPIP OpenTCPIP;
+CLOSETCPIP CloseTCPIP;
+OPENCOM OpenCOM;
+CLOSECOM CloseCOM;
+SETTIMEOUT SetTimeOut;
+SETTIME SetTime;
+GETTIME GetTime;
+GETRECSTART GetRecStart;
+GETRECNEXT GetRecNext;
+CLRREC ClrRec;
+GETSHTM1 GetShtM1;
+SETSHTM1 SetShtM1;
+GETALARM GetAlarm;
+SETALARM SetAlarm;
+//
+TRGSEC TrgSEC;
+FREEMEM FreeMem;
+ALARMOFF AlarmOFF;
+SETUPCARD SetupCard;
+SYSRST SysRst;
+ALARMDUR AlarmDur;
+ACCESSDUR AccessDur;
+TRGALARM TrgAlarm;
+BIOS Bios;
+PERRST PerRst;
+SETMEMDIS SetMemDis;
+GETMEMDIS GetMemDis;
+//
+SHOWMESSAGE ShowMessage;
+REALREC1 RealRec1;
+REALREC2 RealRec2;
+//
+CURRENTTIME CurrentTime;
+FACTORYRST FactoryRst;

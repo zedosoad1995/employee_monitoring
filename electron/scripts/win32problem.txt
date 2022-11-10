@@ -1,0 +1,4 @@
+npm set npm_config_arch ia32
+npm clean-install --arch=ia32
+npm install
+npm run electron

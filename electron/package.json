@@ -19,7 +19,7 @@
     },
     "scripts": {
         "electron": "electron .",
-        "dist": "electron-builder"
+        "dist": "electron-builder --ia32 -w"
     },
     "main": "./main.js",
     "homepage": "./",
