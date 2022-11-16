@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, Timesheet } from "@prisma/client";
 import { PrismaClient } from "@prisma/client";
 import prisma from "../../prisma/prisma-client";
 import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from "../constants";
@@ -51,21 +51,36 @@ export const getMany = async (query: any) => {
         select: {
           id: true,
           name: true,
-          group: {
-            select: {
-              id: true,
-            },
-          },
-          hasIrregularShifts: true,
+        },
+      },
+      group: {
+        select: {
+          id: true,
+          name: true,
           WorkShift: {
             select: {
               id: true,
               date: true,
-              groupId: true,
-            },
-          },
-        },
-      },
+              startTime: true,
+              endTime: true,
+              isConstant: true,
+              Break: {
+                select: {
+                  id: true,
+                  startTime: true,
+                  endTime: true
+                }
+              },
+              WeekDayWork: {
+                select: {
+                  id: true,
+                  value: true
+                }
+              }
+            }
+          }
+        }
+      }
     },
     orderBy: {
       time: "asc",
@@ -75,62 +90,55 @@ export const getMany = async (query: any) => {
   mainQuery.where = {};
   if (date) mainQuery.where.date = date;
   if (employeeId) mainQuery.where.employeeId = employeeId;
-  if (groupId) mainQuery.where.employee = { groupId };
+  if (groupId) mainQuery.where.groupId = groupId;
+    
+  const timesheets = await prisma.timesheet.findMany(mainQuery)
 
-  try {
-    const timesheets = await prisma.timesheet.findMany(mainQuery);
-
-    let groups = await prisma.group.findMany({
-      select: {
-        id: true,
-        name: true,
-        startTime: true,
-        endTime: true,
-        Break: {
-          select: {
-            startTime: true,
-            endTime: true,
-          },
-          orderBy: {
-            startTime: "asc",
-          },
-        },
-      },
-    });
+    type ITransformedTimesheets = {
+      employeeId: string,
+        name: string,
+        group: any,
+        overtime: number | null,
+        timeLate: number | null,
+        startTime: string,
+        endTime: string,
+        date: string,
+        breaks: any,
+        hasNonAcceptableBreaks: boolean,
+        hasMalfunction: boolean,
+    }[]
 
     const transformedTimesheets = Object.values(
       timesheets.reduce((acc: ITimesheetObj, el: any) => {
-        if (!(el.employee.id + el.date in acc)) {
-          const group = el.employee.hasIrregularShifts
-            ? el.employee.WorkShift.find((w: any) => w.date === el.date)
-                ?.groupId
-            : el.employee.group.id;
+        if (!acc[el.employeeId] || !acc[el.employeeId][el.date]) {
 
-          acc[el.employee.id + el.date] = {
+          acc[el.employeeId][el.date] = {
             times: [],
-            employeeId: el.employee.id,
+            employeeId: el.employeeId,
             name: el.employee.name,
-            group,
+            group: el.group,
             date: el.date,
           };
         }
 
-        acc[el.employee.id + el.date].times.push({
+        acc[el.employeeId][el.date].times.push({
           id: el.id,
           time: el.time,
           isEnter: el.isEnter,
         });
         return acc;
       }, {})
-    ).reduce((acc: any, ts) => {
-      const group = groups.find((el) => el.id === ts.group);
-
-      // Calculate Time late
+    ).map(res => Object.values(res))
+    .flat()
+    .reduce((acc: ITransformedTimesheets, ts) => {
+      // Calculate Enter time
       const enterTime = ts.times[0].isEnter ? ts.times[0].time : "";
+      
+      // Calculate Time late
       let timeLate = null;
-      if (group && enterTime) {
+      if (ts.group && enterTime) {
         const val =
-          getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(group.startTime);
+          getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(ts.group.startTime);
 
         if ((isLate === true && val <= 0) || (isLate === false && val > 0))
           return acc;
@@ -140,22 +148,27 @@ export const getMany = async (query: any) => {
         return acc;
       }
 
-      const exitTime = !ts.times.at(-1)?.isEnter ? ts.times.at(-1)?.time : "";
+      // Calculate Exit time
+      let exitTime: string = ""
+      if(ts.times?.at(-1)?.isEnter && ts.times?.at(-1)?.time){
+        // @ts-ignore
+        exitTime = ts.times.at(-1).time;
+      }
 
       // Calculate Breaks Duration
       const {
         breaks,
         isNotAcceptableBreak: hasNonAcceptableBreaks,
         hasMalfunction,
-      } = getBreaks(ts.times, group, enterTime !== "", exitTime != "");
+      } = getBreaks(ts.times, ts.group, enterTime !== "", exitTime != "");
 
       // Calculate Overtime
-      const overtime = group && exitTime ? getOvertime(exitTime, group) : null;
+      const overtime = (ts.group && exitTime) ? getOvertime(exitTime, ts.group) : null;
 
       acc.push({
         employeeId: ts.employeeId,
         name: ts.name,
-        group: group ? { id: group.id, name: group.name } : "",
+        group: ts.group ? { id: ts.group.id, name: ts.group.name } : "",
         overtime,
         timeLate,
         startTime: enterTime,
@@ -169,7 +182,7 @@ export const getMany = async (query: any) => {
       return acc;
     }, []);
 
-    let { page, limit, sortBy, order }: any = query;
+    let { page, limit, sortBy, order } = query;
 
     const allowedSortFields = [
       "name",
@@ -182,25 +195,18 @@ export const getMany = async (query: any) => {
     ];
     if (allowedSortFields.includes(sortBy)) {
       transformedTimesheets.sort((a: any, b: any) => {
-        // @ts-ignore
         if (typeof a[sortBy] === "string") {
-          // @ts-ignore
           return order === "desc"
             ? b[sortBy].localeCompare(a[sortBy])
             : a[sortBy].localeCompare(b[sortBy]);
         } else {
-          // @ts-ignore
           if (a[sortBy] === b[sortBy]) return 0;
-          // @ts-ignore
           if (a[sortBy] === null) return 1;
-          // @ts-ignore
           if (b[sortBy] === null) return -1;
 
           if (order === "desc") {
-            // @ts-ignore
             return b[sortBy] - a[sortBy];
           } else {
-            // @ts-ignore
             return a[sortBy] - b[sortBy];
           }
         }
@@ -222,10 +228,6 @@ export const getMany = async (query: any) => {
           : transformedTimesheets.slice(ini, fin),
       total: transformedTimesheets.length,
     };
-  } catch (err) {
-    fs.appendFileSync("C:/Users/joaop/Desktop/aaa.txt", "wow");
-    fs.appendFileSync("C:/Users/joaop/Desktop/aaa.txt", JSON.stringify(err));
-  }
 };
 
 export const create = async (timesheet: ICreateTimesheet) => {

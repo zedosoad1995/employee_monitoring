@@ -6,11 +6,13 @@ export interface ICreateTimesheet {
 }
 
 export interface ITimesheetObj {
-    [key: string]: {
-        times: Array<{ id: string, time: string, isEnter: boolean }>,
-        employeeId: string,
-        name: string,
-        group: string,
-        date: string
+    [employeeId: string]: {
+        [date: string]: {
+            times: Array<{ id: string, time: string, isEnter: boolean }>,
+            employeeId: string,
+            name: string,
+            group: any,
+            date: string
+        }
     }
 }
