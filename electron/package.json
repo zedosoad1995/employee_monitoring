@@ -63,10 +63,13 @@
             "package.json",
             "main.js",
             "build/**/*",
-            "./dist_backend/**/*",
+            "./backend/**/*",
             "./frontend/**/*",
-            ".env",
-            "./frontend/build/static/**/*"
+            "./prisma/**/*",
+            ".env"
+        ],
+        "extraResources": [
+            "./extraResources/**"
         ]
     },
     "license": "MIT",

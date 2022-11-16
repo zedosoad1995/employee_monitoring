@@ -1,5 +1,6 @@
 import { groups, breaks, employees, timesheets } from './generatedSeed.json'
 import { PrismaClient } from '@prisma/client'
+import { createMany } from '../src/helpers/db'
 const prisma = new PrismaClient()
 
 const main = async () => {
@@ -8,18 +9,10 @@ const main = async () => {
     await prisma.break.deleteMany()
     await prisma.group.deleteMany()
 
-    await prisma.group.createMany({
-        data: groups
-    })
-    await prisma.break.createMany({
-        data: breaks
-    })
-    await prisma.employee.createMany({
-        data: employees
-    })
-    await prisma.timesheet.createMany({
-        data: timesheets
-    })
+    await createMany(prisma.group, groups)
+    await createMany(prisma.break, breaks)
+    await createMany(prisma.employee, employees)
+    await createMany(prisma.timesheet, timesheets)
 }
 
 main()

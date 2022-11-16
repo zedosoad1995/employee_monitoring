@@ -6,63 +6,73 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model Timesheet {
   id         String   @id @default(uuid())
-  employee   Employee @relation(fields: [employeeId], references: [id])
   date       String
   time       String
   isEnter    Boolean
+  employeeId String
+  groupId    String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  group      Group    @relation(fields: [groupId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  employeeId String
 }
 
 model Employee {
-  id                 String      @id @default(uuid())
-  cardId             String
-  name               String
-  group              Group       @relation(fields: [groupId], references: [id])
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
-  Timesheet          Timesheet[]
-  groupId            String
-  hasIrregularShifts Boolean     @default(false)
-  WorkShift          WorkShift[]
+  id          String      @id @default(uuid())
+  cardId      String
+  name        String
+  currGroupId String
+  currGroup   Group       @relation(fields: [currGroupId], references: [id])
+  Timesheet   Timesheet[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Group {
   id        String      @id @default(uuid())
   name      String
-  startTime String
-  endTime   String
+  Employee  Employee[]
+  WorkShift WorkShift[]
+  Timesheet Timesheet[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  Employee  Employee[]
-  Break     Break[]
-  WorkShift WorkShift[]
-}
-
-model Break {
-  id        String   @id @default(uuid())
-  startTime String
-  endTime   String
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  groupId   String
 }
 
 model WorkShift {
-  id         String   @id @default(uuid())
-  date       String
-  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  groupId    String
-  employeeId String
+  id          String        @id @default(uuid())
+  date        String?
+  startTime   String
+  endTime     String
+  isConstant  Boolean
+  group       Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  Break       Break[]
+  WeekDayWork WeekDayWork[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  groupId     String
+}
+
+model Break {
+  id          String    @id @default(uuid())
+  startTime   String
+  endTime     String
+  workShift   WorkShift @relation(fields: [workShiftId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workShiftId String
+}
+
+model WeekDayWork {
+  id          String    @id @default(uuid())
+  value       Int
+  workShift   WorkShift @relation(fields: [workShiftId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workShiftId String
 }

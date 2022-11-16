@@ -2,14 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider      = "prisma-client-js"
-  output        = "../dist_backend/"
-  binaryTargets = ["native"]
+  provider   = "prisma-client-js"
+  engineType = "binary"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = "postgresql://user:password@localhost:15432/employeesMonitoring?schema=public"
+  provider = "sqlite"
+  url      = "file:C:/Users/joaop/Desktop/dev.db"
 }
 
 model Timesheet {

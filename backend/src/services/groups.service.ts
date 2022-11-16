@@ -87,9 +87,7 @@ export const update = async (groupId: string, data: any) => {
                 startTime: data.startTime,
                 endTime: data.endTime,
                 Break: {
-                    createMany: {
-                        data: data.breaks
-                    }
+                    create: data.breaks
                 }
             },
             where: {
@@ -108,9 +106,7 @@ export const create = async (group: ICreateGroup) => {
             startTime: group.startTime,
             endTime: group.endTime,
             Break: {
-                createMany: {
-                    data: group.breaks
-                }
+                create: group.breaks
             }
         }
     }

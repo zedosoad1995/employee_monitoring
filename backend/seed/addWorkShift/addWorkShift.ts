@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { createMany } from '../../src/helpers/db'
 const prisma = new PrismaClient()
 
 const main = async () => {
@@ -37,9 +38,7 @@ const main = async () => {
         return acc
     }, [])
 
-    await prisma.workShift.createMany({
-        data: workShiftObj
-    })
+    await createMany(prisma.workShift, workShiftObj)
     await prisma.employee.updateMany({
         data: {
             hasIrregularShifts: true

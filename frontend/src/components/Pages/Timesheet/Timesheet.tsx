@@ -142,6 +142,7 @@ function Timesheet() {
     const [rows, setRows] = useState<any[] | null>(null)
     const [collapsedRows, setCollapsedRows] = useState<any[] | null>(null)
     const [total, setTotal] = useState(0)
+    const [bla, setBla] = useState("")
 
     const [page, setPage] = useState(0)
     const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -219,6 +220,12 @@ function Timesheet() {
         setSelectedRow(undefined)
         setEditRowNum(undefined)
     }
+
+    useEffect(() => {
+        getTimesheets({ sortBy: orderBy, order, ...selectedFilters }).catch((err) => {
+            setBla(JSON.stringify(err.response))
+        })
+    }, [page, rowsPerPage, orderBy, order, selectedFilters])
 
     const getData = async () => {
         const { groups } = await getGroups()
@@ -494,6 +501,9 @@ function Timesheet() {
 
     return (
         <>
+            <div>
+                {bla}
+            </div>
             <div style={{ marginBottom: "10px", marginTop: "10px", display: "flex", justifyContent: "space-between" }}>
                 <div style={{ display: 'flex', gap: '4px' }}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>

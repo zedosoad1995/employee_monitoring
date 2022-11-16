@@ -261,7 +261,7 @@ String setupCard(const CallbackInfo &info)
   }
 
   const char *id = info[0].ToString().Utf8Value().c_str();
-  const char *state = info[1].ToString().Utf8Value().c_str(); // "0":enabled   "1":disabled
+  const char *cardId = info[1].ToString().Utf8Value().c_str();
   std::string res = SetupCard(id, cardId);
 
   return String::New(env, res);

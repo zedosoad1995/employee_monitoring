@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(routes)
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    return res.status(httpStatusCodes.BAD_REQUEST).json({ message: err.message })
+    return res.status(httpStatusCodes.BAD_REQUEST).json({ message: err })
 })
 
 export default app

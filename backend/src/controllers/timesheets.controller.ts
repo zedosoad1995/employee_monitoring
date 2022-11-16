@@ -1,12 +1,15 @@
 import { Request, Response, NextFunction } from 'express'
 import * as timesheetsService from '../services/timesheets.service'
 import httpStatusCodes from 'http-status-codes'
+import fs from 'fs'
 
 export const getMany = async (req: Request, res: Response, next: NextFunction) => {
     let resp
     try {
+        const caca = fs.writeFileSync('C:/Users/joaop/Desktop/aaa.txt', 'utf8')
         resp = await timesheetsService.getMany(req.query)
     } catch (err) {
+        fs.appendFileSync('C:/Users/joaop/Desktop/aaa.txt', JSON.stringify(err))
         return next(err)
     }
 
