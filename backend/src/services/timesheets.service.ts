@@ -1,12 +1,10 @@
 import { Prisma, Timesheet } from "@prisma/client";
-import { PrismaClient } from "@prisma/client";
 import prisma from "../../prisma/prisma-client";
 import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from "../constants";
 import { getMinsFromTimeStr } from "../helpers/dateTime";
 import { parseBoolean } from "../helpers/parser";
 import { getBreaks, getOvertime } from "../helpers/timesheet";
 import { ICreateTimesheet, ITimesheetObj } from "../types/timesheet";
-import fs from "fs";
 
 export const getManyRaw = async (query: any) => {
   const { date, employeeId } = query;
@@ -68,19 +66,19 @@ export const getMany = async (query: any) => {
                 select: {
                   id: true,
                   startTime: true,
-                  endTime: true
-                }
+                  endTime: true,
+                },
               },
               WeekDayWork: {
                 select: {
                   id: true,
-                  value: true
-                }
-              }
-            }
-          }
-        }
-      }
+                  value: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: {
       time: "asc",
@@ -91,54 +89,55 @@ export const getMany = async (query: any) => {
   if (date) mainQuery.where.date = date;
   if (employeeId) mainQuery.where.employeeId = employeeId;
   if (groupId) mainQuery.where.groupId = groupId;
-    
-  const timesheets = await prisma.timesheet.findMany(mainQuery)
 
-    type ITransformedTimesheets = {
-      employeeId: string,
-        name: string,
-        group: any,
-        overtime: number | null,
-        timeLate: number | null,
-        startTime: string,
-        endTime: string,
-        date: string,
-        breaks: any,
-        hasNonAcceptableBreaks: boolean,
-        hasMalfunction: boolean,
-    }[]
+  const timesheets = await prisma.timesheet.findMany(mainQuery);
 
-    const transformedTimesheets = Object.values(
-      timesheets.reduce((acc: ITimesheetObj, el: any) => {
-        if (!acc[el.employeeId] || !acc[el.employeeId][el.date]) {
+  type ITransformedTimesheets = {
+    employeeId: string;
+    name: string;
+    group: any;
+    overtime: number | null;
+    timeLate: number | null;
+    startTime: string;
+    endTime: string;
+    date: string;
+    breaks: any;
+    hasNonAcceptableBreaks: boolean;
+    hasMalfunction: boolean;
+  }[];
 
-          acc[el.employeeId][el.date] = {
-            times: [],
-            employeeId: el.employeeId,
-            name: el.employee.name,
-            group: el.group,
-            date: el.date,
-          };
-        }
+  const transformedTimesheets = Object.values(
+    timesheets.reduce((acc: ITimesheetObj, el: any) => {
+      if (!acc[el.employeeId] || !acc[el.employeeId][el.date]) {
+        acc[el.employeeId][el.date] = {
+          times: [],
+          employeeId: el.employeeId,
+          name: el.employee.name,
+          group: el.group,
+          date: el.date,
+        };
+      }
 
-        acc[el.employeeId][el.date].times.push({
-          id: el.id,
-          time: el.time,
-          isEnter: el.isEnter,
-        });
-        return acc;
-      }, {})
-    ).map(res => Object.values(res))
+      acc[el.employeeId][el.date].times.push({
+        id: el.id,
+        time: el.time,
+        isEnter: el.isEnter,
+      });
+      return acc;
+    }, {})
+  )
+    .map((res) => Object.values(res))
     .flat()
     .reduce((acc: ITransformedTimesheets, ts) => {
       // Calculate Enter time
       const enterTime = ts.times[0].isEnter ? ts.times[0].time : "";
-      
+
       // Calculate Time late
       let timeLate = null;
       if (ts.group && enterTime) {
         const val =
-          getMinsFromTimeStr(enterTime) - getMinsFromTimeStr(ts.group.startTime);
+          getMinsFromTimeStr(enterTime) -
+          getMinsFromTimeStr(ts.group.startTime);
 
         if ((isLate === true && val <= 0) || (isLate === false && val > 0))
           return acc;
@@ -149,8 +148,8 @@ export const getMany = async (query: any) => {
       }
 
       // Calculate Exit time
-      let exitTime: string = ""
-      if(ts.times?.at(-1)?.isEnter && ts.times?.at(-1)?.time){
+      let exitTime: string = "";
+      if (ts.times?.at(-1)?.isEnter && ts.times?.at(-1)?.time) {
         // @ts-ignore
         exitTime = ts.times.at(-1).time;
       }
@@ -163,7 +162,8 @@ export const getMany = async (query: any) => {
       } = getBreaks(ts.times, ts.group, enterTime !== "", exitTime != "");
 
       // Calculate Overtime
-      const overtime = (ts.group && exitTime) ? getOvertime(exitTime, ts.group) : null;
+      const overtime =
+        ts.group && exitTime ? getOvertime(exitTime, ts.group) : null;
 
       acc.push({
         employeeId: ts.employeeId,
@@ -182,55 +182,61 @@ export const getMany = async (query: any) => {
       return acc;
     }, []);
 
-    let { page, limit, sortBy, order } = query;
+  let { page, limit, sortBy, order } = query;
 
-    const allowedSortFields = [
-      "name",
-      "group",
-      "overtime",
-      "timeLate",
-      "startTime",
-      "endTime",
-      "date",
-    ];
-    if (allowedSortFields.includes(sortBy)) {
-      transformedTimesheets.sort((a: any, b: any) => {
-        if (typeof a[sortBy] === "string") {
-          return order === "desc"
-            ? b[sortBy].localeCompare(a[sortBy])
-            : a[sortBy].localeCompare(b[sortBy]);
+  const allowedSortFields = [
+    "name",
+    "group",
+    "overtime",
+    "timeLate",
+    "startTime",
+    "endTime",
+    "date",
+  ];
+  if (allowedSortFields.includes(sortBy)) {
+    transformedTimesheets.sort((a: any, b: any) => {
+      if (typeof a[sortBy] === "string") {
+        return order === "desc"
+          ? b[sortBy].localeCompare(a[sortBy])
+          : a[sortBy].localeCompare(b[sortBy]);
+      } else {
+        if (a[sortBy] === b[sortBy]) return 0;
+        if (a[sortBy] === null) return 1;
+        if (b[sortBy] === null) return -1;
+
+        if (order === "desc") {
+          return b[sortBy] - a[sortBy];
         } else {
-          if (a[sortBy] === b[sortBy]) return 0;
-          if (a[sortBy] === null) return 1;
-          if (b[sortBy] === null) return -1;
-
-          if (order === "desc") {
-            return b[sortBy] - a[sortBy];
-          } else {
-            return a[sortBy] - b[sortBy];
-          }
+          return a[sortBy] - b[sortBy];
         }
-      });
-    }
+      }
+    });
+  }
 
-    const _page = page ? Math.max(Number(page), 0) : 0;
-    const _limit = limit
-      ? Math.min(Number(limit), MAX_PAGE_LIMIT)
-      : DEFAULT_PAGE_LIMIT;
+  const _page = page ? Math.max(Number(page), 0) : 0;
+  const _limit = limit
+    ? Math.min(Number(limit), MAX_PAGE_LIMIT)
+    : DEFAULT_PAGE_LIMIT;
 
-    const ini = _page * _limit;
-    const fin = ini + _limit;
+  const ini = _page * _limit;
+  const fin = ini + _limit;
 
-    return {
-      timesheets:
-        page === undefined && limit === undefined
-          ? transformedTimesheets
-          : transformedTimesheets.slice(ini, fin),
-      total: transformedTimesheets.length,
-    };
+  return {
+    timesheets:
+      page === undefined && limit === undefined
+        ? transformedTimesheets
+        : transformedTimesheets.slice(ini, fin),
+    total: transformedTimesheets.length,
+  };
 };
 
 export const create = async (timesheet: ICreateTimesheet) => {
+  const employee = await prisma.employee.findFirst({
+    where: {
+      id: timesheet.employeeId,
+    },
+  });
+
   let mainQuery: Prisma.TimesheetCreateArgs = {
     data: {
       date: timesheet.date,
@@ -239,6 +245,11 @@ export const create = async (timesheet: ICreateTimesheet) => {
       employee: {
         connect: {
           id: timesheet.employeeId,
+        },
+      },
+      group: {
+        connect: {
+          id: employee?.currGroupId,
         },
       },
     },
@@ -252,6 +263,12 @@ export const editTimesFromEmployee = async (
   date: any,
   times: any
 ) => {
+  const employee = await prisma.employee.findFirst({
+    where: {
+      id: employeeId,
+    },
+  });
+
   await prisma.$transaction(
     [
       prisma.timesheet.deleteMany({
@@ -271,6 +288,11 @@ export const editTimesFromEmployee = async (
             },
             time: times.startTime,
             isEnter: true,
+            group: {
+              connect: {
+                id: employee?.currGroupId,
+              },
+            },
           },
         }),
       ...times.breaks
@@ -289,6 +311,11 @@ export const editTimesFromEmployee = async (
                     },
                     time: b[k],
                     isEnter: k === "endTime",
+                    group: {
+                      connect: {
+                        id: employee?.currGroupId,
+                      },
+                    },
                   },
                 })
             )
@@ -307,6 +334,11 @@ export const editTimesFromEmployee = async (
             },
             time: times.endTime,
             isEnter: false,
+            group: {
+              connect: {
+                id: employee?.currGroupId,
+              },
+            },
           },
         }),
     ].filter((val) => val)
