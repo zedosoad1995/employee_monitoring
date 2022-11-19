@@ -214,9 +214,13 @@ function Groups() {
     setIsCreateGroup(false);
     const group = await getGroup(groupId);
 
-    const currStartTime = parse(group.startTime, "HH:mm", new Date());
-    const currEndTime = parse(group.endTime, "HH:mm", new Date());
-    const currBreaks = group.Break.map((b: any) => ({
+    const currStartTime = parse(
+      group.subgroups[0].startTime,
+      "HH:mm",
+      new Date()
+    );
+    const currEndTime = parse(group.subgroups[0].endTime, "HH:mm", new Date());
+    const currBreaks = group.subgroups[0].Break.map((b: any) => ({
       startTime: parse(b.startTime, "HH:mm", new Date()),
       endTime: parse(b.endTime, "HH:mm", new Date()),
     }));

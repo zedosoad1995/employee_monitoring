@@ -114,11 +114,6 @@ export const getOne = async (groupId: string) => {
             },
           },
         },
-        where: {
-          group: {
-            isConstant: true,
-          },
-        },
       },
     },
     where: {
@@ -130,12 +125,32 @@ export const getOne = async (groupId: string) => {
     mainQuery
   )) as unknown as IGetManyGroupInferred;
 
-  const retGroups = {
+  let retGroups;
+
+  /* if (group.isConstant) {
+    retGroups = {
+      id: group.id,
+      name: group.name,
+      startTime: group.isConstant
+        ? group.SubGroup?.at(0)?.startTime
+        : undefined,
+      endTime: group.isConstant ? group.SubGroup?.at(0)?.endTime : undefined,
+      Break: group.isConstant ? group.SubGroup?.at(0)?.Break : undefined,
+    };
+  } else {
+    retGroups = {
+      id: group.id,
+      name: group.name,
+      subgroups: group.SubGroup,
+    };
+  } */
+
+  retGroups = {
     id: group.id,
     name: group.name,
-    startTime: group.isConstant ? group.SubGroup?.at(0)?.startTime : undefined,
-    endTime: group.isConstant ? group.SubGroup?.at(0)?.endTime : undefined,
-    Break: group.isConstant ? group.SubGroup?.at(0)?.Break : undefined,
+    isConstant: group.isConstant,
+    weekDays: group.WeekDayWork,
+    subgroups: group.SubGroup,
   };
 
   return retGroups;
