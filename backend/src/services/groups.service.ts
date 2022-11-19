@@ -1,40 +1,65 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../../prisma/prisma-client";
-import { ICreateGroup } from "../types/group";
+import { ICreateGroup, IGetManyGroupInferred } from "../types/group";
 
 export const getMany = async () => {
-  /* let mainQuery: Prisma.GroupFindManyArgs = {
-        select: {
-            id: true,
-            name: true,
-            startTime: true,
-            endTime: true,
-            Employee: {
-                select: {
-                    name: true
-                }
-            },
-            Break: {
-                select: {
-                    startTime: true,
-                    endTime: true
-                },
-                orderBy: {
-                    startTime: 'asc'
-                }
-            }
-        }
-    } */
-
   let mainQuery: Prisma.GroupFindManyArgs = {
     select: {
       id: true,
       name: true,
+      isConstant: true,
+      Employee: {
+        select: {
+          id: true,
+          name: true,
+          cardId: true,
+        },
+      },
+      WeekDayWork: {
+        select: {
+          id: true,
+          value: true,
+        },
+      },
+      SubGroup: {
+        select: {
+          id: true,
+          startTime: true,
+          endTime: true,
+          Break: {
+            select: {
+              id: true,
+              startTime: true,
+              endTime: true,
+            },
+            orderBy: {
+              startTime: "asc",
+            },
+          },
+        },
+        where: {
+          group: {
+            isConstant: true,
+          },
+        },
+      },
     },
   };
 
+  const groups = (await prisma.group.findMany(
+    mainQuery
+  )) as unknown as IGetManyGroupInferred[];
+
+  const retGroups = groups.map((group) => ({
+    id: group.id,
+    name: group.name,
+    startTime: group.isConstant ? group.SubGroup?.at(0)?.startTime : undefined,
+    endTime: group.isConstant ? group.SubGroup?.at(0)?.endTime : undefined,
+    Break: group.isConstant ? group.SubGroup?.at(0)?.Break : undefined,
+  }));
+
   return {
-    groups: await prisma.group.findMany(mainQuery),
+    groups: retGroups,
     total: await prisma.group.count(),
   };
 };
@@ -54,40 +79,65 @@ export const getManyShort = async () => {
 };
 
 export const getOne = async (groupId: string) => {
-  /* let mainQuery: Prisma.GroupFindFirstArgs = {
-    select: {
-      id: true,
-      name: true,
-      startTime: true,
-      endTime: true,
-      Employee: {
-        select: {
-          name: true,
-        },
-      },
-      Break: {
-        select: {
-          startTime: true,
-          endTime: true,
-        },
-      },
-    },
-    where: {
-      id: groupId,
-    },
-  }; */
-
   let mainQuery: Prisma.GroupFindFirstArgs = {
     select: {
       id: true,
       name: true,
+      isConstant: true,
+      Employee: {
+        select: {
+          id: true,
+          name: true,
+          cardId: true,
+        },
+      },
+      WeekDayWork: {
+        select: {
+          id: true,
+          value: true,
+        },
+      },
+      SubGroup: {
+        select: {
+          id: true,
+          startTime: true,
+          endTime: true,
+          Break: {
+            select: {
+              id: true,
+              startTime: true,
+              endTime: true,
+            },
+            orderBy: {
+              startTime: "asc",
+            },
+          },
+        },
+        where: {
+          group: {
+            isConstant: true,
+          },
+        },
+      },
     },
     where: {
       id: groupId,
     },
   };
 
-  return await prisma.group.findFirst(mainQuery);
+  const group = (await prisma.group.findFirst(
+    mainQuery
+  )) as unknown as IGetManyGroupInferred;
+
+  const retGroups = {
+    id: group.id,
+    name: group.name,
+    startTime: group.isConstant ? group.SubGroup?.at(0)?.startTime : undefined,
+    endTime: group.isConstant ? group.SubGroup?.at(0)?.endTime : undefined,
+    Break: group.isConstant ? group.SubGroup?.at(0)?.Break : undefined,
+  };
+
+  return retGroups;
 };
 
 export const update = async (groupId: string, data: any) => {
