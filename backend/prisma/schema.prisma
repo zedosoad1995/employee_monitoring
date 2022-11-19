@@ -32,47 +32,59 @@ model Employee {
   Timesheet   Timesheet[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  WorkShift   WorkShift[]
 }
 
 model Group {
+  id          String        @id @default(uuid())
+  name        String
+  isConstant  Boolean
+  Employee    Employee[]
+  Timesheet   Timesheet[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  SubGroup    Subgroup[]
+  WeekDayWork WeekDayWork[]
+}
+
+model Subgroup {
   id        String      @id @default(uuid())
-  name      String
-  Employee  Employee[]
-  WorkShift WorkShift[]
-  Timesheet Timesheet[]
+  startTime String
+  endTime   String
+  group     Group       @relation(fields: [groupId], references: [id])
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  groupId   String
+  WorkShift WorkShift[]
+  Break     Break[]
 }
 
 model WorkShift {
-  id          String        @id @default(uuid())
-  date        String?
-  startTime   String
-  endTime     String
-  isConstant  Boolean
-  group       Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  Break       Break[]
-  WeekDayWork WeekDayWork[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  groupId     String
+  id         String   @id @default(uuid())
+  date       String?
+  subgroup   Subgroup @relation(fields: [subgroupId], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  subgroupId String
+  employeeId String
 }
 
 model Break {
-  id          String    @id @default(uuid())
-  startTime   String
-  endTime     String
-  workShift   WorkShift @relation(fields: [workShiftId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  workShiftId String
+  id         String   @id @default(uuid())
+  startTime  String
+  endTime    String
+  subgroup   Subgroup @relation(fields: [subgroupId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  subgroupId String
 }
 
 model WeekDayWork {
-  id          String    @id @default(uuid())
-  value       Int
-  workShift   WorkShift @relation(fields: [workShiftId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  workShiftId String
+  id        String   @id @default(uuid())
+  value     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   String
 }

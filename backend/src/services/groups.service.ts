@@ -1,10 +1,9 @@
-import { Prisma } from "@prisma/client"
-import prisma from "../../prisma/prisma-client"
-import { ICreateGroup } from "../types/group"
-
+import { Prisma } from "@prisma/client";
+import prisma from "../../prisma/prisma-client";
+import { ICreateGroup } from "../types/group";
 
 export const getMany = async () => {
-    let mainQuery: Prisma.GroupFindManyArgs = {
+  /* let mainQuery: Prisma.GroupFindManyArgs = {
         select: {
             id: true,
             name: true,
@@ -25,101 +24,118 @@ export const getMany = async () => {
                 }
             }
         }
-    }
+    } */
 
-    return {
-        groups: await prisma.group.findMany(mainQuery),
-        total: await prisma.group.count()
-    }
-}
+  let mainQuery: Prisma.GroupFindManyArgs = {
+    select: {
+      id: true,
+      name: true,
+    },
+  };
+
+  return {
+    groups: await prisma.group.findMany(mainQuery),
+    total: await prisma.group.count(),
+  };
+};
 
 export const getManyShort = async () => {
-    let mainQuery: Prisma.GroupFindManyArgs = {
-        select: {
-            id: true,
-            name: true
-        }
-    }
+  let mainQuery: Prisma.GroupFindManyArgs = {
+    select: {
+      id: true,
+      name: true,
+    },
+  };
 
-    return {
-        groups: await prisma.group.findMany(mainQuery),
-        total: await prisma.group.count()
-    }
-}
+  return {
+    groups: await prisma.group.findMany(mainQuery),
+    total: await prisma.group.count(),
+  };
+};
 
 export const getOne = async (groupId: string) => {
-    let mainQuery: Prisma.GroupFindFirstArgs = {
+  /* let mainQuery: Prisma.GroupFindFirstArgs = {
+    select: {
+      id: true,
+      name: true,
+      startTime: true,
+      endTime: true,
+      Employee: {
         select: {
-            id: true,
-            name: true,
-            startTime: true,
-            endTime: true,
-            Employee: {
-                select: {
-                    name: true
-                }
-            },
-            Break: {
-                select: {
-                    startTime: true,
-                    endTime: true
-                }
-            }
+          name: true,
         },
-        where: {
-            id: groupId
-        }
-    }
+      },
+      Break: {
+        select: {
+          startTime: true,
+          endTime: true,
+        },
+      },
+    },
+    where: {
+      id: groupId,
+    },
+  }; */
 
-    return await prisma.group.findFirst(mainQuery)
-}
+  let mainQuery: Prisma.GroupFindFirstArgs = {
+    select: {
+      id: true,
+      name: true,
+    },
+    where: {
+      id: groupId,
+    },
+  };
+
+  return await prisma.group.findFirst(mainQuery);
+};
 
 export const update = async (groupId: string, data: any) => {
-    await prisma.$transaction([
-        prisma.break.deleteMany({
-            where: {
-                groupId: groupId
-            }
-        }),
-        prisma.group.update({
-            data: {
-                name: data.name,
-                startTime: data.startTime,
-                endTime: data.endTime,
-                Break: {
-                    create: data.breaks
-                }
-            },
-            where: {
-                id: groupId
-            }
-        })
-    ])
+  /* await prisma.$transaction([
+    prisma.break.deleteMany({
+      where: {
+        groupId: groupId,
+      },
+    }),
+    prisma.group.update({
+      data: {
+        name: data.name,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        Break: {
+          create: data.breaks,
+        },
+      },
+      where: {
+        id: groupId,
+      },
+    }),
+  ]); */
 
-    return
-}
+  return;
+};
 
 export const create = async (group: ICreateGroup) => {
-    let mainQuery: Prisma.GroupCreateArgs = {
-        data: {
-            name: group.name,
-            startTime: group.startTime,
-            endTime: group.endTime,
-            Break: {
-                create: group.breaks
-            }
-        }
-    }
+  /* let mainQuery: Prisma.GroupCreateArgs = {
+    data: {
+      name: group.name,
+      startTime: group.startTime,
+      endTime: group.endTime,
+      Break: {
+        create: group.breaks,
+      },
+    },
+  };
 
-    return await prisma.group.create(mainQuery)
-}
+  return await prisma.group.create(mainQuery); */
+};
 
 export const deleteOne = async (groupId: string) => {
-    let mainQuery: Prisma.GroupDeleteArgs = {
-        where: {
-            id: groupId
-        }
-    }
+  let mainQuery: Prisma.GroupDeleteArgs = {
+    where: {
+      id: groupId,
+    },
+  };
 
-    return await prisma.group.delete(mainQuery)
-}
+  return await prisma.group.delete(mainQuery);
+};

@@ -1,4 +1,4 @@
-import { Prisma, Timesheet } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import prisma from "../../prisma/prisma-client";
 import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from "../constants";
 import { getMinsFromTimeStr } from "../helpers/dateTime";
@@ -55,26 +55,11 @@ export const getMany = async (query: any) => {
         select: {
           id: true,
           name: true,
-          WorkShift: {
+          isConstant: true,
+          WeekDayWork: {
             select: {
               id: true,
-              date: true,
-              startTime: true,
-              endTime: true,
-              isConstant: true,
-              Break: {
-                select: {
-                  id: true,
-                  startTime: true,
-                  endTime: true,
-                },
-              },
-              WeekDayWork: {
-                select: {
-                  id: true,
-                  value: true,
-                },
-              },
+              value: true,
             },
           },
         },
@@ -87,10 +72,45 @@ export const getMany = async (query: any) => {
 
   mainQuery.where = {};
   if (date) mainQuery.where.date = date;
-  if (employeeId) mainQuery.where.employeeId = employeeId;
+  if (employeeId)
+    mainQuery.where.employee = {
+      id: employeeId,
+    };
   if (groupId) mainQuery.where.groupId = groupId;
 
   const timesheets = await prisma.timesheet.findMany(mainQuery);
+
+  const mainQueryWorkShift: Prisma.WorkShiftFindManyArgs = {
+    select: {
+      id: true,
+      date: true,
+      subgroupId: true,
+      employeeId: true,
+    },
+  };
+
+  mainQueryWorkShift.where = {};
+  if (date) mainQueryWorkShift.where.date = date;
+
+  const workshifts = await prisma.workShift.findMany(mainQueryWorkShift);
+
+  const mainQuerySubgroup: Prisma.SubgroupFindManyArgs = {
+    select: {
+      id: true,
+      startTime: true,
+      endTime: true,
+      groupId: true,
+      Break: {
+        select: {
+          id: true,
+          startTime: true,
+          endTime: true,
+        },
+      },
+    },
+  };
+
+  const subgroups: any = await prisma.subgroup.findMany(mainQuerySubgroup);
 
   type ITransformedTimesheets = {
     employeeId: string;
@@ -106,19 +126,63 @@ export const getMany = async (query: any) => {
     hasMalfunction: boolean;
   }[];
 
+  const workshiftDict = Object.fromEntries(
+    workshifts.map((w: any) => [w.employeeId + w.date, w])
+  );
+  const subgroupsGroupIdDict = Object.fromEntries(
+    subgroups.map((s: any) => [s.groupId, s])
+  );
+  const subgroupsIdDict = Object.fromEntries(
+    subgroups.map((s: any) => [s.id, s])
+  );
+
   const transformedTimesheets = Object.values(
     timesheets.reduce((acc: ITimesheetObj, el: any) => {
-      if (!acc[el.employeeId] || !acc[el.employeeId][el.date]) {
-        acc[el.employeeId][el.date] = {
-          times: [],
-          employeeId: el.employeeId,
-          name: el.employee.name,
-          group: el.group,
-          date: el.date,
-        };
+      if (!acc[el.employee.id] || !(el.date in acc[el.employee.id])) {
+        let subgroup;
+        let workshift: any;
+
+        if (el.group.isConstant) {
+          subgroup = subgroupsGroupIdDict[el.group.id];
+        } else {
+          workshift = workshiftDict[el.employee.id + el.date];
+          subgroup = subgroupsIdDict[workshift?.subgroupId];
+        }
+
+        let transformedGroup: any = {};
+        if (subgroup) {
+          transformedGroup.id = el.group.id;
+          transformedGroup.name = el.group.name;
+          transformedGroup.startTime = subgroup?.startTime;
+          transformedGroup.endTime = subgroup?.endTime;
+          transformedGroup.Break = subgroup?.Break;
+          transformedGroup.WeekDayWork = el.group.WeekDayWork;
+        } else {
+          transformedGroup = undefined;
+        }
+
+        if (!acc[el.employee.id]) {
+          acc[el.employee.id] = {
+            [el.date]: {
+              times: [],
+              employeeId: el.employee.id,
+              name: el.employee.name,
+              group: transformedGroup,
+              date: el.date,
+            },
+          };
+        } else {
+          acc[el.employee.id][el.date] = {
+            times: [],
+            employeeId: el.employee.id,
+            name: el.employee.name,
+            group: transformedGroup,
+            date: el.date,
+          };
+        }
       }
 
-      acc[el.employeeId][el.date].times.push({
+      acc[el.employee.id][el.date].times.push({
         id: el.id,
         time: el.time,
         isEnter: el.isEnter,
@@ -128,7 +192,7 @@ export const getMany = async (query: any) => {
   )
     .map((res) => Object.values(res))
     .flat()
-    .reduce((acc: ITransformedTimesheets, ts) => {
+    .reduce((acc: ITransformedTimesheets, ts, iddd, lala) => {
       // Calculate Enter time
       const enterTime = ts.times[0].isEnter ? ts.times[0].time : "";
 
@@ -149,7 +213,7 @@ export const getMany = async (query: any) => {
 
       // Calculate Exit time
       let exitTime: string = "";
-      if (ts.times?.at(-1)?.isEnter && ts.times?.at(-1)?.time) {
+      if (!ts.times?.at(-1)?.isEnter && ts.times?.at(-1)?.time) {
         // @ts-ignore
         exitTime = ts.times.at(-1).time;
       }
@@ -168,7 +232,7 @@ export const getMany = async (query: any) => {
       acc.push({
         employeeId: ts.employeeId,
         name: ts.name,
-        group: ts.group ? { id: ts.group.id, name: ts.group.name } : "",
+        group: ts.group ?? "",
         overtime,
         timeLate,
         startTime: enterTime,
