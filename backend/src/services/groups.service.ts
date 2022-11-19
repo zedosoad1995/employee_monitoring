@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import prisma from "../../prisma/prisma-client";
 import { ICreateGroup, IGetManyGroupInferred } from "../types/group";
 
@@ -141,43 +141,75 @@ export const getOne = async (groupId: string) => {
 };
 
 export const update = async (groupId: string, data: any) => {
-  /* await prisma.$transaction([
+  const subgroup = await prisma.subgroup.findFirst({
+    select: {
+      id: true,
+    },
+    where: {
+      groupId,
+    },
+  });
+
+  await prisma.$transaction([
     prisma.break.deleteMany({
       where: {
-        groupId: groupId,
+        subgroup: {
+          AND: [
+            {
+              groupId,
+            },
+            {
+              group: {
+                isConstant: true,
+              },
+            },
+          ],
+        },
       },
     }),
     prisma.group.update({
       data: {
         name: data.name,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        Break: {
-          create: data.breaks,
+        SubGroup: {
+          update: {
+            data: {
+              startTime: data.startTime,
+              endTime: data.endTime,
+              Break: {
+                create: data.breaks,
+              },
+            },
+            where: {
+              id: subgroup?.id,
+            },
+          },
         },
       },
       where: {
         id: groupId,
       },
     }),
-  ]); */
-
-  return;
+  ]);
 };
 
 export const create = async (group: ICreateGroup) => {
-  /* let mainQuery: Prisma.GroupCreateArgs = {
+  let mainQuery: Prisma.GroupCreateArgs = {
     data: {
       name: group.name,
-      startTime: group.startTime,
-      endTime: group.endTime,
-      Break: {
-        create: group.breaks,
+      SubGroup: {
+        create: {
+          startTime: group.startTime,
+          endTime: group.endTime,
+          Break: {
+            create: group.breaks,
+          },
+        },
       },
+      isConstant: true,
     },
   };
 
-  return await prisma.group.create(mainQuery); */
+  return await prisma.group.create(mainQuery);
 };
 
 export const deleteOne = async (groupId: string) => {
