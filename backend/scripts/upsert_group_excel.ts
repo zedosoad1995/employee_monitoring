@@ -1,7 +1,6 @@
 import { format } from "date-fns";
 import { readFile, utils } from "xlsx";
-
-console.log(__dirname);
+import { createSubGroups, getEmployee } from "./upsert_group_helper";
 
 const workbook = readFile(`${__dirname}\\excel_example.xlsx`, {
   type: "binary",
@@ -46,51 +45,66 @@ const tableIdxs = data
     []
   );
 
-const groups: any = {};
-let workShifts: any = [];
+const fillDB = async () => {
+  const groups: any = {};
+  let workShifts: any = [];
 
-for (const tableIdx of tableIdxs) {
-  const schedules = data.slice(tableIdx.schedule[0], tableIdx.schedule[1] + 1);
-  const groupName = schedules[0][0];
-  groups[groupName] = [];
-  for (const schedule of schedules.slice(1)) {
-    groups[schedules[0][0]].push({
-      startTime: format(schedule[1], "HH:mm"),
-      endTime: format(schedule.at(-1), "HH:mm"),
-      breaks:
-        schedule.length > 3
-          ? schedule.slice(2, -1).reduce((acc: any, date: any, idx: number) => {
-              if (idx % 2 === 0) {
-                acc.push({ startTime: format(date, "HH:mm") });
-              } else {
-                acc[acc.length - 1].endTime = format(date, "HH:mm");
-              }
+  for (const tableIdx of tableIdxs) {
+    const schedules = data.slice(
+      tableIdx.schedule[0],
+      tableIdx.schedule[1] + 1
+    );
+    const groupName = schedules[0][0];
+    groups[groupName] = [];
+    for (const schedule of schedules.slice(1)) {
+      const subgroup = await createSubGroups(groupName, {
+        startTime: format(schedule[1], "HH:mm"),
+        endTime: format(schedule.at(-1), "HH:mm"),
+        breaks:
+          schedule.length > 3
+            ? schedule
+                .slice(2, -1)
+                .reduce((acc: any, date: any, idx: number) => {
+                  if (idx % 2 === 0) {
+                    acc.push({ startTime: format(date, "HH:mm") });
+                  } else {
+                    acc[acc.length - 1].endTime = format(date, "HH:mm");
+                  }
 
-              return acc;
-            }, [])
-          : [],
-    });
+                  return acc;
+                }, [])
+            : [],
+      });
+
+      groups[schedules[0][0]].push(subgroup.id);
+    }
+
+    const employees = data.slice(
+      tableIdx.employees[0],
+      tableIdx.employees[1] + 1
+    );
+
+    for (const employeeWorkshifts of employees.slice(1)) {
+      const employeeId = await getEmployee(
+        employeeWorkshifts[0],
+        employeeWorkshifts[1]
+      );
+
+      workShifts = [
+        ...workShifts,
+        ...employeeWorkshifts
+          .slice(2)
+          .map((val: any, idx: number) => ({
+            subgroupId: groups[groupName][Number(val) - 1],
+            employeeId,
+            date: format(employees[0][idx + 2], "yyyy-MM-dd"),
+          }))
+          .filter((val: any) => val.shift),
+      ];
+    }
   }
 
-  const employees = data.slice(
-    tableIdx.employees[0],
-    tableIdx.employees[1] + 1
-  );
+  return workShifts;
+};
 
-  for (const employeeWorkshifts of employees.slice(1)) {
-    workShifts = [
-      ...workShifts,
-      ...employeeWorkshifts
-        .slice(2)
-        .map((val: any, idx: number) => ({
-          group: groupName,
-          shift: groups[groupName][Number(val)],
-          employee: employeeWorkshifts[0],
-          date: format(employees[0][idx + 2], "yyyy-MM-dd"),
-        }))
-        .filter((val: any) => val.shift),
-    ];
-  }
-}
-
-console.log(groups, workShifts);
+fillDB().then(console.log);
