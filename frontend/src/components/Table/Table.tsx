@@ -18,6 +18,7 @@ export default function ({
   editRowNum,
   addCollapsedRow,
   hiddenCols = {},
+  onClickRow,
 }: any) {
   return (
     <TableContainer sx={{ height: "68vh" }} component={Paper}>
@@ -45,6 +46,7 @@ export default function ({
           editRowNum={editRowNum}
           addCollapsedRow={addCollapsedRow}
           hiddenCols={hiddenCols}
+          onClickRow={onClickRow}
         />
       </Table>
     </TableContainer>

@@ -38,7 +38,7 @@ function Home() {
   };
 
   const handleClickMenuItem = (url: string) => () => {
-    navigate(`${url}`);
+    navigate(url);
     setOpenSideMenu(false);
   };
 

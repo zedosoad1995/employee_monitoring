@@ -6,9 +6,10 @@ import Row from "./TableRow";
 interface IProps {
   columns: IColumn[];
   rows: IRow[];
+  onClickRow?: (id: string) => () => void;
 }
 
-export default function ({ columns, rows }: IProps) {
+export default function ({ columns, rows, onClickRow }: IProps) {
   return (
     <TableContainer component={Paper}>
       <Table
@@ -18,9 +19,18 @@ export default function ({ columns, rows }: IProps) {
       >
         <TableHeader columns={columns} />
         <TableBody>
-          {rows.map((row, index) => (
-            <Row key={index} row={row} columns={columns} />
-          ))}
+          {rows.map((row) => {
+            const onClickRowFn = onClickRow ? onClickRow(row.id) : undefined;
+
+            return (
+              <Row
+                key={row.id}
+                onClickRow={onClickRowFn}
+                row={row}
+                columns={columns}
+              />
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>

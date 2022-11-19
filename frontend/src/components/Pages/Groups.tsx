@@ -35,6 +35,7 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { format, parse } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const schema = yup.object().shape({
   name: yup.string().required(),
@@ -138,6 +139,12 @@ function Groups() {
 
   const [isCreateGroup, setIsCreateGroup] = useState<boolean>(false);
   const [selectedGroup, setSelectedGroup] = useState<string | undefined>();
+
+  const navigate = useNavigate();
+
+  const onClickRow = (groupId: string) => () => {
+    navigate(groupId);
+  };
 
   const handleChangeStartBreak =
     (index: number) => (newValue: any, keyboardInputValue: any) => {
@@ -244,6 +251,7 @@ function Groups() {
   const getData = async () => {
     const { groups } = await getGroups();
     const rows = groups.map((g: any, index: number) => ({
+      id: g.id,
       name: g.name,
       startTime: g.startTime,
       endTime: g.endTime,
@@ -334,7 +342,7 @@ function Groups() {
           </IconButton>
         </Tooltip>
       </div>
-      <GroupsTable rows={rows} columns={columns} />
+      <GroupsTable rows={rows} columns={columns} onClickRow={onClickRow} />
       <Dialog fullWidth onClose={handleCloseAddGroup} open={openCreateGroup}>
         <DialogTitle>
           {isCreateGroup && <>Create New Group</>}

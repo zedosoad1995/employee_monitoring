@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { IColumn, IRow } from "../../../types/groupsTable";
 import ScheduleTable from "./Table/Table";
 
@@ -22,6 +24,7 @@ const columns: IColumn[] = [
 
 const rows: IRow[] = [
   {
+    id: "1",
     subgroupLabel: 1,
     on0: "9:00",
     off0: "10:00",
@@ -33,6 +36,7 @@ const rows: IRow[] = [
     off3: "18:00",
   },
   {
+    id: "2",
     subgroupLabel: 2,
     on0: "8:00",
     off0: "10:30",
@@ -46,5 +50,7 @@ const rows: IRow[] = [
 ];
 
 export default function () {
+  useEffect(() => {}, []);
+
   return <ScheduleTable columns={columns} rows={rows} />;
 }
