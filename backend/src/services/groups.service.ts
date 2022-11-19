@@ -56,6 +56,7 @@ export const getMany = async () => {
     startTime: group.isConstant ? group.SubGroup?.at(0)?.startTime : undefined,
     endTime: group.isConstant ? group.SubGroup?.at(0)?.endTime : undefined,
     Break: group.isConstant ? group.SubGroup?.at(0)?.Break : undefined,
+    WeekDayWork: group.isConstant ? group.WeekDayWork : undefined,
   }));
 
   return {
