@@ -2,9 +2,10 @@ import { Button, ButtonGroup } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { WEEK_DAYS_DICT } from "../../../constants";
+import { getEmployees } from "../../../services/employees";
 import { getGroup } from "../../../services/group";
 import { IColumn, IRow } from "../../../types/groupsTable";
-import ScheduleTable from "./Table/Table";
+import Table from "./Table/Table";
 
 const onOffBaseArray = (val: number) => [
   {
@@ -22,6 +23,11 @@ export default function () {
 
   const [columns, setColumns] = useState<IColumn[]>([]);
   const [rows, setRows] = useState<IRow[]>([]);
+
+  const [employeesCols, setEmployeesCols] = useState<IColumn[]>([
+    { id: "employeeName" },
+  ]);
+  const [employeesRows, setEmployeesRows] = useState<IRow[]>([]);
 
   const [selectedWeekDays, setSelectedWeekDays] = useState(
     Array(7)
@@ -42,6 +48,15 @@ export default function () {
 
   useEffect(() => {
     if (!id) return;
+
+    getEmployees({ groupId: id }).then(({ employees }) => {
+      const employeesData = employees.map((e: any) => ({
+        id: e.id,
+        employeeName: e.name,
+      }));
+
+      setEmployeesRows(employeesData);
+    });
 
     getGroup(id).then((group) => {
       setSelectedWeekDays((selected) => {
@@ -102,7 +117,7 @@ export default function () {
 
   return (
     <>
-      <ScheduleTable columns={columns} rows={rows} />
+      <Table columns={columns} rows={rows} />
       <ButtonGroup>
         {[...selectedWeekDays.slice(1, 7), selectedWeekDays[0]].map(
           (selected) => (
@@ -116,6 +131,7 @@ export default function () {
           )
         )}
       </ButtonGroup>
+      <Table columns={employeesCols} rows={employeesRows} />
     </>
   );
 }

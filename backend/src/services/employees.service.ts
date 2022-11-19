@@ -2,19 +2,29 @@ import { Prisma } from "@prisma/client";
 import prisma from "../../prisma/prisma-client";
 import { ICreateEmployee } from "../types/employee";
 
-export const getMany = async () => {
-  let mainQuery: Prisma.EmployeeFindManyArgs = {
+export const getMany = async ({ groupId }: { groupId?: string } = {}) => {
+  const mainQuery: Prisma.EmployeeFindManyArgs = {
     select: {
       id: true,
       cardId: true,
       name: true,
       currGroup: {
         select: {
+          id: true,
           name: true,
         },
       },
     },
   };
+
+  const whereQuery: any = {};
+  if (groupId) {
+    whereQuery.currGroup = {
+      id: groupId,
+    };
+  }
+
+  mainQuery.where = whereQuery;
 
   return {
     employees: await prisma.employee.findMany(mainQuery),
