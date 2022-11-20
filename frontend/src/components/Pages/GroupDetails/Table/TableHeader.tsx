@@ -6,6 +6,11 @@ interface IProps {
 }
 
 export default function ({ columns }: IProps) {
+  const isEveryColEmpty = columns.every((col) => !col.label);
+  if (isEveryColEmpty) {
+    return <></>;
+  }
+
   return (
     <TableHead>
       <TableRow>

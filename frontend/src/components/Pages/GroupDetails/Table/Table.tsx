@@ -7,17 +7,13 @@ interface IProps {
   columns: IColumn[];
   rows: IRow[];
   onClickRow?: (id: string) => () => void;
-  style?: any;
+  style?: React.CSSProperties;
 }
 
 export default function ({ columns, rows, onClickRow, style }: IProps) {
   return (
     <TableContainer style={style} component={Paper}>
-      <Table
-        sx={{ width: "100%", borderCollapse: "initial" }}
-        aria-labelledby="tableTitle"
-        size="small"
-      >
+      <Table sx={{ width: "100%", borderCollapse: "initial" }} size="small">
         <TableHeader columns={columns} />
         <TableBody>
           {rows.map((row) => {

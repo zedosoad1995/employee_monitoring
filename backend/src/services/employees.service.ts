@@ -2,8 +2,60 @@ import { Prisma } from "@prisma/client";
 import prisma from "../../prisma/prisma-client";
 import { ICreateEmployee } from "../types/employee";
 
-export const getMany = async ({ groupId }: { groupId?: string } = {}) => {
-  const mainQuery: Prisma.EmployeeFindManyArgs = {
+interface IGetManyProps {
+  groupId?: string;
+  displayWorkshifts?: boolean;
+  dateIni?: string;
+  dateFin?: string;
+}
+
+export const getMany = async ({
+  groupId,
+  displayWorkshifts,
+  dateIni,
+  dateFin,
+}: IGetManyProps = {}) => {
+  const whereQuery: Prisma.EmployeeWhereInput = {};
+
+  if (groupId) {
+    whereQuery.currGroup = {
+      id: groupId,
+    };
+  }
+
+  let WorkShiftWhereQuery = {};
+  if (dateIni || dateFin) {
+    const dateIniQuery = {
+      date: {
+        gte: dateIni,
+      },
+    };
+    const dateFinQuery = {
+      date: {
+        lte: dateFin,
+      },
+    };
+
+    WorkShiftWhereQuery = {
+      AND: [
+        ...(dateIni ? [dateIniQuery] : []),
+        ...(dateFin ? [dateFinQuery] : []),
+      ],
+    };
+  }
+
+  const WorkShiftQuery = displayWorkshifts
+    ? {
+        select: {
+          id: true,
+          date: true,
+          subgroupId: true,
+        },
+        where: WorkShiftWhereQuery,
+      }
+    : false;
+
+  const employees = await prisma.employee.findMany({
     select: {
       id: true,
       cardId: true,
@@ -14,21 +66,14 @@ export const getMany = async ({ groupId }: { groupId?: string } = {}) => {
           name: true,
         },
       },
+      WorkShift: WorkShiftQuery,
     },
-  };
-
-  const whereQuery: any = {};
-  if (groupId) {
-    whereQuery.currGroup = {
-      id: groupId,
-    };
-  }
-
-  mainQuery.where = whereQuery;
+    where: whereQuery,
+  });
 
   return {
-    employees: await prisma.employee.findMany(mainQuery),
-    total: await prisma.employee.count(),
+    employees,
+    total: await prisma.employee.count({ where: whereQuery }),
   };
 };
 

@@ -5,7 +5,7 @@ import { WEEK_DAYS_DICT } from "../../../constants";
 import { getEmployees } from "../../../services/employees";
 import { getGroup } from "../../../services/group";
 import { IColumn, IRow } from "../../../types/groupsTable";
-import { getScheduleData } from "./helper";
+import { getEmployeesData, getScheduleData } from "./helper";
 import Table from "./Table/Table";
 import WeekDaysButtons from "./WeekDaysButtons";
 
@@ -22,15 +22,16 @@ export default function () {
   const [scheduleCols, setScheduleCols] = useState<IColumn[]>([]);
   const [scheduleRows, setScheduleRows] = useState<IRow[]>([]);
 
-  const [employeesCols, setEmployeesCols] = useState<IColumn[]>([
-    { id: "employeeName" },
-  ]);
+  const [employeesCols, setEmployeesCols] = useState<IColumn[]>();
   const [employeesRows, setEmployeesRows] = useState<IRow[]>([]);
   const [isScheduleConstant, setIsScheduleConstant] = useState(false);
 
   const [selectedWeekDays, setSelectedWeekDays] = useState(
     WEEK_DAYS_DEFAULT_ARRAY
   );
+
+  const [dateIni, setDateIni] = useState("2022-09-01");
+  const [dateFin, setDateFin] = useState("2022-09-30");
 
   const handleWeekDayClick = (label: string) => () => {
     setSelectedWeekDays((selected) => {
@@ -43,16 +44,24 @@ export default function () {
   useEffect(() => {
     if (!id) return;
 
-    getEmployees({ groupId: id }).then(({ employees }) => {
-      const employeesData = employees.map((e: any) => ({
-        id: e.id,
-        employeeName: e.name,
-      }));
-
-      setEmployeesRows(employeesData);
-    });
-
     getGroup(id).then((group) => {
+      getEmployees({
+        groupId: id,
+        displayWorkshifts: !group.isConstant,
+        dateIni,
+        dateFin,
+      }).then(({ employees }) => {
+        const [columnsData, rowsData] = getEmployeesData(
+          group,
+          employees,
+          dateIni,
+          dateFin
+        );
+
+        setEmployeesCols(columnsData);
+        setEmployeesRows(rowsData);
+      });
+
       setIsScheduleConstant(group.isConstant);
 
       setSelectedWeekDays((selected) => {
@@ -77,13 +86,11 @@ export default function () {
           handleClick={handleWeekDayClick}
         />
       )}
-      <Table columns={scheduleCols} rows={scheduleRows} />
+      <div>
+        <Table columns={scheduleCols} rows={scheduleRows} />
+      </div>
       <Typography variant="h5">Employees</Typography>
-      <Table
-        style={{ overflowY: "auto" }}
-        columns={employeesCols}
-        rows={employeesRows}
-      />
+      {employeesCols && <Table columns={employeesCols} rows={employeesRows} />}
     </Stack>
   );
 }
