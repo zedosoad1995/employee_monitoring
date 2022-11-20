@@ -60,7 +60,12 @@ export default function Row(props: RowProps) {
 
   return (
     <>
-      <TableRow hover tabIndex={-1} onClick={onClickRow}>
+      <TableRow
+        hover
+        sx={onClickRow ? { cursor: "pointer" } : {}}
+        tabIndex={-1}
+        onClick={onClickRow}
+      >
         {columns.map((col, index) => {
           return (
             <>

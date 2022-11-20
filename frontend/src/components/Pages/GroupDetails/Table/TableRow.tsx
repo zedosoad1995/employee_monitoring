@@ -9,14 +9,14 @@ interface IProps {
 
 export default function ({ row, columns, onClickRow }: IProps) {
   return (
-    <TableRow hover onClick={onClickRow}>
+    <TableRow
+      hover
+      sx={onClickRow ? { cursor: "pointer" } : {}}
+      onClick={onClickRow}
+    >
       {columns.map((col) => {
         return (
-          <TableCell
-            key={col.id}
-            sx={col.isHidden ? { width: 0, padding: 0, margin: 0 } : {}}
-            align={col.numeric ? "right" : "left"}
-          >
+          <TableCell key={col.id} align={col.numeric ? "right" : "left"}>
             {row[col.id]}
           </TableCell>
         );

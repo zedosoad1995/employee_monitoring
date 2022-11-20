@@ -1,41 +1,35 @@
-import { Button, ButtonGroup } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { WEEK_DAYS_DICT } from "../../../constants";
 import { getEmployees } from "../../../services/employees";
 import { getGroup } from "../../../services/group";
 import { IColumn, IRow } from "../../../types/groupsTable";
+import { getScheduleData } from "./helper";
 import Table from "./Table/Table";
+import WeekDaysButtons from "./WeekDaysButtons";
 
-const onOffBaseArray = (val: number) => [
-  {
-    id: `on${val}`,
-    label: "ON",
-  },
-  {
-    id: `off${val}`,
-    label: "OFF",
-  },
-];
+const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
+  .fill(false)
+  .map((selected, index) => ({
+    selected,
+    label: WEEK_DAYS_DICT[index].short,
+  }));
 
 export default function () {
   const { id } = useParams();
 
-  const [columns, setColumns] = useState<IColumn[]>([]);
-  const [rows, setRows] = useState<IRow[]>([]);
+  const [scheduleCols, setScheduleCols] = useState<IColumn[]>([]);
+  const [scheduleRows, setScheduleRows] = useState<IRow[]>([]);
 
   const [employeesCols, setEmployeesCols] = useState<IColumn[]>([
     { id: "employeeName" },
   ]);
   const [employeesRows, setEmployeesRows] = useState<IRow[]>([]);
+  const [isScheduleConstant, setIsScheduleConstant] = useState(false);
 
   const [selectedWeekDays, setSelectedWeekDays] = useState(
-    Array(7)
-      .fill(false)
-      .map((selected, index) => ({
-        selected,
-        label: WEEK_DAYS_DICT[index].short,
-      }))
+    WEEK_DAYS_DEFAULT_ARRAY
   );
 
   const handleWeekDayClick = (label: string) => () => {
@@ -59,6 +53,8 @@ export default function () {
     });
 
     getGroup(id).then((group) => {
+      setIsScheduleConstant(group.isConstant);
+
       setSelectedWeekDays((selected) => {
         group.weekDays.forEach((w) => {
           selected[w.value].selected = true;
@@ -66,72 +62,28 @@ export default function () {
         return selected;
       });
 
-      let columnsData: IColumn[] = [];
+      const [columnsData, rowsData] = getScheduleData(group);
 
-      if (!group.isConstant) {
-        columnsData.push({
-          id: "subgroupLabel",
-        });
-      }
-
-      const maxNumOnOffs = Math.max(
-        ...group.subgroups.map((subgroup) => subgroup.Break.length + 1)
-      );
-
-      const onOffCols = Array.from(Array(maxNumOnOffs).keys())
-        .map((val) => [...onOffBaseArray(val)])
-        .flat();
-
-      columnsData = columnsData.concat(onOffCols);
-      setColumns(columnsData);
-
-      const rowsData: IRow[] = [];
-
-      group.subgroups.forEach((subgroup, subgroupIdx) => {
-        const rowData: any = {
-          id: group.id,
-        };
-
-        const breakTimes = subgroup.Break.reduce<string[]>((acc, el) => {
-          acc = acc.concat([el.startTime, el.endTime]);
-
-          return acc;
-        }, []);
-
-        const timeArr = [subgroup.startTime, ...breakTimes, subgroup.endTime];
-
-        onOffCols
-          .map((arr) => arr.id)
-          .forEach((id, index) => {
-            rowData[id] = timeArr[index];
-          });
-
-        if (!group.isConstant) rowData.subgroupLabel = subgroupIdx + 1;
-
-        rowsData.push(rowData);
-      });
-
-      setRows(rowsData);
+      setScheduleCols(columnsData);
+      setScheduleRows(rowsData);
     });
   }, [id]);
 
   return (
-    <>
-      <Table columns={columns} rows={rows} />
-      <ButtonGroup>
-        {[...selectedWeekDays.slice(1, 7), selectedWeekDays[0]].map(
-          (selected) => (
-            <Button
-              key={selected.label}
-              variant={selected.selected ? "contained" : "outlined"}
-              onClick={handleWeekDayClick(selected.label)}
-            >
-              {selected.label}
-            </Button>
-          )
-        )}
-      </ButtonGroup>
-      <Table columns={employeesCols} rows={employeesRows} />
-    </>
+    <Stack style={{ height: "80vh" }} spacing={2}>
+      {isScheduleConstant && (
+        <WeekDaysButtons
+          selectedWeekDays={selectedWeekDays}
+          handleClick={handleWeekDayClick}
+        />
+      )}
+      <Table columns={scheduleCols} rows={scheduleRows} />
+      <Typography variant="h5">Employees</Typography>
+      <Table
+        style={{ overflowY: "auto" }}
+        columns={employeesCols}
+        rows={employeesRows}
+      />
+    </Stack>
   );
 }

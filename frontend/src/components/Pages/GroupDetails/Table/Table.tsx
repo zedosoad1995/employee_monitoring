@@ -7,11 +7,12 @@ interface IProps {
   columns: IColumn[];
   rows: IRow[];
   onClickRow?: (id: string) => () => void;
+  style?: any;
 }
 
-export default function ({ columns, rows, onClickRow }: IProps) {
+export default function ({ columns, rows, onClickRow, style }: IProps) {
   return (
-    <TableContainer component={Paper}>
+    <TableContainer style={style} component={Paper}>
       <Table
         sx={{ width: "100%", borderCollapse: "initial" }}
         aria-labelledby="tableTitle"

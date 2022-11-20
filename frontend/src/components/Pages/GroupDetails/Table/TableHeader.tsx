@@ -12,7 +12,7 @@ export default function ({ columns }: IProps) {
         {columns.map((col) => (
           <TableCell
             key={col.id}
-            sx={col.isHidden ? { width: 0, padding: 0, margin: 0 } : {}}
+            sx={!col.label ? { width: 0, padding: 0, margin: 0 } : {}}
             align={col.numeric ? "right" : "left"}
           >
             {col.label}

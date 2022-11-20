@@ -1,4 +1,5 @@
 import axios from "axios";
+import { IGroup } from "../types/group";
 
 export const getGroups = () => {
   return axios
@@ -12,27 +13,7 @@ export const getGroupsShort = () => {
     .then((res) => res.data);
 };
 
-interface IReturnGroup {
-  id: string;
-  name: string;
-  isConstant: boolean;
-  weekDays: {
-    id: string;
-    value: number;
-  }[];
-  subgroups: {
-    id: string;
-    startTime: string;
-    endTime: string;
-    Break: {
-      id: string;
-      startTime: string;
-      endTime: string;
-    }[];
-  }[];
-}
-
-export const getGroup = (groupId: string): Promise<IReturnGroup> => {
+export const getGroup = (groupId: string): Promise<IGroup> => {
   return axios
     .get(`${process.env.REACT_APP_API_URL}/groups/${groupId}`)
     .then((res) => res.data);
