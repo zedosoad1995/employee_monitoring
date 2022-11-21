@@ -6,6 +6,7 @@ import {
   createGroup,
   createSubGroups,
   getEmployee,
+  getExcelTables,
 } from "./upsert_group_helper";
 
 const workbook = readFile(`${__dirname}\\excel_example.xlsx`, {
@@ -19,70 +20,39 @@ const data: Array<any> = utils.sheet_to_json(
   { header: 1 }
 );
 
-const tableIdxs = data
-  .reduce((acc, row, idx) => {
-    if (
-      idx === 0 ||
-      idx === data.length - 1 ||
-      (row.length > 0 &&
-        (data[idx - 1].length === 0 || data[idx + 1].length === 0))
-    ) {
-      acc.push(idx);
-    }
-
-    return acc;
-  }, [])
-  .reduce(
-    (
-      acc: Array<{ schedule: Array<number>; employees: Array<number> }>,
-      num: number,
-      idx: number
-    ) => {
-      if (idx % 4 === 0) {
-        acc.push({ schedule: [num], employees: [] });
-      } else if (idx % 4 === 1) {
-        acc[acc.length - 1].schedule.push(num);
-      } else if (idx % 4 >= 2) {
-        acc[acc.length - 1].employees.push(num);
-      }
-
-      return acc;
-    },
-    []
-  );
+const tables = getExcelTables(data);
 
 const fillDB = async () => {
   return prisma.$transaction(async (tx) => {
-    const groups: any = {};
+    const subgroupDict: any = {};
     let workShifts: any = [];
 
-    for (const tableIdx of tableIdxs) {
-      const schedules = data.slice(
-        tableIdx.schedule[0],
-        tableIdx.schedule[1] + 1
-      );
+    for (const { schedules, employees } of tables) {
       const groupName = schedules[0][0];
-      groups[groupName] = [];
-
+      subgroupDict[groupName] = [];
       const createdGroup = await createGroup(tx, groupName);
-      for (const schedule of schedules.slice(1)) {
-        const subgroupData = {
-          startTime: format(schedule[1], "HH:mm"),
-          endTime: format(schedule.at(-1), "HH:mm"),
-          breaks:
-            schedule.length > 3
-              ? schedule
-                  .slice(2, -1)
-                  .reduce((acc: any, date: any, idx: number) => {
-                    if (idx % 2 === 0) {
-                      acc.push({ startTime: format(date, "HH:mm") });
-                    } else {
-                      acc[acc.length - 1].endTime = format(date, "HH:mm");
-                    }
 
-                    return acc;
-                  }, [])
-              : [],
+      // Schedules Table
+      for (const [subgroupLabel, ...schedule] of schedules.slice(1)) {
+        const breaks =
+          schedule.length >= 2
+            ? schedule
+                .slice(1, -1)
+                .reduce((acc: any, date: any, idx: number) => {
+                  if (idx % 2 === 0) {
+                    acc.push({ startTime: format(date, "HH:mm") });
+                  } else {
+                    acc[acc.length - 1].endTime = format(date, "HH:mm");
+                  }
+
+                  return acc;
+                }, [])
+            : [];
+
+        const subgroupData = {
+          startTime: format(schedule[0], "HH:mm"),
+          endTime: format(schedule.at(-1), "HH:mm"),
+          breaks,
         };
 
         const subgroup = await createSubGroups(
@@ -91,27 +61,34 @@ const fillDB = async () => {
           createdGroup.id
         );
 
-        groups[schedules[0][0]].push(subgroup.id);
+        if (subgroupDict[groupName]) {
+          subgroupDict[groupName][String(subgroupLabel)] = subgroup.id;
+        } else {
+          subgroupDict[groupName] = {
+            [String(subgroupLabel)]: subgroup.id,
+          };
+        }
       }
 
-      const employees = data.slice(
-        tableIdx.employees[0],
-        tableIdx.employees[1] + 1
-      );
+      // Employees Table
+      const dates = employees[0].slice(2);
 
       for (const employeeWorkshifts of employees.slice(1)) {
-        const employeeId = (
-          await getEmployee(employeeWorkshifts[0], employeeWorkshifts[1])
-        ).id;
+        console.log(employeeWorkshifts);
+
+        const employeeName = employeeWorkshifts[0];
+        const employeeCardId = employeeWorkshifts[1];
+
+        const employeeId = (await getEmployee(employeeName, employeeCardId)).id;
 
         workShifts = [
           ...workShifts,
           ...employeeWorkshifts
             .slice(2)
-            .map((val: any, idx: number) => ({
-              subgroupId: groups[groupName][Number(val) - 1],
+            .map((workshiftNum: any, idx: number) => ({
+              subgroupId: subgroupDict[groupName][String(workshiftNum)],
               employeeId,
-              date: format(employees[0][idx + 2], "yyyy-MM-dd"),
+              date: format(dates[idx], "yyyy-MM-dd"),
             }))
             .filter((val: any) => val.subgroupId),
         ];

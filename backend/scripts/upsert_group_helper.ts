@@ -49,3 +49,42 @@ export const createSubGroups = async (
 
   return subgroup;
 };
+
+export const getExcelTables = (data: Array<any>) => {
+  const tableIdxs = data
+    .reduce((acc, row, idx) => {
+      if (
+        idx === 0 ||
+        idx === data.length - 1 ||
+        (row.length > 0 &&
+          (data[idx - 1].length === 0 || data[idx + 1].length === 0))
+      ) {
+        acc.push(idx);
+      }
+
+      return acc;
+    }, [])
+    .reduce(
+      (
+        acc: Array<{ schedule: Array<number>; employees: Array<number> }>,
+        num: number,
+        idx: number
+      ) => {
+        if (idx % 4 === 0) {
+          acc.push({ schedule: [num], employees: [] });
+        } else if (idx % 4 === 1) {
+          acc[acc.length - 1].schedule.push(num);
+        } else if (idx % 4 >= 2) {
+          acc[acc.length - 1].employees.push(num);
+        }
+
+        return acc;
+      },
+      []
+    );
+
+  return tableIdxs.map((tableIdx: any) => ({
+    schedules: data.slice(tableIdx.schedule[0], tableIdx.schedule[1] + 1),
+    employees: data.slice(tableIdx.employees[0], tableIdx.employees[1] + 1),
+  }));
+};
