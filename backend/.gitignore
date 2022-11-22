@@ -40,8 +40,6 @@ dist/**/*
 # ignore yarn.lock
 yarn.lock
 
-prisma/data/baseSeed.json
-prisma/data/employees_sample.xlsx
-prisma/data/generatedSeed.json
+prisma/data/*
 fly.toml
 seed/generatedSeed.json

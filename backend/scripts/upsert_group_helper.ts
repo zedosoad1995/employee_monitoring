@@ -1,4 +1,6 @@
 import { Prisma } from "@prisma/client";
+import { getYear, isDate } from "date-fns";
+import getDayOfYear from "date-fns/getDayOfYear";
 import prisma from "../prisma/prisma-client";
 
 export const getEmployee = async (name: string, cardId: string) => {
@@ -15,17 +17,67 @@ export const getEmployee = async (name: string, cardId: string) => {
   return employee;
 };
 
-export const createGroup = async (
-  tx: Prisma.TransactionClient,
-  name: string
-) => {
-  const group = await tx.group.create({
-    data: {
+export const getGroup = async (tx: Prisma.TransactionClient, name: string) => {
+  const group = await tx.group.findFirst({
+    where: {
       name,
-      isConstant: false,
     },
   });
+
   return group;
+};
+
+export const isDatesInSequence = (dates: Date[]) => {
+  for (let i = 1; i < dates.length; i++) {
+    if (
+      getDayOfYear(dates[i]) - getDayOfYear(dates[i - 1]) !== 1 ||
+      getYear(dates[i]) !== getYear(dates[i - 1]) ||
+      !isDate(dates[i]) ||
+      isDate(dates[i - 1])
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+export const isEveryEmployeeInGroup = async (
+  tx: Prisma.TransactionClient,
+  employees: any
+) => {
+  const employeeNames = employees.slice(1).map((e: any) => e[0]);
+  const employeeCardIds = employees.slice(1).map((e: any) => e[1]);
+
+  const andQuery = employeeNames.map((eName: any, idx: number) => ({
+    Employee: {
+      some: {
+        AND: [
+          {
+            name: {
+              equals: eName,
+            },
+          },
+          {
+            cardId: {
+              equals: employeeCardIds[idx],
+            },
+          },
+        ],
+      },
+    },
+  }));
+
+  const group = await tx.group.findFirst({
+    include: {
+      Employee: true,
+    },
+    where: {
+      AND: andQuery,
+    },
+  });
+
+  return !!group;
 };
 
 export const createSubGroups = async (

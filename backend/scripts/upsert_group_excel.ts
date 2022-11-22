@@ -3,10 +3,12 @@ import { readFile, utils } from "xlsx";
 import prisma from "../prisma/prisma-client";
 import { createMany } from "../src/helpers/db";
 import {
-  createGroup,
+  getGroup,
   createSubGroups,
   getEmployee,
   getExcelTables,
+  isEveryEmployeeInGroup,
+  isDatesInSequence,
 } from "./upsert_group_helper";
 
 const workbook = readFile(`${__dirname}\\excel_example.xlsx`, {
@@ -30,7 +32,14 @@ const fillDB = async () => {
     for (const { schedules, employees } of tables) {
       const groupName = schedules[0][0];
       subgroupDict[groupName] = [];
-      const createdGroup = await createGroup(tx, groupName);
+      const group = await getGroup(tx, groupName);
+      if (!group) throw new Error(`Group ${groupName} does not exist`);
+
+      const isValidGroup = await isEveryEmployeeInGroup(tx, employees);
+      if (!isValidGroup)
+        throw new Error(
+          `One or more employees are not present the in the group ${groupName}`
+        );
 
       // Schedules Table
       for (const [subgroupLabel, ...schedule] of schedules.slice(1)) {
@@ -55,11 +64,7 @@ const fillDB = async () => {
           breaks,
         };
 
-        const subgroup = await createSubGroups(
-          tx,
-          subgroupData,
-          createdGroup.id
-        );
+        const subgroup = await createSubGroups(tx, subgroupData, group.id);
 
         if (subgroupDict[groupName]) {
           subgroupDict[groupName][String(subgroupLabel)] = subgroup.id;
@@ -72,10 +77,13 @@ const fillDB = async () => {
 
       // Employees Table
       const dates = employees[0].slice(2);
+      if (isDatesInSequence(dates)) {
+        throw new Error(
+          "Dates must be in sequence, of the same year, and have a valid Date format"
+        );
+      }
 
       for (const employeeWorkshifts of employees.slice(1)) {
-        console.log(employeeWorkshifts);
-
         const employeeName = employeeWorkshifts[0];
         const employeeCardId = employeeWorkshifts[1];
 
