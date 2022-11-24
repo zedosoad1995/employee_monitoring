@@ -102,7 +102,27 @@ export const createSubGroups = async (
   return subgroup;
 };
 
+const trimRows = (data: Array<any>) => {
+  while (data.length > 0) {
+    if (data[0].length > 0) break;
+
+    data.splice(0, 1);
+  }
+
+  let i = data.length - 1;
+  while (data.length > 0) {
+    if (data[i].length > 0) break;
+
+    data.splice(i, 1);
+    i -= 1;
+  }
+
+  return data;
+};
+
 export const getExcelTables = (data: Array<any>) => {
+  data = trimRows(data);
+
   const tableIdxs = data
     .reduce((acc, row, idx) => {
       if (
@@ -139,4 +159,42 @@ export const getExcelTables = (data: Array<any>) => {
     schedules: data.slice(tableIdx.schedule[0], tableIdx.schedule[1] + 1),
     employees: data.slice(tableIdx.employees[0], tableIdx.employees[1] + 1),
   }));
+};
+
+export const getSubgroup = async (
+  tx: Prisma.TransactionClient,
+  subgroupData: any,
+  group: any
+) => {
+  const andQuery = subgroupData.breaks.map(({ startTime, endTime }: any) => ({
+    Break: {
+      some: {
+        AND: [
+          {
+            startTime: {
+              equals: startTime,
+            },
+          },
+          {
+            endTime: {
+              equals: endTime,
+            },
+          },
+        ],
+      },
+    },
+  }));
+
+  const subgroup = await tx.subgroup.findFirst({
+    where: {
+      groupId: group.id,
+      startTime: subgroupData.startTime,
+      endTime: subgroupData.endTime,
+      AND: andQuery,
+    },
+  });
+
+  if (!subgroup) throw new Error(`Subgroup does not exist: ${subgroupData}`);
+
+  return subgroup;
 };

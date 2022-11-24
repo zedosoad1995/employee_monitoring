@@ -9,6 +9,7 @@ import {
   getExcelTables,
   isEveryEmployeeInGroup,
   isDatesInSequence,
+  getSubgroup,
 } from "./upsert_group_helper";
 
 const workbook = readFile(`${__dirname}\\excel_example.xlsx`, {
@@ -64,7 +65,11 @@ const fillDB = async () => {
           breaks,
         };
 
-        const subgroup = await createSubGroups(tx, subgroupData, group.id);
+        const subgroup = await getSubgroup(tx, subgroupData, group);
+
+        console.log(subgroup);
+
+        //const subgroup = await createSubGroups(tx, subgroupData, group.id);
 
         if (subgroupDict[groupName]) {
           subgroupDict[groupName][String(subgroupLabel)] = subgroup.id;

@@ -46,19 +46,19 @@ const weekDayWorks = [
 
 const subGroupConstant = {
   id: faker.datatype.uuid(),
-  startTime: "8:00",
+  startTime: "08:00",
   endTime: "18:00",
   groupId: groupConstant.id,
 };
 const subGroupVariant1 = {
   id: faker.datatype.uuid(),
-  startTime: "9:00",
+  startTime: "09:00",
   endTime: "18:00",
   groupId: groupVariant.id,
 };
 const subGroupVariant2 = {
   id: faker.datatype.uuid(),
-  startTime: "9:00",
+  startTime: "09:00",
   endTime: "19:00",
   groupId: groupVariant.id,
 };
@@ -127,7 +127,7 @@ const employees = Object.entries(
   id: uuidv4(),
   name,
   cardId,
-  currGroupId: selectGroup(faker.datatype.number({ min: 0, max: 1 })),
+  currGroupId: selectGroup(faker.datatype.number({ min: 0, max: 0 })),
 }));
 
 const timesheets = convertedData.reduce((acc: any, el) => {
