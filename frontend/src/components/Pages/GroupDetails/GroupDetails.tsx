@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { WEEK_DAYS_DICT } from "../../../constants";
@@ -6,6 +6,7 @@ import { getEmployees } from "../../../services/employees";
 import { getGroup } from "../../../services/group";
 import { IColumn, IRow } from "../../../types/groupsTable";
 import { getEmployeesData, getScheduleData } from "./helper";
+import EditIcon from "@mui/icons-material/Edit";
 import Table from "./Table/Table";
 import WeekDaysButtons from "./WeekDaysButtons";
 
@@ -30,6 +31,8 @@ export default function () {
     WEEK_DAYS_DEFAULT_ARRAY
   );
 
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+
   const [dateIni, setDateIni] = useState("2022-09-01");
   const [dateFin, setDateFin] = useState("2022-09-30");
 
@@ -39,6 +42,10 @@ export default function () {
       selected[idx].selected = !selected[idx].selected;
       return [...selected];
     });
+  };
+
+  const hancleClickEditSchedule = () => {
+    setIsEditingSchedule((e) => !e);
   };
 
   useEffect(() => {
@@ -80,6 +87,28 @@ export default function () {
 
   return (
     <Stack style={{ height: "80vh" }} spacing={2}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography
+          style={{ marginTop: "auto", marginBottom: "auto" }}
+          variant="h5"
+        >
+          Schedule
+        </Typography>
+        <div style={{ flexGrow: 1 }} />
+        <div style={{ marginTop: "auto" }}>
+          <Tooltip title="Edit schedule">
+            <IconButton onClick={hancleClickEditSchedule}>
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+        </div>
+      </div>
+
       {isScheduleConstant && (
         <WeekDaysButtons
           selectedWeekDays={selectedWeekDays}
@@ -87,10 +116,20 @@ export default function () {
         />
       )}
       <div>
-        <Table columns={scheduleCols} rows={scheduleRows} />
+        <Table
+          columns={scheduleCols}
+          rows={scheduleRows}
+          isEditing={isEditingSchedule}
+        />
       </div>
       <Typography variant="h5">Employees</Typography>
-      {employeesCols && <Table columns={employeesCols} rows={employeesRows} />}
+      {employeesCols && (
+        <Table
+          columns={employeesCols}
+          rows={employeesRows}
+          cellStyle={{ whiteSpace: "nowrap" }}
+        />
+      )}
     </Stack>
   );
 }

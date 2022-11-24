@@ -4,14 +4,16 @@ import { IColumn, IRow } from "../../../types/groupsTable";
 
 const SUBGROUP_LABEL = "subgroupLabel";
 
-const ON_OFF_BASE_ARRAY = (val: number) => [
+const ON_OFF_BASE_ARRAY = (val: number): IColumn[] => [
   {
     id: `on${val}`,
     label: "ON",
+    canEdit: true,
   },
   {
     id: `off${val}`,
     label: "OFF",
+    canEdit: true,
   },
 ];
 

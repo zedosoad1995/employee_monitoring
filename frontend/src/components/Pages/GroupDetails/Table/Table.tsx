@@ -8,9 +8,18 @@ interface IProps {
   rows: IRow[];
   onClickRow?: (id: string) => () => void;
   style?: React.CSSProperties;
+  cellStyle?: React.CSSProperties;
+  isEditing?: boolean;
 }
 
-export default function ({ columns, rows, onClickRow, style }: IProps) {
+export default function ({
+  columns,
+  rows,
+  onClickRow,
+  style,
+  cellStyle,
+  isEditing,
+}: IProps) {
   return (
     <TableContainer style={style} component={Paper}>
       <Table sx={{ width: "100%", borderCollapse: "initial" }} size="small">
@@ -25,6 +34,8 @@ export default function ({ columns, rows, onClickRow, style }: IProps) {
                 onClickRow={onClickRowFn}
                 row={row}
                 columns={columns}
+                cellStyle={cellStyle}
+                isEditing={isEditing}
               />
             );
           })}
