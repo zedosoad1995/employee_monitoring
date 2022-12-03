@@ -42,7 +42,9 @@ const getScheduleCols = (group: IGroup) => {
   }
 
   const maxNumOnOffs = Math.max(
-    ...group.subgroups.map((subgroup) => subgroup.Break.length + 1)
+    ...group.subgroups.map((subgroup) =>
+      subgroup.Break ? subgroup.Break.length + 1 : 1
+    )
   );
 
   const onOffCols = Array.from(Array(maxNumOnOffs).keys())
@@ -65,11 +67,13 @@ const getScheduleRows = (group: IGroup, onOffCols: IColumn[]) => {
       }),
     };
 
-    const breakTimes = subgroup.Break.reduce<string[]>((acc, el) => {
-      acc = acc.concat([el.startTime, el.endTime]);
+    const breakTimes = subgroup.Break
+      ? subgroup.Break.reduce<string[]>((acc, el) => {
+          acc = acc.concat([el.startTime, el.endTime]);
 
-      return acc;
-    }, []);
+          return acc;
+        }, [])
+      : [];
 
     const timesArr = [subgroup.startTime, ...breakTimes, subgroup.endTime];
 

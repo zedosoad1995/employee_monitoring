@@ -1,3 +1,5 @@
+import { ISubgroup } from "./subgroup";
+
 export interface IGroup {
   id: string;
   name: string;
@@ -6,14 +8,5 @@ export interface IGroup {
     id: string;
     value: number;
   }[];
-  subgroups: {
-    id: string;
-    startTime: string;
-    endTime: string;
-    Break: {
-      id: string;
-      startTime: string;
-      endTime: string;
-    }[];
-  }[];
+  subgroups: ISubgroup[];
 }

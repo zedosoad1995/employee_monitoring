@@ -220,10 +220,12 @@ function Groups() {
       new Date()
     );
     const currEndTime = parse(group.subgroups[0].endTime, "HH:mm", new Date());
-    const currBreaks = group.subgroups[0].Break.map((b: any) => ({
-      startTime: parse(b.startTime, "HH:mm", new Date()),
-      endTime: parse(b.endTime, "HH:mm", new Date()),
-    }));
+    const currBreaks = group.subgroups[0].Break
+      ? group.subgroups[0].Break.map((b: any) => ({
+          startTime: parse(b.startTime, "HH:mm", new Date()),
+          endTime: parse(b.endTime, "HH:mm", new Date()),
+        }))
+      : [];
 
     setValue("name", group.name);
     setValue("startTime", currStartTime);
