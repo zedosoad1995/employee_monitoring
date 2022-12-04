@@ -157,55 +157,15 @@ export const getOne = async (groupId: string) => {
 };
 
 export const update = async (groupId: string, data: any) => {
-  const subgroup = await prisma.subgroup.findFirst({
-    select: {
-      id: true,
+  return prisma.group.update({
+    data: {
+      isConstant: data.isConstant,
+      name: data.name,
     },
     where: {
-      groupId,
+      id: groupId,
     },
   });
-
-  await prisma.$transaction([
-    prisma.break.deleteMany({
-      where: {
-        subgroup: {
-          AND: [
-            {
-              groupId,
-            },
-            {
-              group: {
-                isConstant: true,
-              },
-            },
-          ],
-        },
-      },
-    }),
-    prisma.group.update({
-      data: {
-        name: data.name,
-        SubGroup: {
-          update: {
-            data: {
-              startTime: data.startTime,
-              endTime: data.endTime,
-              Break: {
-                create: data.breaks,
-              },
-            },
-            where: {
-              id: subgroup?.id,
-            },
-          },
-        },
-      },
-      where: {
-        id: groupId,
-      },
-    }),
-  ]);
 };
 
 export const create = async (group: ICreateGroup) => {

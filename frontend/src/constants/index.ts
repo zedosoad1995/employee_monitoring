@@ -28,3 +28,10 @@ export const WEEK_DAYS_DICT = [
     label: "Saturday",
   },
 ];
+
+export const SUBGROUP_TYPES = {
+  START_TIME: "startTime",
+  END_TIME: "endTime",
+  BREAK_START_TIME: "break.startTime",
+  BREAK_END_TIME: "break.endTime",
+};

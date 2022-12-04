@@ -11,6 +11,7 @@ import Table from "./Table/Table";
 import WeekDaysButtons from "./WeekDaysButtons";
 import SubgroupDialog from "./SubgroupDialog";
 import { ISubgroup } from "../../../types/subgroup";
+import { updateSubgroup } from "../../../services/subgroup";
 
 const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
   .fill(false)
@@ -44,6 +45,32 @@ export default function () {
   >();
   const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
 
+  const orderAndSetSubgroup = (
+    value: React.SetStateAction<ISubgroup | undefined>
+  ) => {
+    setSelectedSubgroup((prevValue: ISubgroup | undefined) => {
+      let newValue;
+
+      if (typeof value === "object" || typeof value === "undefined") {
+        newValue = prevValue;
+      } else {
+        newValue = value(prevValue);
+      }
+
+      if (newValue) {
+        newValue.Break?.sort((a, b) => {
+          return a.startTime.localeCompare(b.startTime);
+        });
+
+        return { ...newValue };
+      }
+    });
+  };
+
+  const handleCloseScheduleDialog = () => {
+    setOpenScheduleDialog(false);
+  };
+
   const handleWeekDayClick = (label: string) => () => {
     setSelectedWeekDays((selected) => {
       const idx = selected.findIndex((s) => s.label === label);
@@ -64,10 +91,10 @@ export default function () {
     }
   };
 
-  useEffect(() => {
+  const updateData = async () => {
     if (!id) return;
 
-    getGroup(id).then((group) => {
+    return getGroup(id).then((group) => {
       setSubgroups(group.subgroups);
 
       getEmployees({
@@ -101,14 +128,26 @@ export default function () {
       setScheduleCols(columnsData);
       setScheduleRows(rowsData);
     });
+  };
+
+  const handleEditSchedule = async (data: any) => {
+    if (selectedSubgroup) await updateSubgroup(selectedSubgroup.id, data);
+    setOpenScheduleDialog(false);
+    updateData();
+  };
+
+  useEffect(() => {
+    updateData();
   }, [id]);
 
   return (
     <>
       <SubgroupDialog
         open={openScheduleDialog}
-        onClose={() => {}}
+        onClose={handleCloseScheduleDialog}
         subgroup={selectedSubgroup}
+        setSubgroup={orderAndSetSubgroup}
+        onSubmit={handleEditSchedule}
       />
       <Stack style={{ height: "80vh" }} spacing={2}>
         <div

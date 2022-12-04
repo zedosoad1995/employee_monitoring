@@ -1,5 +1,13 @@
+import { isValid, parse } from "date-fns";
 import * as yup from "yup";
 import { AnyObject } from "yup/lib/types";
+
+function isTimeValid(this: yup.TestContext<AnyObject>, time?: string) {
+  if (!time) return false;
+
+  const parsedTime = parse(time, "HH:mm", new Date());
+  return /\d{2}:\d{2}/.test(time) && isValid(parsedTime);
+}
 
 function isStartTimeSmaller(
   this: yup.TestContext<AnyObject>,
@@ -30,13 +38,15 @@ export const SubgroupSchema = yup.object().shape({
     .string()
     .typeError("Invalid String")
     .required()
-    .test("is-smaller", "Start Time should be smaller", isStartTimeSmaller),
+    .test("is-smaller", "Start Time should be smaller", isStartTimeSmaller)
+    .test("is-valid-time", "Time is not invalid", isTimeValid),
   endTime: yup
     .string()
     .typeError("Invalid String")
     .required()
-    .test("is-greater", "End Time should be greater", isEndTimeGreater),
-  Break: yup.array().of(
+    .test("is-greater", "End Time should be greater", isEndTimeGreater)
+    .test("is-valid-time", "Time is not invalid", isTimeValid),
+  breaks: yup.array().of(
     yup.object().shape({
       startTime: yup
         .string()
@@ -46,7 +56,8 @@ export const SubgroupSchema = yup.object().shape({
           "is-smaller-break",
           "Start Time should be smaller",
           isStartTimeSmaller
-        ),
+        )
+        .test("is-valid-time", "Time is not invalid", isTimeValid),
       endTime: yup
         .string()
         .typeError("Invalid String")
@@ -55,7 +66,8 @@ export const SubgroupSchema = yup.object().shape({
           "is-greater-break",
           "End Time should be greater",
           isEndTimeGreater
-        ),
+        )
+        .test("is-valid-time", "Time is not invalid", isTimeValid),
     })
   ),
 });
