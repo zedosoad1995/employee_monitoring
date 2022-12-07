@@ -1,7 +1,7 @@
 import prisma from "../../prisma/prisma-client";
 
 export const update = async (subgroupId: string, data: any) => {
-  const breaks = data.breaks.map((b: any) => ({
+  const breaks = data.Break.map((b: any) => ({
     startTime: b.startTime,
     endTime: b.endTime,
   }));

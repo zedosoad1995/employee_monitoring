@@ -27,7 +27,7 @@ function isEndTimeGreater(this: yup.TestContext<AnyObject>, endTime?: string) {
 export interface ISubgroupSchema {
   startTime?: string;
   endTime?: string;
-  breaks: {
+  Break: {
     startTime?: string;
     endTime?: string;
   }[];
@@ -46,7 +46,7 @@ export const SubgroupSchema = yup.object().shape({
     .required()
     .test("is-greater", "End Time should be greater", isEndTimeGreater)
     .test("is-valid-time", "Time is not invalid", isTimeValid),
-  breaks: yup.array().of(
+  Break: yup.array().of(
     yup.object().shape({
       startTime: yup
         .string()

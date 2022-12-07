@@ -1,6 +1,7 @@
 import { dateToStr, getDateRange } from "../../../helpers/dateTime";
 import { IGroup } from "../../../types/group";
-import { IColumn, IRow } from "../../../types/groupsTable";
+import { IColumn, IRow, CellType } from "../../../types/groupsTable";
+import { ISubgroup } from "../../../types/subgroup";
 
 const SUBGROUP_LABEL = "subgroupLabel";
 
@@ -9,11 +10,13 @@ const ON_OFF_BASE_ARRAY = (val: number): IColumn[] => [
     id: `on${val}`,
     label: "ON",
     canEdit: true,
+    type: CellType.TIME,
   },
   {
     id: `off${val}`,
     label: "OFF",
     canEdit: true,
+    type: CellType.TIME,
   },
 ];
 
@@ -96,6 +99,28 @@ export const getScheduleData = (group: IGroup) => {
   return [columnsData, rowsData];
 };
 
+export const scheduleRows2Subgroups = (rows: IRow[], cols: IColumn[]) => {
+  cols = cols.filter((col) => col.canEdit);
+  return rows.map((row) =>
+    cols.reduce(
+      (acc: ISubgroup, col, index) => {
+        if (index === 0) {
+          acc.startTime = row[col.id];
+        } else if (index === cols.length - 1) {
+          acc.endTime = row[col.id];
+        } else if (index % 2 === 1) {
+          acc.Break?.push({ id: "", startTime: row[col.id], endTime: "" });
+        } else {
+          if (acc.Break) acc.Break[acc.Break?.length - 1].endTime = row[col.id];
+        }
+
+        return acc;
+      },
+      { id: row.id, startTime: "", endTime: "", Break: [] }
+    )
+  );
+};
+
 const getEmployeesCols = (group: any, dateIni: string, dateFin: string) => {
   const columnsData: IColumn[] = [{ id: "employeeName" }];
 
@@ -106,6 +131,8 @@ const getEmployeesCols = (group: any, dateIni: string, dateFin: string) => {
       columnsData.push({
         id: dateToStr(date),
         label: dateToStr(date, "M/dd"),
+        canEdit: true,
+        type: CellType.SELECT,
       });
     });
   }

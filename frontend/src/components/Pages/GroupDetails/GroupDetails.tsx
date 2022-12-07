@@ -1,17 +1,29 @@
-import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  IconButton,
+  SelectChangeEvent,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { WEEK_DAYS_DICT } from "../../../constants";
 import { getEmployees } from "../../../services/employees";
 import { getGroup } from "../../../services/group";
 import { IColumn, IRow } from "../../../types/groupsTable";
-import { getEmployeesData, getScheduleData } from "./helper";
+import {
+  getEmployeesData,
+  getScheduleData,
+  scheduleRows2Subgroups,
+} from "./helper";
 import EditIcon from "@mui/icons-material/Edit";
 import Table from "./Table/Table";
 import WeekDaysButtons from "./WeekDaysButtons";
 import SubgroupDialog from "./SubgroupDialog";
 import { ISubgroup } from "../../../types/subgroup";
 import { updateSubgroup } from "../../../services/subgroup";
+import SaveIcon from "@mui/icons-material/Save";
+import { format } from "date-fns";
 
 const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
   .fill(false)
@@ -83,11 +95,22 @@ export default function () {
     setIsEditingSchedule((e) => !e);
   };
 
+  const hancleClickSaveSchedule = async () => {
+    const newSubgroups = scheduleRows2Subgroups(scheduleRows, scheduleCols);
+    for (const row of newSubgroups) {
+      await updateSubgroup(row.id, row);
+    }
+    setIsEditingSchedule(false);
+    updateData();
+  };
+
   const handleClickSchedule = (id: string) => () => {
-    const subgroup = subgroups.find((s) => s.id === id);
-    if (subgroup) {
-      setOpenScheduleDialog(true);
-      setSelectedSubgroup(subgroup);
+    if (!isEditingSchedule) {
+      const subgroup = subgroups.find((s) => s.id === id);
+      if (subgroup) {
+        setOpenScheduleDialog(true);
+        setSelectedSubgroup(subgroup);
+      }
     }
   };
 
@@ -130,11 +153,47 @@ export default function () {
     });
   };
 
-  const handleEditSchedule = async (data: any) => {
+  const handleEditScheduleDialog = async (data: any) => {
     if (selectedSubgroup) await updateSubgroup(selectedSubgroup.id, data);
     setOpenScheduleDialog(false);
     updateData();
   };
+
+  const handleEditScheduleTable =
+    (rowId: string) =>
+    (colId: string) =>
+    (value: any, keyboardInputValue?: string) => {
+      setScheduleRows((prevVal) => {
+        const rowIdx = prevVal.findIndex((val) => val.id === rowId);
+        if (rowIdx !== -1) {
+          if (keyboardInputValue !== undefined) {
+            prevVal[rowIdx][colId] = keyboardInputValue;
+          } else if (value) {
+            prevVal[rowIdx][colId] = format(value, "HH:mm");
+          }
+        }
+
+        return [...prevVal];
+      });
+    };
+
+  const handleEditEmployeeTable =
+    (rowId: string) =>
+    (colId: string) =>
+    (event: SelectChangeEvent<number>, child: React.ReactNode) => {
+      setEmployeesRows((prevVal) => {
+        const rowIdx = prevVal.findIndex((val) => val.id === rowId);
+        if (rowIdx !== -1) {
+          if (event.target.value === "") {
+            delete prevVal[rowIdx][colId];
+          } else {
+            prevVal[rowIdx][colId] = event.target.value;
+          }
+        }
+
+        return [...prevVal];
+      });
+    };
 
   useEffect(() => {
     updateData();
@@ -147,7 +206,7 @@ export default function () {
         onClose={handleCloseScheduleDialog}
         subgroup={selectedSubgroup}
         setSubgroup={orderAndSetSubgroup}
-        onSubmit={handleEditSchedule}
+        onSubmit={handleEditScheduleDialog}
       />
       <Stack style={{ height: "80vh" }} spacing={2}>
         <div
@@ -169,6 +228,14 @@ export default function () {
                 <EditIcon />
               </IconButton>
             </Tooltip>
+            <Tooltip title="Save Changes">
+              <IconButton
+                disabled={!isEditingSchedule}
+                onClick={hancleClickSaveSchedule}
+              >
+                <SaveIcon />
+              </IconButton>
+            </Tooltip>
           </div>
         </div>
 
@@ -184,6 +251,7 @@ export default function () {
             rows={scheduleRows}
             isEditing={isEditingSchedule}
             onClickRow={handleClickSchedule}
+            onChangeTime={handleEditScheduleTable}
           />
         </div>
         <Typography variant="h5">Employees</Typography>
@@ -192,6 +260,9 @@ export default function () {
             columns={employeesCols}
             rows={employeesRows}
             cellStyle={{ whiteSpace: "nowrap" }}
+            isEditing={true}
+            onChangeSelect={handleEditEmployeeTable}
+            selectValues={subgroups.map((s, index) => index + 1)}
           />
         )}
       </Stack>

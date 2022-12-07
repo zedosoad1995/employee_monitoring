@@ -55,7 +55,7 @@ export default function ({
     defaultValues: {
       startTime: subgroup?.startTime,
       endTime: subgroup?.endTime,
-      breaks: subgroup?.Break ? subgroup.Break : [],
+      Break: subgroup?.Break ? subgroup.Break : [],
     },
     resolver: yupResolver(SubgroupSchema),
     mode: "onChange",
@@ -69,7 +69,7 @@ export default function ({
       startTime: "00:00",
       endTime: "00:00",
     });
-    setValue("breaks", subgroup.Break);
+    setValue("Break", subgroup.Break);
     setSubgroup({ ...subgroup });
   };
 
@@ -77,7 +77,7 @@ export default function ({
     if (!subgroup || !subgroup.Break) return;
 
     subgroup.Break.splice(row, 1);
-    setValue("breaks", subgroup.Break);
+    setValue("Break", subgroup.Break);
     setSubgroup({ ...subgroup });
   };
 
@@ -147,7 +147,7 @@ export default function ({
         return a.startTime.localeCompare(b.startTime);
       });
 
-      setValue("breaks", subgroup.Break);
+      setValue("Break", subgroup.Break);
       console.log(subgroup.Break);
     }
   }, [JSON.stringify(subgroup?.Break)]);
@@ -228,7 +228,7 @@ export default function ({
                       >
                         <Controller
                           control={control}
-                          name={`breaks.${index}.startTime`}
+                          name={`Break.${index}.startTime`}
                           defaultValue={b.startTime}
                           render={() => (
                             <TimeField
@@ -238,8 +238,8 @@ export default function ({
                                 index
                               )}
                               errorMessage={
-                                errors.breaks &&
-                                errors.breaks[index]?.startTime?.message
+                                errors.Break &&
+                                errors.Break[index]?.startTime?.message
                               }
                               label="Start Time"
                             />
@@ -248,7 +248,7 @@ export default function ({
 
                         <Controller
                           control={control}
-                          name={`breaks.${index}.endTime`}
+                          name={`Break.${index}.endTime`}
                           defaultValue={b.endTime}
                           render={() => (
                             <TimeField
@@ -258,8 +258,8 @@ export default function ({
                                 index
                               )}
                               errorMessage={
-                                errors.breaks &&
-                                errors.breaks[index]?.endTime?.message
+                                errors.Break &&
+                                errors.Break[index]?.endTime?.message
                               }
                               label="End Time"
                             />

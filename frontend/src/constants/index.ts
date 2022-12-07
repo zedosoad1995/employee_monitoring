@@ -32,6 +32,6 @@ export const WEEK_DAYS_DICT = [
 export const SUBGROUP_TYPES = {
   START_TIME: "startTime",
   END_TIME: "endTime",
-  BREAK_START_TIME: "break.startTime",
-  BREAK_END_TIME: "break.endTime",
+  BREAK_START_TIME: "Break.startTime",
+  BREAK_END_TIME: "Break.endTime",
 };

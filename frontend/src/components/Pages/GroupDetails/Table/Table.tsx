@@ -1,4 +1,10 @@
-import { Paper, Table, TableBody, TableContainer } from "@mui/material";
+import {
+  Paper,
+  SelectChangeEvent,
+  Table,
+  TableBody,
+  TableContainer,
+} from "@mui/material";
 import { IColumn, IRow } from "../../../../types/groupsTable";
 import TableHeader from "./TableHeader";
 import Row from "./TableRow";
@@ -10,6 +16,15 @@ interface IProps {
   style?: React.CSSProperties;
   cellStyle?: React.CSSProperties;
   isEditing?: boolean;
+  onChangeTime?: (
+    row: string
+  ) => (col: string) => (value: any, keyboardInputValue?: string) => void;
+  onChangeSelect?: (
+    row: string
+  ) => (
+    col: string
+  ) => (event: SelectChangeEvent<number>, child: React.ReactNode) => void;
+  selectValues?: any[];
 }
 
 export default function ({
@@ -19,6 +34,9 @@ export default function ({
   style,
   cellStyle,
   isEditing,
+  onChangeTime,
+  onChangeSelect,
+  selectValues,
 }: IProps) {
   return (
     <TableContainer style={style} component={Paper}>
@@ -36,6 +54,11 @@ export default function ({
                 columns={columns}
                 cellStyle={cellStyle}
                 isEditing={isEditing}
+                onChangeTime={onChangeTime ? onChangeTime(row.id) : undefined}
+                onChangeSelect={
+                  onChangeSelect ? onChangeSelect(row.id) : undefined
+                }
+                selectValues={selectValues}
               />
             );
           })}
