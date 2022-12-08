@@ -47,6 +47,7 @@ export default function () {
   );
 
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+  const [isEditingEmployees, setIsEditingEmoloyees] = useState(false);
 
   const [dateIni, setDateIni] = useState("2022-09-01");
   const [dateFin, setDateFin] = useState("2022-09-30");
@@ -95,13 +96,26 @@ export default function () {
     setIsEditingSchedule((e) => !e);
   };
 
-  const hancleClickSaveSchedule = async () => {
+  const hancleClickEditEmployees = () => {
+    setIsEditingEmoloyees((e) => !e);
+  };
+
+  const handleClickSaveSchedule = async () => {
     const newSubgroups = scheduleRows2Subgroups(scheduleRows, scheduleCols);
     for (const row of newSubgroups) {
       await updateSubgroup(row.id, row);
     }
     setIsEditingSchedule(false);
     updateData();
+  };
+
+  const handleClickSaveEmployees = async () => {
+    /* const newSubgroups = scheduleRows2Subgroups(scheduleRows, scheduleCols);
+    for (const row of newSubgroups) {
+      await updateSubgroup(row.id, row);
+    }
+    setIsEditingSchedule(false);
+    updateData(); */
   };
 
   const handleClickSchedule = (id: string) => () => {
@@ -221,7 +235,6 @@ export default function () {
           >
             Schedule
           </Typography>
-          <div style={{ flexGrow: 1 }} />
           <div style={{ marginTop: "auto" }}>
             <Tooltip title="Edit schedule">
               <IconButton onClick={hancleClickEditSchedule}>
@@ -231,7 +244,7 @@ export default function () {
             <Tooltip title="Save Changes">
               <IconButton
                 disabled={!isEditingSchedule}
-                onClick={hancleClickSaveSchedule}
+                onClick={handleClickSaveSchedule}
               >
                 <SaveIcon />
               </IconButton>
@@ -254,13 +267,41 @@ export default function () {
             onChangeTime={handleEditScheduleTable}
           />
         </div>
-        <Typography variant="h5">Employees</Typography>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography
+            style={{ marginTop: "auto", marginBottom: "auto" }}
+            variant="h5"
+          >
+            Employees
+          </Typography>
+          <div style={{ marginTop: "auto" }}>
+            <Tooltip title="Edit Employees Dates">
+              <IconButton onClick={hancleClickEditEmployees}>
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Save Changes">
+              <IconButton
+                disabled={!isEditingEmployees}
+                onClick={handleClickSaveEmployees}
+              >
+                <SaveIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
+        </div>
+
         {employeesCols && (
           <Table
             columns={employeesCols}
             rows={employeesRows}
             cellStyle={{ whiteSpace: "nowrap" }}
-            isEditing={true}
+            isEditing={isEditingEmployees}
             onChangeSelect={handleEditEmployeeTable}
             selectValues={subgroups.map((s, index) => index + 1)}
           />

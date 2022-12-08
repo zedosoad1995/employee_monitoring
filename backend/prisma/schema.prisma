@@ -69,6 +69,7 @@ model WorkShift {
   updatedAt  DateTime @updatedAt
   subgroupId String
   employeeId String
+  @@unique([employeeId, date])
 }
 
 model Break {
