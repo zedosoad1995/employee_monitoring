@@ -6,7 +6,7 @@ export const updateMany = async (
   dateIni: string,
   dateFin: string
 ) => {
-  prisma.$transaction([
+  await prisma.$transaction([
     prisma.workShift.deleteMany({
       where: {
         AND: [
@@ -24,7 +24,7 @@ export const updateMany = async (
         employeeId,
       },
     }),
-    data.map(({ date, subgroupId }: any) =>
+    ...data.workshifts.map(({ date, subgroupId }: any) =>
       prisma.workShift.create({
         data: {
           date,

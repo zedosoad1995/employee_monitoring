@@ -10,6 +10,6 @@ const api = Router()
   .use("/employees", employeesRoute)
   .use("/groups", groupsRoute)
   .use("/subgroups", subgroupsRoute)
-  .use("/workshift", workshiftRoute);
+  .use("/workshifts", workshiftRoute);
 
 export default Router().use("/api", api);

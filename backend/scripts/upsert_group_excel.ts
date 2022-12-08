@@ -67,10 +67,6 @@ const fillDB = async () => {
 
         const subgroup = await getSubgroup(tx, subgroupData, group);
 
-        console.log(subgroup);
-
-        //const subgroup = await createSubGroups(tx, subgroupData, group.id);
-
         if (subgroupDict[groupName]) {
           subgroupDict[groupName][String(subgroupLabel)] = subgroup.id;
         } else {
@@ -115,3 +111,5 @@ const fillDB = async () => {
 fillDB().then(() => {
   console.log("Done");
 });
+
+// TODO: Check if employee is constant

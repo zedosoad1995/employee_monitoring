@@ -2,6 +2,7 @@ import { dateToStr, getDateRange } from "../../../helpers/dateTime";
 import { IGroup } from "../../../types/group";
 import { IColumn, IRow, CellType } from "../../../types/groupsTable";
 import { ISubgroup } from "../../../types/subgroup";
+import { IUpdateWorkshiftBody } from "../../../types/workshift";
 
 const SUBGROUP_LABEL = "subgroupLabel";
 
@@ -32,6 +33,13 @@ export const getSubgroupId2LabelDict = (subgroups: { id: string }[]) => {
       return acc;
     },
     {}
+  );
+};
+
+export const getLabel2SubgroupIdDict = (subgroups: { id: string }[]) => {
+  const subgroupId2Label = getSubgroupId2LabelDict(subgroups);
+  return Object.fromEntries(
+    Object.entries(subgroupId2Label).map(([k, v]) => [v, k])
   );
 };
 
@@ -119,6 +127,29 @@ export const scheduleRows2Subgroups = (rows: IRow[], cols: IColumn[]) => {
       { id: row.id, startTime: "", endTime: "", Break: [] }
     )
   );
+};
+
+export const transformWorkshifts = (
+  rows: IRow[],
+  cols: IColumn[],
+  label2SubgroupId: {
+    [k: string]: string;
+  }
+) => {
+  cols = cols.filter((col) => col.canEdit);
+
+  return rows.map((row) => ({
+    [row.id]: cols.reduce<IUpdateWorkshiftBody[]>((acc, col) => {
+      if (row[col.id]) {
+        acc.push({
+          date: col.id,
+          subgroupId: label2SubgroupId[row[col.id]],
+        });
+      }
+
+      return acc;
+    }, []),
+  }));
 };
 
 const getEmployeesCols = (group: any, dateIni: string, dateFin: string) => {

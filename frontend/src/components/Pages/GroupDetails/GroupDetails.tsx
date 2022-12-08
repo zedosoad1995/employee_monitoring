@@ -13,8 +13,10 @@ import { getGroup } from "../../../services/group";
 import { IColumn, IRow } from "../../../types/groupsTable";
 import {
   getEmployeesData,
+  getLabel2SubgroupIdDict,
   getScheduleData,
   scheduleRows2Subgroups,
+  transformWorkshifts,
 } from "./helper";
 import EditIcon from "@mui/icons-material/Edit";
 import Table from "./Table/Table";
@@ -24,6 +26,7 @@ import { ISubgroup } from "../../../types/subgroup";
 import { updateSubgroup } from "../../../services/subgroup";
 import SaveIcon from "@mui/icons-material/Save";
 import { format } from "date-fns";
+import { updateWorkshifts } from "../../../services/workshift";
 
 const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
   .fill(false)
@@ -47,7 +50,7 @@ export default function () {
   );
 
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
-  const [isEditingEmployees, setIsEditingEmoloyees] = useState(false);
+  const [isEditingEmployees, setIsEditingEmployees] = useState(false);
 
   const [dateIni, setDateIni] = useState("2022-09-01");
   const [dateFin, setDateFin] = useState("2022-09-30");
@@ -97,7 +100,7 @@ export default function () {
   };
 
   const hancleClickEditEmployees = () => {
-    setIsEditingEmoloyees((e) => !e);
+    setIsEditingEmployees((e) => !e);
   };
 
   const handleClickSaveSchedule = async () => {
@@ -110,6 +113,26 @@ export default function () {
   };
 
   const handleClickSaveEmployees = async () => {
+    const label2SubgroupId = getLabel2SubgroupIdDict(subgroups);
+    const workshifts = transformWorkshifts(
+      employeesRows,
+      employeesCols as IColumn[],
+      label2SubgroupId
+    );
+
+    for (const workshiftsEmployee of workshifts) {
+      await updateWorkshifts(
+        { workshifts: Object.values(workshiftsEmployee)[0] },
+        Object.keys(workshiftsEmployee)[0],
+        dateIni,
+        dateFin
+      );
+    }
+
+    setIsEditingEmployees(false);
+    updateData();
+
+    //employeesRows[0]
     /* const newSubgroups = scheduleRows2Subgroups(scheduleRows, scheduleCols);
     for (const row of newSubgroups) {
       await updateSubgroup(row.id, row);
