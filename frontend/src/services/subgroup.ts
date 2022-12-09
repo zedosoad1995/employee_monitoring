@@ -20,3 +20,7 @@ export const createSubgroup = ({
     breaks,
   });
 };
+
+export const deleteSubgroup = (id: string) => {
+  return axios.delete(`${process.env.REACT_APP_API_URL}/subgroups/${id}`);
+};

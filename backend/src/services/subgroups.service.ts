@@ -44,3 +44,11 @@ export const update = async (subgroupId: string, data: any) => {
     }),
   ]);
 };
+
+export const deleteOne = async (id: string) => {
+  return prisma.subgroup.delete({
+    where: {
+      id,
+    },
+  });
+};

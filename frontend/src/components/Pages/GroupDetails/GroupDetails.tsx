@@ -23,7 +23,11 @@ import Table from "./Table/Table";
 import WeekDaysButtons from "./WeekDaysButtons";
 import SubgroupDialog from "./SubgroupDialog";
 import { ISubgroup } from "../../../types/subgroup";
-import { createSubgroup, updateSubgroup } from "../../../services/subgroup";
+import {
+  createSubgroup,
+  deleteSubgroup,
+  updateSubgroup,
+} from "../../../services/subgroup";
 import SaveIcon from "@mui/icons-material/Save";
 import { format } from "date-fns";
 import { updateWorkshifts } from "../../../services/workshift";
@@ -151,12 +155,22 @@ export default function () {
   const handleClickSchedule = (id: string) => () => {
     if (!isEditingSchedule) {
       setDialogScheduleType("edit");
-      const subgroup = subgroups.find((s) => s.id === id);
-      if (subgroup) {
-        setOpenScheduleDialog(true);
-        setSelectedSubgroup(subgroup);
-      }
+      setSubgroups((prevVal) => {
+        const subgroup = prevVal.find((s) => s.id === id);
+
+        if (subgroup) {
+          setOpenScheduleDialog(true);
+          setSelectedSubgroup(subgroup);
+        }
+
+        return [...prevVal];
+      });
     }
+  };
+
+  const handleDeleteSchedule = (id: string) => async () => {
+    await deleteSubgroup(id);
+    await updateData();
   };
 
   const updateData = async () => {
@@ -191,7 +205,11 @@ export default function () {
         return selected;
       });
 
-      const [columnsData, rowsData] = getScheduleData(group);
+      const [columnsData, rowsData] = getScheduleData(
+        group,
+        handleClickSchedule,
+        handleDeleteSchedule
+      );
 
       setScheduleCols(columnsData);
       setScheduleRows(rowsData);
@@ -311,15 +329,12 @@ export default function () {
             handleClick={handleWeekDayClick}
           />
         )}
-        <div>
-          <Table
-            columns={scheduleCols}
-            rows={scheduleRows}
-            isEditing={isEditingSchedule}
-            onClickRow={handleClickSchedule}
-            onChangeTime={handleEditScheduleTable}
-          />
-        </div>
+        <Table
+          columns={scheduleCols}
+          rows={scheduleRows}
+          isEditing={isEditingSchedule}
+          onChangeTime={handleEditScheduleTable}
+        />
         <div
           style={{
             display: "flex",

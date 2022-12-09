@@ -148,7 +148,6 @@ export default function ({
       });
 
       setValue("breaks", subgroup.Break);
-      console.log(subgroup.Break);
     }
   }, [JSON.stringify(subgroup?.Break)]);
 

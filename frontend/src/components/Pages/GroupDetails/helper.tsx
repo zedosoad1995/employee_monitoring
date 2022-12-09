@@ -3,8 +3,57 @@ import { IGroup } from "../../../types/group";
 import { IColumn, IRow, CellType } from "../../../types/groupsTable";
 import { ISubgroup } from "../../../types/subgroup";
 import { IUpdateWorkshiftBody } from "../../../types/workshift";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { IconButton, Menu, MenuItem } from "@mui/material";
+import { useState } from "react";
 
 const SUBGROUP_LABEL = "subgroupLabel";
+const MORE_OPTIONS_LABEL = "moreOptionsLabel";
+
+const MoreOptionsComponent: React.FC<{
+  isConstant: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+}> = ({ isConstant, onEdit, onDelete }) => {
+  const [anchorEl, setAnchorEl] = useState<
+    (EventTarget & HTMLButtonElement) | undefined
+  >();
+  const [open, setOpen] = useState(false);
+
+  const handleEdit = async () => {
+    await onEdit();
+    setOpen(false);
+  };
+
+  const handleDelete = async () => {
+    await onDelete();
+    setOpen(false);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpen = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.stopPropagation();
+    setOpen(true);
+    setAnchorEl(event.currentTarget);
+  };
+
+  return (
+    <>
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+        <MenuItem onClick={handleEdit}>Edit Schedule</MenuItem>
+        <MenuItem onClick={handleDelete}>Delete Schedule</MenuItem>
+      </Menu>
+      <IconButton onClick={handleOpen}>
+        <MoreVertIcon />
+      </IconButton>
+    </>
+  );
+};
 
 const ON_OFF_BASE_ARRAY = (val: number): IColumn[] => [
   {
@@ -46,6 +95,10 @@ export const getLabel2SubgroupIdDict = (subgroups: { id: string }[]) => {
 const getScheduleCols = (group: IGroup) => {
   const columnsData: IColumn[] = [];
 
+  columnsData.push({
+    id: MORE_OPTIONS_LABEL,
+  });
+
   if (!group.isConstant) {
     columnsData.push({
       id: SUBGROUP_LABEL,
@@ -65,7 +118,12 @@ const getScheduleCols = (group: IGroup) => {
   return [columnsData.concat(onOffCols), onOffCols];
 };
 
-const getScheduleRows = (group: IGroup, onOffCols: IColumn[]) => {
+const getScheduleRows = (
+  group: IGroup,
+  onOffCols: IColumn[],
+  handleEditSchedule: (id: string) => () => void,
+  handleDeleteSchedule: (id: string) => () => void
+) => {
   const rowsData: IRow[] = [];
 
   const subgroupId2Label = getSubgroupId2LabelDict(group.subgroups);
@@ -73,6 +131,13 @@ const getScheduleRows = (group: IGroup, onOffCols: IColumn[]) => {
   group.subgroups.forEach((subgroup) => {
     const rowData: any = {
       id: subgroup.id,
+      [MORE_OPTIONS_LABEL]: (
+        <MoreOptionsComponent
+          isConstant={group.isConstant}
+          onEdit={handleEditSchedule(subgroup.id)}
+          onDelete={handleDeleteSchedule(subgroup.id)}
+        />
+      ),
       ...(!group.isConstant && {
         [SUBGROUP_LABEL]: subgroupId2Label[subgroup.id],
       }),
@@ -100,9 +165,18 @@ const getScheduleRows = (group: IGroup, onOffCols: IColumn[]) => {
   return rowsData;
 };
 
-export const getScheduleData = (group: IGroup) => {
+export const getScheduleData = (
+  group: IGroup,
+  handleEditSchedule: (id: string) => () => void,
+  handleDeleteSchedule: (id: string) => () => void
+) => {
   const [columnsData, onOffCols] = getScheduleCols(group);
-  const rowsData = getScheduleRows(group, onOffCols);
+  const rowsData = getScheduleRows(
+    group,
+    onOffCols,
+    handleEditSchedule,
+    handleDeleteSchedule
+  );
 
   return [columnsData, rowsData];
 };

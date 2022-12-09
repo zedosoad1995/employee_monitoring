@@ -32,3 +32,18 @@ export const update = async (
 
   res.status(httpStatusCodes.OK).json(resp);
 };
+
+export const deleteOne = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let resp;
+  try {
+    resp = await SubgroupsService.deleteOne(req.params.id);
+  } catch (err) {
+    return next(err);
+  }
+
+  res.status(httpStatusCodes.NO_CONTENT).json({});
+};

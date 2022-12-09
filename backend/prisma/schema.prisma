@@ -62,8 +62,8 @@ model Subgroup {
 model WorkShift {
   id         String   @id @default(uuid())
   date       String?
-  subgroup   Subgroup @relation(fields: [subgroupId], references: [id])
-  employee   Employee @relation(fields: [employeeId], references: [id])
+  subgroup   Subgroup @relation(fields: [subgroupId], references: [id], onDelete: Cascade)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   subgroupId String
@@ -75,7 +75,7 @@ model Break {
   id         String   @id @default(uuid())
   startTime  String
   endTime    String
-  subgroup   Subgroup @relation(fields: [subgroupId], references: [id])
+  subgroup   Subgroup @relation(fields: [subgroupId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   subgroupId String
