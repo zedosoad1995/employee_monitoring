@@ -23,10 +23,11 @@ import Table from "./Table/Table";
 import WeekDaysButtons from "./WeekDaysButtons";
 import SubgroupDialog from "./SubgroupDialog";
 import { ISubgroup } from "../../../types/subgroup";
-import { updateSubgroup } from "../../../services/subgroup";
+import { createSubgroup, updateSubgroup } from "../../../services/subgroup";
 import SaveIcon from "@mui/icons-material/Save";
 import { format } from "date-fns";
 import { updateWorkshifts } from "../../../services/workshift";
+import AddIcon from "@mui/icons-material/Add";
 
 const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
   .fill(false)
@@ -60,6 +61,9 @@ export default function () {
     ISubgroup | undefined
   >();
   const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
+  const [dialogScheduleType, setDialogScheduleType] = useState<
+    "edit" | "create"
+  >("edit");
 
   const orderAndSetSubgroup = (
     value: React.SetStateAction<ISubgroup | undefined>
@@ -95,11 +99,22 @@ export default function () {
     });
   };
 
-  const hancleClickEditSchedule = () => {
+  const handleClickCreateSchedule = () => {
+    setDialogScheduleType("create");
+    setOpenScheduleDialog(true);
+    setSelectedSubgroup({
+      id: "",
+      startTime: "00:00",
+      endTime: "00:00",
+      Break: [],
+    });
+  };
+
+  const handleClickEditSchedule = () => {
     setIsEditingSchedule((e) => !e);
   };
 
-  const hancleClickEditEmployees = () => {
+  const handleClickEditEmployees = () => {
     setIsEditingEmployees((e) => !e);
   };
 
@@ -131,18 +146,11 @@ export default function () {
 
     setIsEditingEmployees(false);
     updateData();
-
-    //employeesRows[0]
-    /* const newSubgroups = scheduleRows2Subgroups(scheduleRows, scheduleCols);
-    for (const row of newSubgroups) {
-      await updateSubgroup(row.id, row);
-    }
-    setIsEditingSchedule(false);
-    updateData(); */
   };
 
   const handleClickSchedule = (id: string) => () => {
     if (!isEditingSchedule) {
+      setDialogScheduleType("edit");
       const subgroup = subgroups.find((s) => s.id === id);
       if (subgroup) {
         setOpenScheduleDialog(true);
@@ -188,6 +196,18 @@ export default function () {
       setScheduleCols(columnsData);
       setScheduleRows(rowsData);
     });
+  };
+
+  const handleCreateScheduleDialog = async (data: any) => {
+    if (selectedSubgroup)
+      await createSubgroup({
+        groupId: id,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        breaks: data.breaks,
+      });
+    setOpenScheduleDialog(false);
+    updateData();
   };
 
   const handleEditScheduleDialog = async (data: any) => {
@@ -243,7 +263,12 @@ export default function () {
         onClose={handleCloseScheduleDialog}
         subgroup={selectedSubgroup}
         setSubgroup={orderAndSetSubgroup}
-        onSubmit={handleEditScheduleDialog}
+        onSubmit={
+          dialogScheduleType === "edit"
+            ? handleEditScheduleDialog
+            : handleCreateScheduleDialog
+        }
+        isCreate={dialogScheduleType === "create"}
       />
       <Stack style={{ height: "80vh" }} spacing={2}>
         <div
@@ -259,8 +284,13 @@ export default function () {
             Schedule
           </Typography>
           <div style={{ marginTop: "auto" }}>
+            <Tooltip title="Add schedule">
+              <IconButton onClick={handleClickCreateSchedule}>
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Edit schedule">
-              <IconButton onClick={hancleClickEditSchedule}>
+              <IconButton onClick={handleClickEditSchedule}>
                 <EditIcon />
               </IconButton>
             </Tooltip>
@@ -304,7 +334,7 @@ export default function () {
           </Typography>
           <div style={{ marginTop: "auto" }}>
             <Tooltip title="Edit Employees Dates">
-              <IconButton onClick={hancleClickEditEmployees}>
+              <IconButton onClick={handleClickEditEmployees}>
                 <EditIcon />
               </IconButton>
             </Tooltip>

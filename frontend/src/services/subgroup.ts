@@ -6,3 +6,17 @@ export const updateSubgroup = (subgroupId: string, data: any) => {
     data
   );
 };
+
+export const createSubgroup = ({
+  groupId,
+  startTime,
+  endTime,
+  breaks,
+}: any) => {
+  return axios.post(`${process.env.REACT_APP_API_URL}/subgroups`, {
+    groupId,
+    startTime,
+    endTime,
+    breaks,
+  });
+};
