@@ -22,6 +22,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import Table from "./Table/Table";
 import WeekDaysButtons from "./WeekDaysButtons";
 import SubgroupDialog from "./SubgroupDialog";
+import EmployeesListDialog from "./EmployeesListDialog";
 import { ISubgroup } from "../../../types/subgroup";
 import {
   createSubgroup,
@@ -65,6 +66,7 @@ export default function () {
     ISubgroup | undefined
   >();
   const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
+  const [openEmployeesDialog, setOpenEmployeesDialog] = useState(false);
   const [dialogScheduleType, setDialogScheduleType] = useState<
     "edit" | "create"
   >("edit");
@@ -95,6 +97,10 @@ export default function () {
     setOpenScheduleDialog(false);
   };
 
+  const handleCloseEmployeesDialog = () => {
+    setOpenEmployeesDialog(false);
+  };
+
   const handleWeekDayClick = (label: string) => () => {
     setSelectedWeekDays((selected) => {
       const idx = selected.findIndex((s) => s.label === label);
@@ -112,6 +118,10 @@ export default function () {
       endTime: "00:00",
       Break: [],
     });
+  };
+
+  const handleClickAddEmployees = () => {
+    setOpenEmployeesDialog(true);
   };
 
   const handleClickEditSchedule = () => {
@@ -152,7 +162,7 @@ export default function () {
     updateData();
   };
 
-  const handleClickSchedule = (id: string) => () => {
+  const handleClickSchedule = (id: string) => async () => {
     if (!isEditingSchedule) {
       setDialogScheduleType("edit");
       setSubgroups((prevVal) => {
@@ -276,6 +286,11 @@ export default function () {
 
   return (
     <>
+      <EmployeesListDialog
+        open={openEmployeesDialog}
+        onClose={handleCloseEmployeesDialog}
+        groupId={id}
+      />
       <SubgroupDialog
         open={openScheduleDialog}
         onClose={handleCloseScheduleDialog}
@@ -329,12 +344,14 @@ export default function () {
             handleClick={handleWeekDayClick}
           />
         )}
-        <Table
-          columns={scheduleCols}
-          rows={scheduleRows}
-          isEditing={isEditingSchedule}
-          onChangeTime={handleEditScheduleTable}
-        />
+        <div>
+          <Table
+            columns={scheduleCols}
+            rows={scheduleRows}
+            isEditing={isEditingSchedule}
+            onChangeTime={handleEditScheduleTable}
+          />
+        </div>
         <div
           style={{
             display: "flex",
@@ -348,6 +365,11 @@ export default function () {
             Employees
           </Typography>
           <div style={{ marginTop: "auto" }}>
+            <Tooltip title="Add Employee to group">
+              <IconButton onClick={handleClickAddEmployees}>
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Edit Employees Dates">
               <IconButton onClick={handleClickEditEmployees}>
                 <EditIcon />

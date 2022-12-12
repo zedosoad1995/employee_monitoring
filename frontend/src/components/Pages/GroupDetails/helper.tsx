@@ -10,10 +10,10 @@ import { useState } from "react";
 const SUBGROUP_LABEL = "subgroupLabel";
 const MORE_OPTIONS_LABEL = "moreOptionsLabel";
 
-const MoreOptionsComponent: React.FC<{
+const MoreOptionsSchedule: React.FC<{
   isConstant: boolean;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit: () => Promise<void>;
+  onDelete: () => Promise<void>;
 }> = ({ isConstant, onEdit, onDelete }) => {
   const [anchorEl, setAnchorEl] = useState<
     (EventTarget & HTMLButtonElement) | undefined
@@ -121,8 +121,8 @@ const getScheduleCols = (group: IGroup) => {
 const getScheduleRows = (
   group: IGroup,
   onOffCols: IColumn[],
-  handleEditSchedule: (id: string) => () => void,
-  handleDeleteSchedule: (id: string) => () => void
+  handleEditSchedule: (id: string) => () => Promise<void>,
+  handleDeleteSchedule: (id: string) => () => Promise<void>
 ) => {
   const rowsData: IRow[] = [];
 
@@ -132,7 +132,7 @@ const getScheduleRows = (
     const rowData: any = {
       id: subgroup.id,
       [MORE_OPTIONS_LABEL]: (
-        <MoreOptionsComponent
+        <MoreOptionsSchedule
           isConstant={group.isConstant}
           onEdit={handleEditSchedule(subgroup.id)}
           onDelete={handleDeleteSchedule(subgroup.id)}
@@ -167,8 +167,8 @@ const getScheduleRows = (
 
 export const getScheduleData = (
   group: IGroup,
-  handleEditSchedule: (id: string) => () => void,
-  handleDeleteSchedule: (id: string) => () => void
+  handleEditSchedule: (id: string) => () => Promise<void>,
+  handleDeleteSchedule: (id: string) => () => Promise<void>
 ) => {
   const [columnsData, onOffCols] = getScheduleCols(group);
   const rowsData = getScheduleRows(
