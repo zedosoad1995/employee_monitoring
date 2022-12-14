@@ -12,10 +12,16 @@ import MultipleSelects from "../../../components/MultipleSelects/MultipleSelects
 interface IProps {
   open: boolean;
   onClose: () => void;
+  onAdd: () => Promise<void>;
   groupId?: string;
 }
 
-export default function ({ open, onClose: handleClose, groupId }: IProps) {
+export default function ({
+  open,
+  onClose: handleClose,
+  groupId,
+  onAdd,
+}: IProps) {
   const [employees, setEmployees] = useState<any[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
 
@@ -34,13 +40,17 @@ export default function ({ open, onClose: handleClose, groupId }: IProps) {
         groupId,
       });
     }
+
+    await onAdd();
+
+    handleClose();
   };
 
   useEffect(() => {
     getEmployees().then(({ employees }) => {
       setEmployees(employees.filter((e: any) => e.currGroup.id !== groupId));
     });
-  }, []);
+  }, [open]);
 
   return (
     <Dialog fullWidth onClose={handleClose} open={open}>

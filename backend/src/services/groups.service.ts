@@ -157,10 +157,25 @@ export const getOne = async (groupId: string) => {
 };
 
 export const update = async (groupId: string, data: any) => {
+  let weekdaysWork;
+
+  if (data.isConstant) {
+    const weekDays = await prisma.weekDayWork.findMany();
+    weekdaysWork = data.weekdaysWork.map((dayValue: any) => ({
+      id: weekDays.find((weekDay) => weekDay.value === dayValue)?.id,
+    }));
+
+    if (weekdaysWork.some((day: any) => day.id === undefined))
+      throw new Error("Undefined week day value");
+  }
+
   return prisma.group.update({
     data: {
       isConstant: data.isConstant,
       name: data.name,
+      WeekDayWork: {
+        set: weekdaysWork,
+      },
     },
     where: {
       id: groupId,

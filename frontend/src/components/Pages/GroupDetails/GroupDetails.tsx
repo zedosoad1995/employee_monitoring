@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { WEEK_DAYS_DICT } from "../../../constants";
 import { getEmployees } from "../../../services/employees";
-import { getGroup } from "../../../services/group";
+import { getGroup, updateGroup } from "../../../services/group";
 import { IColumn, IRow } from "../../../types/groupsTable";
 import {
   getEmployeesData,
@@ -50,6 +50,7 @@ export default function () {
   const [employeesCols, setEmployeesCols] = useState<IColumn[]>();
   const [employeesRows, setEmployeesRows] = useState<IRow[]>([]);
   const [isScheduleConstant, setIsScheduleConstant] = useState(false);
+  const [groupName, setGroupName] = useState("");
 
   const [selectedWeekDays, setSelectedWeekDays] = useState(
     WEEK_DAYS_DEFAULT_ARRAY
@@ -133,10 +134,21 @@ export default function () {
   };
 
   const handleClickSaveSchedule = async () => {
-    const newSubgroups = scheduleRows2Subgroups(scheduleRows, scheduleCols);
-    for (const row of newSubgroups) {
+    const editedSubgroups = scheduleRows2Subgroups(scheduleRows, scheduleCols);
+    for (const row of editedSubgroups) {
       await updateSubgroup(row.id, row);
     }
+    if (isScheduleConstant && id) {
+      await updateGroup(id, {
+        isConstant: isScheduleConstant,
+        name: groupName,
+        weekdaysWork: selectedWeekDays
+          .map((day, index) => ({ selected: day.selected, value: index }))
+          .filter((day) => day.selected)
+          .map((day) => day.value),
+      });
+    }
+
     setIsEditingSchedule(false);
     updateData();
   };
@@ -207,6 +219,7 @@ export default function () {
       });
 
       setIsScheduleConstant(group.isConstant);
+      setGroupName(group.name);
 
       setSelectedWeekDays((selected) => {
         group.weekDays.forEach((w) => {
@@ -290,6 +303,7 @@ export default function () {
         open={openEmployeesDialog}
         onClose={handleCloseEmployeesDialog}
         groupId={id}
+        onAdd={updateData}
       />
       <SubgroupDialog
         open={openScheduleDialog}
@@ -317,11 +331,13 @@ export default function () {
             Schedule
           </Typography>
           <div style={{ marginTop: "auto" }}>
-            <Tooltip title="Add schedule">
-              <IconButton onClick={handleClickCreateSchedule}>
-                <AddIcon />
-              </IconButton>
-            </Tooltip>
+            {!isScheduleConstant && (
+              <Tooltip title="Add schedule">
+                <IconButton onClick={handleClickCreateSchedule}>
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
+            )}
             <Tooltip title="Edit schedule">
               <IconButton onClick={handleClickEditSchedule}>
                 <EditIcon />
@@ -340,6 +356,7 @@ export default function () {
 
         {isScheduleConstant && (
           <WeekDaysButtons
+            isEditing={isEditingSchedule}
             selectedWeekDays={selectedWeekDays}
             handleClick={handleWeekDayClick}
           />
@@ -370,19 +387,23 @@ export default function () {
                 <AddIcon />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Edit Employees Dates">
-              <IconButton onClick={handleClickEditEmployees}>
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Save Changes">
-              <IconButton
-                disabled={!isEditingEmployees}
-                onClick={handleClickSaveEmployees}
-              >
-                <SaveIcon />
-              </IconButton>
-            </Tooltip>
+            {!isScheduleConstant && (
+              <>
+                <Tooltip title="Edit Employees Dates">
+                  <IconButton onClick={handleClickEditEmployees}>
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Save Changes">
+                  <IconButton
+                    disabled={!isEditingEmployees}
+                    onClick={handleClickSaveEmployees}
+                  >
+                    <SaveIcon />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
           </div>
         </div>
 

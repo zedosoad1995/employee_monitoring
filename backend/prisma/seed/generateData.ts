@@ -4,10 +4,67 @@ import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import { faker } from "@faker-js/faker";
 
+const weekDayWorkSun = {
+  id: faker.datatype.uuid(),
+  value: 0,
+};
+const weekDayWorkMon = {
+  id: faker.datatype.uuid(),
+  value: 1,
+};
+const weekDayWorkTue = {
+  id: faker.datatype.uuid(),
+  value: 2,
+};
+const weekDayWorkWed = {
+  id: faker.datatype.uuid(),
+  value: 3,
+};
+const weekDayWorkThu = {
+  id: faker.datatype.uuid(),
+  value: 4,
+};
+const weekDayWorkFri = {
+  id: faker.datatype.uuid(),
+  value: 5,
+};
+const weekDayWorkSat = {
+  id: faker.datatype.uuid(),
+  value: 6,
+};
+const weekDayWorks = [
+  weekDayWorkSun,
+  weekDayWorkMon,
+  weekDayWorkTue,
+  weekDayWorkWed,
+  weekDayWorkThu,
+  weekDayWorkFri,
+  weekDayWorkSat,
+];
+
 const groupConstant = {
   id: faker.datatype.uuid(),
   name: `${faker.word.adjective()} workers`,
   isConstant: true,
+  WeekDayWork: {
+    connect: [
+      {
+        id: weekDayWorkMon.id,
+      },
+      {
+        id: weekDayWorkTue.id,
+      },
+      {
+        id: weekDayWorkWed.id,
+      },
+      {
+        id: weekDayWorkThu.id,
+      },
+      {
+        id: weekDayWorkFri.id,
+      },
+    ],
+  },
 };
 const groupVariant = {
   id: faker.datatype.uuid(),
@@ -15,34 +72,6 @@ const groupVariant = {
   isConstant: false,
 };
 const groups = [groupConstant, groupVariant];
-
-const weekDayWorkMon = {
-  value: 1,
-  groupId: groupConstant.id,
-};
-const weekDayWorkTue = {
-  value: 2,
-  groupId: groupConstant.id,
-};
-const weekDayWorkWed = {
-  value: 3,
-  groupId: groupConstant.id,
-};
-const weekDayWorkThu = {
-  value: 4,
-  groupId: groupConstant.id,
-};
-const weekDayWorkFri = {
-  value: 5,
-  groupId: groupConstant.id,
-};
-const weekDayWorks = [
-  weekDayWorkMon,
-  weekDayWorkTue,
-  weekDayWorkWed,
-  weekDayWorkThu,
-  weekDayWorkFri,
-];
 
 const subGroupConstant = {
   id: faker.datatype.uuid(),

@@ -41,10 +41,10 @@ model Group {
   isConstant  Boolean
   Employee    Employee[]
   Timesheet   Timesheet[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
   SubGroup    Subgroup[]
   WeekDayWork WeekDayWork[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Subgroup {
@@ -68,6 +68,7 @@ model WorkShift {
   updatedAt  DateTime @updatedAt
   subgroupId String
   employeeId String
+
   @@unique([employeeId, date])
 }
 
@@ -84,8 +85,7 @@ model Break {
 model WeekDayWork {
   id        String   @id @default(uuid())
   value     Int
+  groups    Group[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  group     Group    @relation(fields: [groupId], references: [id])
-  groupId   String
 }
