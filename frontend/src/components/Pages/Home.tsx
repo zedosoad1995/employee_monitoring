@@ -4,7 +4,13 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  matchPath,
+} from "react-router-dom";
 import Groups from "./Groups";
 import { useNavigate } from "react-router-dom";
 import Timesheet from "./Timesheet/Timesheet";
@@ -16,6 +22,8 @@ import Box from "@mui/material/Box";
 import Employees from "./Employees";
 import { Typography } from "@mui/material";
 import GroupDetails from "./GroupDetails/GroupDetails";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavbarStore } from "../../store/navbar";
 
 const NAVBAR_TEXTS = [
   { page: "/", text: "Timesheet" },
@@ -26,6 +34,8 @@ const NAVBAR_TEXTS = [
 function Home() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { title } = useNavbarStore();
 
   const [openSideMenu, setOpenSideMenu] = useState(false);
 
@@ -42,21 +52,46 @@ function Home() {
     setOpenSideMenu(false);
   };
 
+  const handleClickBackGroupDetails = () => {
+    navigate("/groups");
+  };
+
+  const isGroupDetails = Boolean(matchPath("groups/:id", location.pathname));
+
   return (
     <>
       <AppBar position="static">
         <Toolbar variant="dense">
-          <IconButton
-            color="inherit"
-            edge="start"
-            sx={{ mr: 2 }}
-            onClick={handleClickMenuBtn}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div">
-            {NAVBAR_TEXTS.find((n) => n.page === location.pathname)?.text}
-          </Typography>
+          {isGroupDetails && (
+            <IconButton
+              color="inherit"
+              edge="start"
+              sx={{ mr: 2 }}
+              onClick={handleClickBackGroupDetails}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+          )}
+          {!isGroupDetails && (
+            <IconButton
+              color="inherit"
+              edge="start"
+              sx={{ mr: 2 }}
+              onClick={handleClickMenuBtn}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+          {isGroupDetails && (
+            <Typography variant="h6" component="div">
+              Group: {title}
+            </Typography>
+          )}
+          {!isGroupDetails && (
+            <Typography variant="h6" component="div">
+              {NAVBAR_TEXTS.find((n) => n.page === location.pathname)?.text}
+            </Typography>
+          )}
         </Toolbar>
       </AppBar>
       <div>

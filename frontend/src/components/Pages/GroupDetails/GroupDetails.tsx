@@ -33,6 +33,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import { format } from "date-fns";
 import { updateWorkshifts } from "../../../services/workshift";
 import AddIcon from "@mui/icons-material/Add";
+import { useNavbarStore } from "../../../store/navbar";
 
 const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
   .fill(false)
@@ -43,6 +44,8 @@ const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
 
 export default function () {
   const { id } = useParams();
+
+  const { setTitle } = useNavbarStore();
 
   const [scheduleCols, setScheduleCols] = useState<IColumn[]>([]);
   const [scheduleRows, setScheduleRows] = useState<IRow[]>([]);
@@ -292,6 +295,10 @@ export default function () {
         return [...prevVal];
       });
     };
+
+  useEffect(() => {
+    setTitle(groupName);
+  }, [groupName]);
 
   useEffect(() => {
     updateData();
