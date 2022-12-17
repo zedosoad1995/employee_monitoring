@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { getYear, isDate } from "date-fns";
+import { format, getYear, isDate } from "date-fns";
 import getDayOfYear from "date-fns/getDayOfYear";
 import prisma from "../prisma/prisma-client";
 
@@ -44,6 +44,7 @@ export const isDatesInSequence = (dates: Date[]) => {
 
 export const isEveryEmployeeInGroup = async (
   tx: Prisma.TransactionClient,
+  groupId: string,
   employees: any
 ) => {
   const employeeNames = employees.slice(1).map((e: any) => e[0]);
@@ -69,15 +70,13 @@ export const isEveryEmployeeInGroup = async (
   }));
 
   const group = await tx.group.findFirst({
-    include: {
-      Employee: true,
-    },
     where: {
+      id: groupId,
       AND: andQuery,
     },
   });
 
-  return !!group;
+  return Boolean(group);
 };
 
 export const createSubGroups = async (
@@ -198,3 +197,8 @@ export const getSubgroup = async (
 
   return subgroup;
 };
+
+export const parseScheduleDate = (date: Date | string) =>
+  typeof date !== "string"
+    ? format(date, "yyyy-MM-dd")
+    : `${new Date().getFullYear()}-${date.split("/")[1]}-${date.split("/")[0]}`;

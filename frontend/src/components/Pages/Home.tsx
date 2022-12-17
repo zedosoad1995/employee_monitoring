@@ -20,10 +20,11 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import Box from "@mui/material/Box";
 import Employees from "./Employees";
-import { Typography } from "@mui/material";
+import { Menu, MenuItem, Typography } from "@mui/material";
 import GroupDetails from "./GroupDetails/GroupDetails";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavbarStore } from "../../store/navbar";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const NAVBAR_TEXTS = [
   { page: "/", text: "Timesheet" },
@@ -38,6 +39,21 @@ function Home() {
   const { title } = useNavbarStore();
 
   const [openSideMenu, setOpenSideMenu] = useState(false);
+  const [openMoreOptions, setOpenMoreOptions] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<
+    (EventTarget & HTMLButtonElement) | undefined
+  >();
+
+  const handleOpenMoreOptions = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    setOpenMoreOptions(true);
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMoreOptions = () => {
+    setOpenMoreOptions(false);
+  };
 
   const handleClickMenuBtn = () => {
     setOpenSideMenu(true);
@@ -58,40 +74,69 @@ function Home() {
 
   const isGroupDetails = Boolean(matchPath("groups/:id", location.pathname));
 
+  const renderMenuElements = () => {
+    return (
+      <>
+        {isGroupDetails && (
+          <>
+            <MenuItem>Download Template</MenuItem>
+            <MenuItem>Upload</MenuItem>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
       <AppBar position="static">
         <Toolbar variant="dense">
-          {isGroupDetails && (
-            <IconButton
-              color="inherit"
-              edge="start"
-              sx={{ mr: 2 }}
-              onClick={handleClickBackGroupDetails}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-          )}
-          {!isGroupDetails && (
-            <IconButton
-              color="inherit"
-              edge="start"
-              sx={{ mr: 2 }}
-              onClick={handleClickMenuBtn}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-          {isGroupDetails && (
-            <Typography variant="h6" component="div">
-              Group: {title}
-            </Typography>
-          )}
-          {!isGroupDetails && (
-            <Typography variant="h6" component="div">
-              {NAVBAR_TEXTS.find((n) => n.page === location.pathname)?.text}
-            </Typography>
-          )}
+          <div style={{ display: "flex", flexGrow: 1, alignItems: "center" }}>
+            {isGroupDetails && (
+              <IconButton
+                color="inherit"
+                edge="start"
+                sx={{ mr: 2 }}
+                onClick={handleClickBackGroupDetails}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+            )}
+            {!isGroupDetails && (
+              <IconButton
+                color="inherit"
+                edge="start"
+                sx={{ mr: 2 }}
+                onClick={handleClickMenuBtn}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            {isGroupDetails && (
+              <Typography variant="h6" component="div">
+                Group: {title}
+              </Typography>
+            )}
+            {!isGroupDetails && (
+              <Typography variant="h6" component="div">
+                {NAVBAR_TEXTS.find((n) => n.page === location.pathname)?.text}
+              </Typography>
+            )}
+          </div>
+          <IconButton
+            color="inherit"
+            edge="end"
+            onClick={handleOpenMoreOptions}
+          >
+            <MoreVertIcon />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={openMoreOptions}
+            onClose={handleCloseMoreOptions}
+          >
+            {renderMenuElements()}
+          </Menu>
         </Toolbar>
       </AppBar>
       <div>

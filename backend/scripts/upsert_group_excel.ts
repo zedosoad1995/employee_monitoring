@@ -4,12 +4,12 @@ import prisma from "../prisma/prisma-client";
 import { createMany } from "../src/helpers/db";
 import {
   getGroup,
-  createSubGroups,
   getEmployee,
   getExcelTables,
   isEveryEmployeeInGroup,
   isDatesInSequence,
   getSubgroup,
+  parseScheduleDate,
 } from "./upsert_group_helper";
 
 const workbook = readFile(`${__dirname}\\excel_example.xlsx`, {
@@ -36,7 +36,11 @@ const fillDB = async () => {
       const group = await getGroup(tx, groupName);
       if (!group) throw new Error(`Group ${groupName} does not exist`);
 
-      const isValidGroup = await isEveryEmployeeInGroup(tx, employees);
+      const isValidGroup = await isEveryEmployeeInGroup(
+        tx,
+        group.id,
+        employees
+      );
       if (!isValidGroup)
         throw new Error(
           `One or more employees are not present the in the group ${groupName}`
@@ -49,10 +53,12 @@ const fillDB = async () => {
             ? schedule
                 .slice(1, -1)
                 .reduce((acc: any, date: any, idx: number) => {
+                  if (typeof date !== "string") date = format(date, "HH:mm");
+
                   if (idx % 2 === 0) {
-                    acc.push({ startTime: format(date, "HH:mm") });
+                    acc.push({ startTime: date });
                   } else {
-                    acc[acc.length - 1].endTime = format(date, "HH:mm");
+                    acc[acc.length - 1].endTime = date;
                   }
 
                   return acc;
@@ -60,8 +66,14 @@ const fillDB = async () => {
             : [];
 
         const subgroupData = {
-          startTime: format(schedule[0], "HH:mm"),
-          endTime: format(schedule.at(-1), "HH:mm"),
+          startTime:
+            typeof schedule[0] !== "string"
+              ? format(schedule[0], "HH:mm")
+              : schedule[0],
+          endTime:
+            typeof schedule.at(-1) !== "string"
+              ? format(schedule.at(-1), "HH:mm")
+              : schedule.at(-1),
           breaks,
         };
 
@@ -78,7 +90,7 @@ const fillDB = async () => {
 
       // Employees Table
       const dates = employees[0].slice(2);
-      if (isDatesInSequence(dates)) {
+      if (isDatesInSequence(dates.map((date: any) => new Date(date)))) {
         throw new Error(
           "Dates must be in sequence, of the same year, and have a valid Date format"
         );
@@ -97,10 +109,28 @@ const fillDB = async () => {
             .map((workshiftNum: any, idx: number) => ({
               subgroupId: subgroupDict[groupName][String(workshiftNum)],
               employeeId,
-              date: format(dates[idx], "yyyy-MM-dd"),
+              date: parseScheduleDate(dates[idx]),
             }))
             .filter((val: any) => val.subgroupId),
         ];
+
+        await tx.workShift.deleteMany({
+          where: {
+            employeeId,
+            AND: [
+              {
+                date: {
+                  gte: parseScheduleDate(dates[0]),
+                },
+              },
+              {
+                date: {
+                  lte: parseScheduleDate(dates.at(-1)),
+                },
+              },
+            ],
+          },
+        });
       }
     }
 

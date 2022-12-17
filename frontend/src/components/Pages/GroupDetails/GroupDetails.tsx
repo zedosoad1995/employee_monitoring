@@ -339,24 +339,30 @@ export default function () {
           </Typography>
           <div style={{ marginTop: "auto" }}>
             {!isScheduleConstant && (
-              <Tooltip title="Add schedule">
-                <IconButton onClick={handleClickCreateSchedule}>
-                  <AddIcon />
-                </IconButton>
-              </Tooltip>
+              <span>
+                <Tooltip title="Add schedule">
+                  <IconButton onClick={handleClickCreateSchedule}>
+                    <AddIcon />
+                  </IconButton>
+                </Tooltip>
+              </span>
             )}
             <Tooltip title="Edit schedule">
-              <IconButton onClick={handleClickEditSchedule}>
-                <EditIcon />
-              </IconButton>
+              <span>
+                <IconButton onClick={handleClickEditSchedule}>
+                  <EditIcon />
+                </IconButton>
+              </span>
             </Tooltip>
             <Tooltip title="Save Changes">
-              <IconButton
-                disabled={!isEditingSchedule}
-                onClick={handleClickSaveSchedule}
-              >
-                <SaveIcon />
-              </IconButton>
+              <span>
+                <IconButton
+                  disabled={!isEditingSchedule}
+                  onClick={handleClickSaveSchedule}
+                >
+                  <SaveIcon />
+                </IconButton>
+              </span>
             </Tooltip>
           </div>
         </div>
@@ -390,24 +396,30 @@ export default function () {
           </Typography>
           <div style={{ marginTop: "auto" }}>
             <Tooltip title="Add Employee to group">
-              <IconButton onClick={handleClickAddEmployees}>
-                <AddIcon />
-              </IconButton>
+              <span>
+                <IconButton onClick={handleClickAddEmployees}>
+                  <AddIcon />
+                </IconButton>
+              </span>
             </Tooltip>
             {!isScheduleConstant && (
               <>
                 <Tooltip title="Edit Employees Dates">
-                  <IconButton onClick={handleClickEditEmployees}>
-                    <EditIcon />
-                  </IconButton>
+                  <span>
+                    <IconButton onClick={handleClickEditEmployees}>
+                      <EditIcon />
+                    </IconButton>
+                  </span>
                 </Tooltip>
                 <Tooltip title="Save Changes">
-                  <IconButton
-                    disabled={!isEditingEmployees}
-                    onClick={handleClickSaveEmployees}
-                  >
-                    <SaveIcon />
-                  </IconButton>
+                  <span>
+                    <IconButton
+                      disabled={!isEditingEmployees}
+                      onClick={handleClickSaveEmployees}
+                    >
+                      <SaveIcon />
+                    </IconButton>
+                  </span>
                 </Tooltip>
               </>
             )}
