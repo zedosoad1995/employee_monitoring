@@ -33,7 +33,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import { format } from "date-fns";
 import { updateWorkshifts } from "../../../services/workshift";
 import AddIcon from "@mui/icons-material/Add";
-import { useNavbarStore } from "../../../store/navbar";
+import { useExcelNavbarStore, useNavbarStore } from "../../../store/navbar";
 
 const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
   .fill(false)
@@ -46,6 +46,7 @@ export default function () {
   const { id } = useParams();
 
   const { setTitle } = useNavbarStore();
+  const { setCanDownload, setHasOptions } = useExcelNavbarStore();
 
   const [scheduleCols, setScheduleCols] = useState<IColumn[]>([]);
   const [scheduleRows, setScheduleRows] = useState<IRow[]>([]);
@@ -217,11 +218,14 @@ export default function () {
           dateFin
         );
 
+        setCanDownload(employees.length > 0);
+
         setEmployeesCols(columnsData);
         setEmployeesRows(rowsData);
       });
 
       setIsScheduleConstant(group.isConstant);
+      setHasOptions(!group.isConstant);
       setGroupName(group.name);
 
       setSelectedWeekDays((selected) => {

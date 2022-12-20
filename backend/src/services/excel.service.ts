@@ -63,7 +63,7 @@ export const generateGroupExcel = async (groupId: string) => {
 
   const dates = getDateRange(monthStart, monthEnd);
 
-  const employeesHeader = ([undefined, undefined] as any[]).concat(
+  const employeesHeader = (["Employee", "CardId"] as any[]).concat(
     dates.map((date) => format(date, "dd/MM"))
   );
 
@@ -102,7 +102,5 @@ export const generateGroupExcel = async (groupId: string) => {
 
   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-  XLSX.writeFile(workbook, "myExcelFile.xlsx");
+  return workbook;
 };
-
-generateGroupExcel("a1c0dbdd-e5c1-43f8-af71-dcc3d7948b4f");

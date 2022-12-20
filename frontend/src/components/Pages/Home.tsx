@@ -23,8 +23,11 @@ import Employees from "./Employees";
 import { Menu, MenuItem, Typography } from "@mui/material";
 import GroupDetails from "./GroupDetails/GroupDetails";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useNavbarStore } from "../../store/navbar";
+import { useExcelNavbarStore, useNavbarStore } from "../../store/navbar";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { getTemplate } from "../../services/excel.service";
+
+import { saveAs } from "file-saver";
 
 const NAVBAR_TEXTS = [
   { page: "/", text: "Timesheet" },
@@ -37,6 +40,7 @@ function Home() {
   const navigate = useNavigate();
 
   const { title } = useNavbarStore();
+  const { canDownload, hasOptions } = useExcelNavbarStore();
 
   const [openSideMenu, setOpenSideMenu] = useState(false);
   const [openMoreOptions, setOpenMoreOptions] = useState(false);
@@ -72,15 +76,27 @@ function Home() {
     navigate("/groups");
   };
 
+  const handleDownloadTemplate = async () => {
+    const id = location.pathname.split("/").at(-1);
+    if (id) {
+      const data = await getTemplate(id);
+      const fileBlob = new Blob([data]);
+      saveAs(fileBlob, "template.xlsx");
+    }
+  };
+
   const isGroupDetails = Boolean(matchPath("groups/:id", location.pathname));
+  console.log(matchPath("groups/:id", location.pathname));
 
   const renderMenuElements = () => {
     return (
       <>
-        {isGroupDetails && (
+        {isGroupDetails && hasOptions && (
           <>
-            <MenuItem>Download Template</MenuItem>
-            <MenuItem>Upload</MenuItem>
+            <MenuItem disabled={!canDownload} onClick={handleDownloadTemplate}>
+              Download Template
+            </MenuItem>
+            <MenuItem disabled={!canDownload}>Upload</MenuItem>
           </>
         )}
       </>
@@ -123,13 +139,15 @@ function Home() {
               </Typography>
             )}
           </div>
-          <IconButton
-            color="inherit"
-            edge="end"
-            onClick={handleOpenMoreOptions}
-          >
-            <MoreVertIcon />
-          </IconButton>
+          {hasOptions && (
+            <IconButton
+              color="inherit"
+              edge="end"
+              onClick={handleOpenMoreOptions}
+            >
+              <MoreVertIcon />
+            </IconButton>
+          )}
           <Menu
             anchorEl={anchorEl}
             open={openMoreOptions}

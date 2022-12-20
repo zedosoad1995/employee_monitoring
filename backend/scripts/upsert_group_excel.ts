@@ -143,3 +143,4 @@ fillDB().then(() => {
 });
 
 // TODO: Check if employee is constant
+// Trim right
