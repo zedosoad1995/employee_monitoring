@@ -5,7 +5,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { WEEK_DAYS_DICT } from "../../../constants";
 import { getEmployees } from "../../../services/employees";
@@ -34,6 +34,9 @@ import { format } from "date-fns";
 import { updateWorkshifts } from "../../../services/workshift";
 import AddIcon from "@mui/icons-material/Add";
 import { useExcelNavbarStore, useNavbarStore } from "../../../store/navbar";
+import { INavbarOption } from "../../../types/navbar";
+import saveAs from "file-saver";
+import { getTemplate, upload } from "../../../services/excel.service";
 
 const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
   .fill(false)
@@ -45,7 +48,9 @@ const WEEK_DAYS_DEFAULT_ARRAY = Array(7)
 export default function () {
   const { id } = useParams();
 
-  const { setTitle } = useNavbarStore();
+  const fileInput = useRef<HTMLInputElement | null>(null);
+
+  const { setTitle, setOptions } = useNavbarStore();
   const { setCanDownload, setHasOptions } = useExcelNavbarStore();
 
   const [scheduleCols, setScheduleCols] = useState<IColumn[]>([]);
@@ -199,11 +204,47 @@ export default function () {
     await updateData();
   };
 
+  const handleDownloadTemplate = async () => {
+    if (id) {
+      const data = await getTemplate(id);
+      const fileBlob = new Blob([data]);
+      saveAs(fileBlob, "template.xlsx");
+    }
+  };
+
+  const handleUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target;
+    if (input.files) {
+      upload(input.files[0]);
+    }
+  };
+
+  const handleClickUploadFile = () => {
+    if (fileInput.current) {
+      fileInput.current.click();
+    }
+  };
+
   const updateData = async () => {
     if (!id) return;
 
     return getGroup(id).then((group) => {
       setSubgroups(group.subgroups);
+
+      const navbarOptions: INavbarOption[] = [];
+      if (!group.isConstant) {
+        navbarOptions.push({
+          label: "Download Template",
+          isDisabled: false,
+          onClick: handleDownloadTemplate,
+        });
+
+        navbarOptions.push({
+          label: "Upload",
+          isDisabled: false,
+          onClick: handleClickUploadFile,
+        });
+      }
 
       getEmployees({
         groupId: id,
@@ -218,11 +259,18 @@ export default function () {
           dateFin
         );
 
-        setCanDownload(employees.length > 0);
+        if (employees.length === 0) {
+          const idx = navbarOptions.findIndex(
+            (option) => option.label === "Download Template"
+          );
+          if (idx !== -1) navbarOptions[idx].isDisabled = true;
+        }
 
         setEmployeesCols(columnsData);
         setEmployeesRows(rowsData);
       });
+
+      setOptions(navbarOptions);
 
       setIsScheduleConstant(group.isConstant);
       setHasOptions(!group.isConstant);
@@ -310,6 +358,12 @@ export default function () {
 
   return (
     <>
+      <input
+        ref={fileInput}
+        type="file"
+        style={{ display: "none" }}
+        onChange={handleUploadFile}
+      />
       <EmployeesListDialog
         open={openEmployeesDialog}
         onClose={handleCloseEmployeesDialog}

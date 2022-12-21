@@ -39,7 +39,7 @@ function Home() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { title } = useNavbarStore();
+  const { title, menuOptions } = useNavbarStore();
   const { canDownload, hasOptions } = useExcelNavbarStore();
 
   const [openSideMenu, setOpenSideMenu] = useState(false);
@@ -103,26 +103,20 @@ function Home() {
   const isGroupDetails = Boolean(matchPath("groups/:id", location.pathname));
 
   const renderMenuElements = () => {
-    return (
-      <>
-        {isGroupDetails && hasOptions && (
-          <>
-            <input
-              ref={fileInput}
-              type="file"
-              style={{ display: "none" }}
-              onChange={handleUploadFile}
-            />
-            <MenuItem disabled={!canDownload} onClick={handleDownloadTemplate}>
-              Download Template
-            </MenuItem>
-            <MenuItem disabled={!canDownload} onClick={handleClickUploadFile}>
-              Upload
-            </MenuItem>
-          </>
-        )}
-      </>
-    );
+    const handleClose = (func: () => void) => () => {
+      func();
+      handleCloseMoreOptions();
+    };
+
+    return menuOptions.map((option) => (
+      <MenuItem
+        key={option.label}
+        disabled={option.isDisabled}
+        onClick={handleClose(option.onClick)}
+      >
+        {option.label}
+      </MenuItem>
+    ));
   };
 
   return (
