@@ -46,5 +46,3 @@ const workshifts = Array.from({ length: 30 }, (_, i) => i + 1).map((day) => ({
   date: format(new Date(year, month, day), "yyyy-MM-dd"),
   subgroupId: selectSubGroup(faker.datatype.number({ min: 0, max: 2 })),
 }));
-
-console.log(workshifts);

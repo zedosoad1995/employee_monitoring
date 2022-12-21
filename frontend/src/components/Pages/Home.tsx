@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -25,7 +25,7 @@ import GroupDetails from "./GroupDetails/GroupDetails";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useExcelNavbarStore, useNavbarStore } from "../../store/navbar";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { getTemplate } from "../../services/excel.service";
+import { getTemplate, upload } from "../../services/excel.service";
 
 import { saveAs } from "file-saver";
 
@@ -47,6 +47,21 @@ function Home() {
   const [anchorEl, setAnchorEl] = useState<
     (EventTarget & HTMLButtonElement) | undefined
   >();
+
+  const fileInput = useRef<HTMLInputElement | null>(null);
+
+  const handleClickUploadFile = () => {
+    if (fileInput.current) {
+      fileInput.current.click();
+    }
+  };
+
+  const handleUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target;
+    if (input.files) {
+      upload(input.files[0]);
+    }
+  };
 
   const handleOpenMoreOptions = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -86,17 +101,24 @@ function Home() {
   };
 
   const isGroupDetails = Boolean(matchPath("groups/:id", location.pathname));
-  console.log(matchPath("groups/:id", location.pathname));
 
   const renderMenuElements = () => {
     return (
       <>
         {isGroupDetails && hasOptions && (
           <>
+            <input
+              ref={fileInput}
+              type="file"
+              style={{ display: "none" }}
+              onChange={handleUploadFile}
+            />
             <MenuItem disabled={!canDownload} onClick={handleDownloadTemplate}>
               Download Template
             </MenuItem>
-            <MenuItem disabled={!canDownload}>Upload</MenuItem>
+            <MenuItem disabled={!canDownload} onClick={handleClickUploadFile}>
+              Upload
+            </MenuItem>
           </>
         )}
       </>

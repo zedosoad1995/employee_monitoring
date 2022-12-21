@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { generateGroupExcel } from "../services/excel.service";
+import { generateGroupExcel, uploadExcelToDB } from "../services/excel.service";
 import { NextFunction, Request, Response } from "express";
 
 export const getTemplate = async (
@@ -18,4 +18,15 @@ export const getTemplate = async (
   res.setHeader("Content-Disposition", "attachment; filename=template.xlsx");
 
   res.send(buffer);
+};
+
+export const uploadExcel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const fileContents = req.file;
+  await uploadExcelToDB(fileContents);
+
+  res.send({ success: true });
 };
