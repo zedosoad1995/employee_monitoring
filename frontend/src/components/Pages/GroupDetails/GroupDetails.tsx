@@ -2,6 +2,7 @@ import {
   IconButton,
   SelectChangeEvent,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -60,6 +61,7 @@ export default function () {
   const [employeesRows, setEmployeesRows] = useState<IRow[]>([]);
   const [isScheduleConstant, setIsScheduleConstant] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [groupNameTemp, setGroupNameTemp] = useState("");
 
   const [selectedWeekDays, setSelectedWeekDays] = useState(
     WEEK_DAYS_DEFAULT_ARRAY
@@ -212,10 +214,13 @@ export default function () {
     }
   };
 
-  const handleUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadFile = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const input = event.target;
     if (input.files) {
-      upload(input.files[0]);
+      await upload(input.files[0]);
+      updateData();
     }
   };
 
@@ -275,6 +280,7 @@ export default function () {
       setIsScheduleConstant(group.isConstant);
       setHasOptions(!group.isConstant);
       setGroupName(group.name);
+      setGroupNameTemp(group.name);
 
       setSelectedWeekDays((selected) => {
         group.weekDays.forEach((w) => {
@@ -356,6 +362,22 @@ export default function () {
     updateData();
   }, [id]);
 
+  const handleGroupNameChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setGroupNameTemp(event.currentTarget.value);
+  };
+
+  const handleClickSaveGroupName = async () => {
+    if (id) {
+      await updateGroup(id, {
+        isConstant: isScheduleConstant,
+        name: groupNameTemp,
+      });
+      updateData();
+    }
+  };
+
   return (
     <>
       <input
@@ -383,6 +405,23 @@ export default function () {
         isCreate={dialogScheduleType === "create"}
       />
       <Stack style={{ height: "80vh" }} spacing={2}>
+        <div style={{ display: "flex" }}>
+          <TextField
+            sx={{ width: "200px" }}
+            label="Title"
+            variant="outlined"
+            value={groupNameTemp}
+            onChange={handleGroupNameChange}
+            size="small"
+          />
+          <Tooltip title="Save Changes">
+            <span>
+              <IconButton onClick={handleClickSaveGroupName}>
+                <SaveIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </div>
         <div
           style={{
             display: "flex",
