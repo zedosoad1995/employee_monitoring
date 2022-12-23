@@ -11,7 +11,7 @@ import {
   useLocation,
   matchPath,
 } from "react-router-dom";
-import Groups from "./Groups";
+import Groups from "./Groups/Groups";
 import { useNavigate } from "react-router-dom";
 import Timesheet from "./Timesheet/Timesheet";
 import AppBar from "@mui/material/AppBar";

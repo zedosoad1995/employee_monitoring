@@ -7,9 +7,9 @@ import {
   getGroup,
   getGroups,
   updateGroup,
-} from "../../services/group";
-import { HeadCell } from "../../types/table";
-import GroupsTable from "../Table/Table";
+} from "../../../services/group";
+import { HeadCell } from "../../../types/table";
+import GroupsTable from "../../Table/Table";
 import AddIcon from "@mui/icons-material/Add";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
@@ -36,6 +36,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { format, parse } from "date-fns";
 import { useNavigate } from "react-router-dom";
+
+import CreateGroupDialog from "./CreateGroupDialog";
 
 const schema = yup.object().shape({
   name: yup.string().required(),
@@ -332,6 +334,15 @@ function Groups() {
     setOpenCreateGroup(false);
   };
 
+  const handleCreateGroup = async (
+    groupName: string,
+    isScheduleFixed: boolean
+  ) => {
+    await createGroup({ name: groupName, isConstant: isScheduleFixed });
+    await getData();
+    setOpenCreateGroup(false);
+  };
+
   return (
     <>
       <div
@@ -349,7 +360,7 @@ function Groups() {
         </Tooltip>
       </div>
       <GroupsTable rows={rows} columns={columns} onClickRow={onClickRow} />
-      <Dialog fullWidth onClose={handleCloseAddGroup} open={openCreateGroup}>
+      {/* <Dialog fullWidth onClose={handleCloseAddGroup} open={openCreateGroup}>
         <DialogTitle>
           {isCreateGroup && <>Create New Group</>}
           {!isCreateGroup && <>Edit Group</>}
@@ -557,7 +568,7 @@ function Groups() {
           </Button>
           <Button onClick={handleCloseAddGroup}>Close</Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
       <Dialog fullWidth onClose={handleCloseDeleteGroup} open={openDeleteGroup}>
         <DialogTitle>Delete Group</DialogTitle>
         <DialogContent sx={{ mt: 1, maxWidth: "600px" }}>
@@ -570,6 +581,11 @@ function Groups() {
           <Button onClick={handleCloseDeleteGroup}>Close</Button>
         </DialogActions>
       </Dialog>
+      <CreateGroupDialog
+        open={openCreateGroup}
+        onClose={handleCloseAddGroup}
+        onCreate={handleCreateGroup}
+      />
     </>
   );
 }

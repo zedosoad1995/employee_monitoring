@@ -187,16 +187,7 @@ export const create = async (group: ICreateGroup) => {
   let mainQuery: Prisma.GroupCreateArgs = {
     data: {
       name: group.name,
-      SubGroup: {
-        create: {
-          startTime: group.startTime,
-          endTime: group.endTime,
-          Break: {
-            create: group.breaks,
-          },
-        },
-      },
-      isConstant: true,
+      isConstant: group.isConstant,
     },
   };
 

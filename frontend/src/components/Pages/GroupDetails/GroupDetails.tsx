@@ -435,7 +435,7 @@ export default function () {
             Schedule
           </Typography>
           <div style={{ marginTop: "auto" }}>
-            {!isScheduleConstant && (
+            {(!isScheduleConstant || scheduleRows.length === 0) && (
               <span>
                 <Tooltip title="Add schedule">
                   <IconButton onClick={handleClickCreateSchedule}>

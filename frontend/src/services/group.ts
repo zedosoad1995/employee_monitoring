@@ -23,12 +23,7 @@ export const updateGroup = (groupId: string, data: any) => {
   return axios.put(`${process.env.REACT_APP_API_URL}/groups/${groupId}`, data);
 };
 
-export const createGroup = (data: {
-  name: string;
-  startTime: string;
-  endTime: string;
-  breaks: Array<{ startTime: string; endTime: string }>;
-}) => {
+export const createGroup = (data: { name: string; isConstant: boolean }) => {
   return axios.post(`${process.env.REACT_APP_API_URL}/groups`, data);
 };
 
