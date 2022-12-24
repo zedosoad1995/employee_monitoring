@@ -88,7 +88,7 @@ function Employees() {
     const rows = employees.map((e: any) => ({
       name: e.name,
       cardId: e.cardId,
-      group: e.currGroup.name,
+      group: e.currGroup?.name,
       edit: (
         <>
           {

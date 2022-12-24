@@ -41,7 +41,7 @@ const CellComponent = ({
   return (
     <>
       {isNotEditing && row[col.id]}
-      {isEditingTime && (
+      {isEditingTime && row[col.id] !== undefined && (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <TimePicker
             value={
@@ -106,6 +106,7 @@ export default function ({
 }: IProps) {
   return (
     <TableRow
+      key={row.id}
       hover
       sx={onClickRow ? { cursor: "pointer" } : {}}
       onClick={onClickRow}

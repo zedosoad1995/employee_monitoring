@@ -146,6 +146,7 @@ export default function () {
 
   const handleClickSaveSchedule = async () => {
     const editedSubgroups = scheduleRows2Subgroups(scheduleRows, scheduleCols);
+    console.log(editedSubgroups, scheduleRows, scheduleCols);
     for (const row of editedSubgroups) {
       await updateSubgroup(row.id, row);
     }
@@ -264,7 +265,7 @@ export default function () {
           dateFin
         );
 
-        if (employees.length === 0) {
+        if (employees.length === 0 || group.subgroups.length === 0) {
           const idx = navbarOptions.findIndex(
             (option) => option.label === "Download Template"
           );

@@ -201,5 +201,5 @@ export const deleteOne = async (groupId: string) => {
     },
   };
 
-  return await prisma.group.delete(mainQuery);
+  return prisma.group.delete(mainQuery);
 };

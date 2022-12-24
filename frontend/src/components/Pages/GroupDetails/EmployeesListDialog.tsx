@@ -48,7 +48,7 @@ export default function ({
 
   useEffect(() => {
     getEmployees().then(({ employees }) => {
-      setEmployees(employees.filter((e: any) => e.currGroup.id !== groupId));
+      setEmployees(employees.filter((e: any) => !e.currGroup?.id || e.currGroup.id !== groupId));
     });
   }, [open]);
 
@@ -57,7 +57,7 @@ export default function ({
       <DialogTitle>Add Employees to Group</DialogTitle>
       <DialogContent sx={{ mt: 1, maxWidth: "600px" }}>
         <MultipleSelects
-          values={employees.map((e: any) => ({ id: e.id, label: e.name }))}
+          values={employees.map((e: any) => ({ id: e.id, label: `${e.name} - ${e.cardId}`, labelSelected: e.name }))}
           onChange={handleEmployeeSelection}
         />
       </DialogContent>

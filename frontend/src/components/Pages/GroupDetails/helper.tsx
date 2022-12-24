@@ -158,7 +158,7 @@ const getScheduleRows = (
 
     const timesArr = [subgroup.startTime, ...breakTimes, subgroup.endTime];
 
-    onOffCols.forEach(({ id }, index) => {
+    onOffCols.slice(0, timesArr.length).forEach(({ id }, index) => {
       rowData[id] = timesArr[index];
     });
 
@@ -188,12 +188,14 @@ export const getScheduleData = (
 
 export const scheduleRows2Subgroups = (rows: IRow[], cols: IColumn[]) => {
   cols = cols.filter((col) => col.canEdit);
-  return rows.map((row) =>
-    cols.reduce(
+  return rows.map((row) => {
+    const definedCols = cols.filter((col) => row[col.id]);
+
+    return definedCols.reduce(
       (acc: ISubgroupBody, col, index) => {
         if (index === 0) {
           acc.startTime = row[col.id];
-        } else if (index === cols.length - 1) {
+        } else if (index === definedCols.length - 1) {
           acc.endTime = row[col.id];
         } else if (index % 2 === 1) {
           acc.breaks?.push({ id: "", startTime: row[col.id], endTime: "" });
@@ -205,8 +207,8 @@ export const scheduleRows2Subgroups = (rows: IRow[], cols: IColumn[]) => {
         return acc;
       },
       { id: row.id, startTime: "", endTime: "", breaks: [] }
-    )
-  );
+    );
+  });
 };
 
 export const transformWorkshifts = (

@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["interactiveTransactions"]
 }
 
@@ -17,9 +17,9 @@ model Timesheet {
   time       String
   isEnter    Boolean
   employeeId String
-  groupId    String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  group      Group    @relation(fields: [groupId], references: [id])
+  groupId    String?
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  group      Group?   @relation(fields: [groupId], references: [id], onDelete: SetNull)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -28,8 +28,8 @@ model Employee {
   id          String      @id @default(uuid())
   cardId      String
   name        String
-  currGroupId String
-  currGroup   Group       @relation(fields: [currGroupId], references: [id])
+  currGroupId String?
+  currGroup   Group?      @relation(fields: [currGroupId], references: [id], onDelete: SetNull)
   Timesheet   Timesheet[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -52,7 +52,7 @@ model Subgroup {
   id        String      @id @default(uuid())
   startTime String
   endTime   String
-  group     Group       @relation(fields: [groupId], references: [id])
+  group     Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   groupId   String

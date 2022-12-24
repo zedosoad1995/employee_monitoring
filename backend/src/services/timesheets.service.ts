@@ -311,11 +311,11 @@ export const create = async (timesheet: ICreateTimesheet) => {
           id: timesheet.employeeId,
         },
       },
-      group: {
+      group: employee?.currGroupId ? {
         connect: {
           id: employee?.currGroupId,
         },
-      },
+      } : undefined,
     },
   };
 
@@ -353,9 +353,9 @@ export const editTimesFromEmployee = async (
             time: times.startTime,
             isEnter: true,
             group: {
-              connect: {
+              connect: employee?.currGroupId ? {
                 id: employee?.currGroupId,
-              },
+              } : undefined,
             },
           },
         }),
@@ -376,9 +376,9 @@ export const editTimesFromEmployee = async (
                     time: b[k],
                     isEnter: k === "endTime",
                     group: {
-                      connect: {
+                      connect: employee?.currGroupId ? {
                         id: employee?.currGroupId,
-                      },
+                      } : undefined,
                     },
                   },
                 })
@@ -399,9 +399,9 @@ export const editTimesFromEmployee = async (
             time: times.endTime,
             isEnter: false,
             group: {
-              connect: {
+              connect: employee?.currGroupId ? {
                 id: employee?.currGroupId,
-              },
+              } : undefined,
             },
           },
         }),
